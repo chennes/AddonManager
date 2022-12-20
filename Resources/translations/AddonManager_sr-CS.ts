@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="tr" sourcelanguage="en">
+<TS version="2.1" language="sr-CS" sourcelanguage="en">
   <context>
     <name>AddCustomRepositoryDialog</name>
     <message>
       <location filename="../../AddonManagerOptions_AddCustomRepository.ui" line="14"/>
       <source>Custom repository</source>
-      <translation>Özel depo</translation>
+      <translation>Sopstveno spremište</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions_AddCustomRepository.ui" line="20"/>
       <source>Repository URL</source>
-      <translation>Depo URL' si</translation>
+      <translation>URL adresa spremišta</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions_AddCustomRepository.ui" line="30"/>
       <source>Branch</source>
-      <translation>Dal</translation>
+      <translation>Grana</translation>
     </message>
   </context>
   <context>
@@ -24,32 +24,32 @@
     <message>
       <location filename="../../compact_view.ui" line="20"/>
       <source>Form</source>
-      <translation>Şekil:</translation>
+      <translation>Obrazac</translation>
     </message>
     <message>
       <location filename="../../compact_view.ui" line="59"/>
       <source>Icon</source>
-      <translation>Simge</translation>
+      <translation>Ikona</translation>
     </message>
     <message>
       <location filename="../../compact_view.ui" line="66"/>
       <source>&lt;b&gt;Package Name&lt;/b&gt;</source>
-      <translation>&lt;b&gt;Paket Adı&lt;/b&gt;</translation>
+      <translation>&lt;b&gt;Ime paketa&lt;/b&gt;</translation>
     </message>
     <message>
       <location filename="../../compact_view.ui" line="73"/>
       <source>Version</source>
-      <translation>Sürüm</translation>
+      <translation>Verzija</translation>
     </message>
     <message>
       <location filename="../../compact_view.ui" line="86"/>
       <source>Description</source>
-      <translation>Açıklama</translation>
+      <translation>Opis</translation>
     </message>
     <message>
       <location filename="../../compact_view.ui" line="102"/>
       <source>UpdateAvailable</source>
-      <translation>Güncelleme Mevcut</translation>
+      <translation>Na raspolaganju je novija verzija</translation>
     </message>
   </context>
   <context>
@@ -57,22 +57,22 @@
     <message>
       <location filename="../../developer_mode_dependencies.ui" line="14"/>
       <source>Dependencies</source>
-      <translation>Bağımlılıklar</translation>
+      <translation>Zavisnosti</translation>
     </message>
     <message>
       <location filename="../../developer_mode_dependencies.ui" line="39"/>
       <source>Dependency type</source>
-      <translation>Bağımlılık türü</translation>
+      <translation>Vrsta zavisnosti</translation>
     </message>
     <message>
       <location filename="../../developer_mode_dependencies.ui" line="44"/>
       <source>Name</source>
-      <translation>Isim</translation>
+      <translation>Ime</translation>
     </message>
     <message>
       <location filename="../../developer_mode_dependencies.ui" line="49"/>
       <source>Optional?</source>
-      <translation>İsteğe bağlı?</translation>
+      <translation>Opciono?</translation>
     </message>
   </context>
   <context>
@@ -80,31 +80,31 @@
     <message>
       <location filename="../../dependency_resolution_dialog.ui" line="17"/>
       <source>Resolve Dependencies</source>
-      <translation>Bağımlılıkları Çöz</translation>
+      <translation>Rešiti zavisnosti</translation>
     </message>
     <message>
       <location filename="../../dependency_resolution_dialog.ui" line="29"/>
       <source>This Addon has the following required and optional dependencies. You must install them before this Addon can be used.
 
 Do you want the Addon Manager to install them automatically? Choose &quot;Ignore&quot; to install the Addon without installing the dependencies.</source>
-      <translation>Bu Eklenti aşağıdaki gerekli ve isteğe bağlı bağımlılıklara sahiptir. Bu Eklentinin kullanılabilmesi için bunları yüklemeniz gerekir.
+      <translation>Ovaj dodatak ima sledeće obavezne i opcione zavisnosti. Morate ih instalirati da biste mogli da koristite ovaj dodatak.
 
-Eklenti Yöneticisinin bunları otomatik olarak kurmasını istiyor musunuz? Eklentiyi bağımlılıklar olmadan kurmak için &quot; Yoksay &quot; seçin.</translation>
+Da li želite da ih menadžer dodataka automatski instalira? Izaberite &quot;zanemari&quot; da instalirate dodatak bez instaliranja zavisnosti.</translation>
     </message>
     <message>
       <location filename="../../dependency_resolution_dialog.ui" line="43"/>
       <source>FreeCAD Addons</source>
-      <translation>FreeCAD Eklentileri</translation>
+      <translation>FreeCAD dodaci</translation>
     </message>
     <message>
       <location filename="../../dependency_resolution_dialog.ui" line="55"/>
       <source>Required Python modules</source>
-      <translation>Gerekli Python modülleri</translation>
+      <translation>Potrebni Python moduli</translation>
     </message>
     <message>
       <location filename="../../dependency_resolution_dialog.ui" line="67"/>
       <source>Optional Python modules</source>
-      <translation>İsteğe bağlı Python modülleri</translation>
+      <translation>Opcioni Python moduli</translation>
     </message>
   </context>
   <context>
@@ -112,64 +112,64 @@ Eklenti Yöneticisinin bunları otomatik olarak kurmasını istiyor musunuz? Ekl
     <message>
       <location filename="../../developer_mode.ui" line="14"/>
       <source>Addon Developer Tools</source>
-      <translation>Eklenti Geliştirici Araçları</translation>
+      <translation>Alatke za programere dodataka</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="25"/>
       <source>Path to Addon</source>
-      <translation>Eklentiyi giden yol</translation>
+      <translation>Putanja do dodatka</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="45"/>
       <location filename="../../developer_mode.ui" line="195"/>
       <source>Browse...</source>
-      <translation>Gözat...</translation>
+      <translation>Potraži...</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="54"/>
       <source>Metadata</source>
-      <translation>Üst veri</translation>
+      <translation>Metapodaci</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="65"/>
       <source>Primary branch</source>
-      <translation>Birincil dal</translation>
+      <translation type="unfinished">Primary branch</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="77"/>
       <location filename="../../developer_mode.ui" line="160"/>
       <source>Explanation of what this Addon provides. Displayed in the Addon Manager. It is not necessary for this to state that this is a FreeCAD Addon.</source>
-      <translation type="unfinished">Explanation of what this Addon provides. Displayed in the Addon Manager. It is not necessary for this to state that this is a FreeCAD Addon.</translation>
+      <translation>Objašnjenje šta ovaj dodatak pruža. Prikazuje se u Menadžeru dodataka. Nije neophodno da se navodi da je ovo dodatak za FreeCAD.</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="80"/>
       <source>Description</source>
-      <translation>Açıklama</translation>
+      <translation>Opis</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="90"/>
       <source>Discussion URL</source>
-      <translation>Tartışma URL'si</translation>
+      <translation>URL adresa diskusije</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="97"/>
       <source>Icon</source>
-      <translation>Simge</translation>
+      <translation>Ikona</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="104"/>
       <source>Bugtracker URL</source>
-      <translation>Hata İzleyici URL'si</translation>
+      <translation type="unfinished">Bugtracker URL</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="113"/>
       <source>Semantic (1.2.3-beta) or CalVer (2022.08.30) styles supported</source>
-      <translation>Semantic (1.2.3-beta) ya da CalVer (2022.08.30) stilleri desteklenir</translation>
+      <translation>Podržani su Semantic (1.2.3-beta) ili CalVer (2022.08.30) stilovi</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="120"/>
       <source>Set to today (CalVer style)</source>
-      <translation>Bugüne ayarla (CalVer stili)</translation>
+      <translation type="unfinished">Set to today (CalVer style)</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="132"/>
@@ -177,7 +177,7 @@ Eklenti Yöneticisinin bunları otomatik olarak kurmasını istiyor musunuz? Ekl
       <location filename="../../developer_mode.ui" line="180"/>
       <location filename="../../developer_mode.ui" line="218"/>
       <source>(Optional)</source>
-      <translation>(Isteğe bağlı)</translation>
+      <translation>(neobavezno)</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="139"/>
@@ -188,7 +188,7 @@ Eklenti Yöneticisinin bunları otomatik olarak kurmasını istiyor musunuz? Ekl
     <message>
       <location filename="../../developer_mode.ui" line="153"/>
       <source>README URL</source>
-      <translation>BENIOKU URL'si</translation>
+      <translation>URL adresa datoteke README</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="166"/>
@@ -198,52 +198,52 @@ Eklenti Yöneticisinin bunları otomatik olarak kurmasını istiyor musunuz? Ekl
     <message>
       <location filename="../../developer_mode.ui" line="173"/>
       <source>Repository URL</source>
-      <translation>Depo URL' si</translation>
+      <translation>URL adresa spremišta</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="204"/>
       <source>Website URL</source>
-      <translation>Web Sitesi URL’si</translation>
+      <translation>URL adresa veb sajta</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="211"/>
       <source>Documentation URL</source>
-      <translation>Döküman URL'si</translation>
+      <translation>URL adresa dokumentacije</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="228"/>
       <source>Addon Name</source>
-      <translation>Eklenti Adı</translation>
+      <translation>Ime dodatka</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="235"/>
       <source>Version</source>
-      <translation>Sürüm</translation>
+      <translation>Verzija</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="242"/>
       <source>(Recommended)</source>
-      <translation>(Önerilen)</translation>
+      <translation>(Preporučeno)</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="249"/>
       <source>Minimum Python</source>
-      <translation>Min. Python</translation>
+      <translation type="unfinished">Minimum Python</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="258"/>
       <source>(Optional, only 3.x version supported)</source>
-      <translation>(İsteğe bağlı, yalnızca 3.x sürümü desteklenir)</translation>
+      <translation>(Opciono, podržana je samo verzija 3.x)</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="265"/>
       <source>Detect...</source>
-      <translation>Algıla...</translation>
+      <translation>Otkrij...</translation>
     </message>
     <message>
       <location filename="../../developer_mode.ui" line="277"/>
       <source>Addon Contents</source>
-      <translation>Eklenti İçeriği</translation>
+      <translation type="unfinished">Addon Contents</translation>
     </message>
   </context>
   <context>
@@ -251,122 +251,122 @@ Eklenti Yöneticisinin bunları otomatik olarak kurmasını istiyor musunuz? Ekl
     <message>
       <location filename="../../AddonManager.ui" line="14"/>
       <source>Addon Manager</source>
-      <translation>Eklenti Yöneticisi</translation>
+      <translation>Menadžer dodataka</translation>
     </message>
     <message>
       <location filename="../../AddonManager.ui" line="64"/>
       <source>Downloading info...</source>
-      <translation>Bilgi indiriliyor...</translation>
+      <translation>Preuzimanje informacija...</translation>
     </message>
     <message>
       <location filename="../../AddonManager.ui" line="71"/>
       <source>Pause cache update</source>
-      <translation>Önbellek güncellemesini duraklat</translation>
+      <translation>Pauziraj ažuriranje keša</translation>
     </message>
     <message>
       <location filename="../../AddonManager.ui" line="103"/>
       <source>Refresh local cache</source>
-      <translation>Yerel önbelleği yenile</translation>
+      <translation>Osveži lokalni keš</translation>
     </message>
     <message>
       <location filename="../../AddonManager.ui" line="110"/>
       <source>Download and apply all available updates</source>
-      <translation>Tüm geçerli güncellemeleri yükle ve uygula</translation>
+      <translation>Preuzmi i primeni sva dostupna ažuriranja</translation>
     </message>
     <message>
       <location filename="../../AddonManager.ui" line="113"/>
       <source>Update all Addons</source>
-      <translation>Tüm Eklentileri Güncelle</translation>
+      <translation>Ažuriraj sve dodatke</translation>
     </message>
     <message>
       <location filename="../../AddonManager.ui" line="120"/>
       <source>Check for updates</source>
-      <translation>Güncellemeleri denetle</translation>
+      <translation>Proveri ažuriranja</translation>
     </message>
     <message>
       <location filename="../../AddonManager.ui" line="130"/>
       <source>View and update Python package dependencies</source>
-      <translation>Python paketi bağımlılıklarını görüntüleyin ve güncelleyin</translation>
+      <translation>Pregledaj i ažuriraj zavisnosti Python paketa</translation>
     </message>
     <message>
       <location filename="../../AddonManager.ui" line="133"/>
       <source>Python dependencies...</source>
-      <translation>Python bağımlılıkları...</translation>
+      <translation>Python zavisnosti...</translation>
     </message>
     <message>
       <location filename="../../AddonManager.ui" line="140"/>
       <source>Developer tools...</source>
-      <translation>Geliştirici araçları...</translation>
+      <translation>Alati za programere...</translation>
     </message>
     <message>
       <location filename="../../AddonManager.ui" line="160"/>
       <source>Close the Addon Manager</source>
-      <translation>Eklenti Yöneticisi' ni kapat</translation>
+      <translation>Zatvori Menadžer dodataka</translation>
     </message>
     <message>
       <location filename="../../AddonManager.ui" line="163"/>
       <source>Close</source>
-      <translation>Kapat</translation>
+      <translation>Zatvori</translation>
     </message>
     <message>
       <location filename="../../first_run.ui" line="17"/>
       <source>Welcome to the Addon Manager</source>
-      <translation>Eklenti Yöneticisine Hoş Geldiniz</translation>
+      <translation>Dobrodošli u Menadžer dodataka</translation>
     </message>
     <message>
       <location filename="../../first_run.ui" line="23"/>
       <source>The addons that can be installed here are not officially part of FreeCAD, and are not reviewed by the FreeCAD team. Make sure you know what you are installing!</source>
-      <translation>Buraya kurulabilen eklentiler resmi olarak FreeCAD'in bir parçası değildir ve FreeCAD ekibi tarafından incelenmez. Ne yüklediğinizi bildiğinizden emin olun!</translation>
+      <translation>Dodaci koji se mogu instalirati ovde nisu zvanično deo FreeCAD-a i FreeCAD tim ih ne pregleda. Budite sigurni u to šta instalirate!</translation>
     </message>
     <message>
       <location filename="../../first_run.ui" line="46"/>
       <source>Download Settings</source>
-      <translation>İndirme Ayarları</translation>
+      <translation>Podešavanja preuzimanja</translation>
     </message>
     <message>
       <location filename="../../first_run.ui" line="53"/>
       <source>Automatically check installed Addons for updates</source>
-      <translation>Güncellemeler için yüklü Eklentileri otomatik olarak kontrol edin</translation>
+      <translation>Automatski proverite instalirane dodatke da li imaju ažuriranja</translation>
     </message>
     <message>
       <location filename="../../first_run.ui" line="60"/>
       <source>Download Macro metadata (approximately 10MB)</source>
-      <translation>Makro MetaVerilerini indirin (yaklaşık 10MB)</translation>
+      <translation>Preuzmi makro metapodatke (približno 10MB)</translation>
     </message>
     <message>
       <location filename="../../first_run.ui" line="70"/>
       <source>No proxy</source>
-      <translation>Vekil sunucu yok</translation>
+      <translation>Bez proksi</translation>
     </message>
     <message>
       <location filename="../../first_run.ui" line="75"/>
       <source>System proxy</source>
-      <translation>Sistem vekil sunucusu</translation>
+      <translation>Sistemski proksi</translation>
     </message>
     <message>
       <location filename="../../first_run.ui" line="80"/>
       <source>User-defined proxy:</source>
-      <translation>Kullanıcı tanımlı vekil sunucu:</translation>
+      <translation>Korisnički proksi:</translation>
     </message>
     <message>
       <location filename="../../first_run.ui" line="93"/>
       <source>These and other settings are available in the FreeCAD Preferences window.</source>
-      <translation>Bu ve diğer ayarlar FreeCAD Tercihler penceresinde mevcuttur.</translation>
+      <translation>Ova i druga podešavanja su dostupna u prozoru Podešavanja FreeCAD-a.</translation>
     </message>
     <message>
       <location filename="../../developer_mode_tags.ui" line="14"/>
       <source>Edit Tags</source>
-      <translation>Etiketleri Düzenle</translation>
+      <translation>Uredi oznake</translation>
     </message>
     <message>
       <location filename="../../developer_mode_tags.ui" line="20"/>
       <source>Comma-separated list of tags describing this item:</source>
-      <translation>Bu öğeyi açıklayan virgülle ayrılmış etiketler listesi:</translation>
+      <translation>Lista oznaka razdvojenih zarezima koje opisuju ovu stavku:</translation>
     </message>
     <message>
       <location filename="../../developer_mode_tags.ui" line="35"/>
       <source>HINT: Common tags include &quot;Assembly&quot;, &quot;FEM&quot;, &quot;Mesh&quot;, &quot;NURBS&quot;, etc.</source>
-      <translation type="unfinished">HINT: Common tags include &quot;Assembly&quot;, &quot;FEM&quot;, &quot;Mesh&quot;, &quot;NURBS&quot;, etc.</translation>
+      <translation>SAVET: Uobičajene oznake uključuju &quot;Sklop&quot;, &quot;FEM&quot;, &quot;Mreža&quot;, &quot;NURBS&quot;, etc.</translation>
     </message>
   </context>
   <context>
@@ -374,22 +374,22 @@ Eklenti Yöneticisinin bunları otomatik olarak kurmasını istiyor musunuz? Ekl
     <message>
       <location filename="../../developer_mode_edit_dependency.ui" line="14"/>
       <source>Edit Dependency</source>
-      <translation>Bağımlılığı Düzenle</translation>
+      <translation>Uredi zavisnost</translation>
     </message>
     <message>
       <location filename="../../developer_mode_edit_dependency.ui" line="20"/>
       <source>Dependency Type</source>
-      <translation>Bağımlılığı Biçimi</translation>
+      <translation>Vrsta zavisnosti</translation>
     </message>
     <message>
       <location filename="../../developer_mode_edit_dependency.ui" line="30"/>
       <source>Dependency</source>
-      <translation>Bağımlılık</translation>
+      <translation>Zavisnost</translation>
     </message>
     <message>
       <location filename="../../developer_mode_edit_dependency.ui" line="42"/>
       <source>Package name, if &quot;Other...&quot;</source>
-      <translation>Paket adı, eğer &quot;Diğer...&quot;</translation>
+      <translation>Ime paketa, ako je &quot;Ostalo...&quot;</translation>
     </message>
     <message>
       <location filename="../../developer_mode_edit_dependency.ui" line="54"/>
@@ -399,12 +399,12 @@ Eklenti Yöneticisinin bunları otomatik olarak kurmasını istiyor musunuz? Ekl
     <message>
       <location filename="../../developer_mode_edit_dependency.ui" line="69"/>
       <source>If this is an optional dependency, the Addon Manager will offer to install it (when possible), but will not block installation if the user chooses not to, or cannot, install the package.</source>
-      <translation type="unfinished">If this is an optional dependency, the Addon Manager will offer to install it (when possible), but will not block installation if the user chooses not to, or cannot, install the package.</translation>
+      <translation>Ako je ovo opciona zavisnost, Menadžer dodataka će ponuditi da je instalira (kada je to moguće), ali neće blokirati instalaciju ako korisnik odluči da ne instalira ili ne može da instalira paket.</translation>
     </message>
     <message>
       <location filename="../../developer_mode_edit_dependency.ui" line="72"/>
       <source>Optional</source>
-      <translation>Isteğe bağlı</translation>
+      <translation>Opciono</translation>
     </message>
   </context>
   <context>
@@ -412,42 +412,42 @@ Eklenti Yöneticisinin bunları otomatik olarak kurmasını istiyor musunuz? Ekl
     <message>
       <location filename="../../expanded_view.ui" line="20"/>
       <source>Form</source>
-      <translation>Şekil:</translation>
+      <translation>Obrazac</translation>
     </message>
     <message>
       <location filename="../../expanded_view.ui" line="68"/>
       <source>Icon</source>
-      <translation>Simge</translation>
+      <translation>Ikona</translation>
     </message>
     <message>
       <location filename="../../expanded_view.ui" line="101"/>
       <source>&lt;h1&gt;Package Name&lt;/h1&gt;</source>
-      <translation>&lt;h1&gt;Paket Adı&lt;/h1&gt;</translation>
+      <translation>&lt;h1&gt;Ime paketa&lt;/h1&gt;</translation>
     </message>
     <message>
       <location filename="../../expanded_view.ui" line="114"/>
       <source>Version</source>
-      <translation>Sürüm</translation>
+      <translation>Verzija</translation>
     </message>
     <message>
       <location filename="../../expanded_view.ui" line="121"/>
       <source>(tags)</source>
-      <translation>(etiketler)</translation>
+      <translation>(oznake)</translation>
     </message>
     <message>
       <location filename="../../expanded_view.ui" line="149"/>
       <source>Description</source>
-      <translation>Açıklama</translation>
+      <translation>Opis</translation>
     </message>
     <message>
       <location filename="../../expanded_view.ui" line="171"/>
       <source>Maintainer</source>
-      <translation>Geliştirici</translation>
+      <translation>Programer zadužen za održavanje</translation>
     </message>
     <message>
       <location filename="../../expanded_view.ui" line="186"/>
       <source>UpdateAvailable</source>
-      <translation>Güncelleme Mevcut</translation>
+      <translation>Na raspolaganju je novija verzija</translation>
     </message>
   </context>
   <context>
@@ -456,42 +456,42 @@ Eklenti Yöneticisinin bunları otomatik olarak kurmasını istiyor musunuz? Ekl
       <location filename="../../developer_mode_licenses_table.ui" line="14"/>
       <location filename="../../developer_mode_people_table.ui" line="14"/>
       <source>Form</source>
-      <translation>Şekil:</translation>
+      <translation>Obrazac</translation>
     </message>
     <message>
       <location filename="../../developer_mode_licenses_table.ui" line="38"/>
       <source>Licenses</source>
-      <translation>Lisanslar</translation>
+      <translation>Licence</translation>
     </message>
     <message>
       <location filename="../../developer_mode_licenses_table.ui" line="69"/>
       <source>License</source>
-      <translation>Lisans</translation>
+      <translation>Licenca</translation>
     </message>
     <message>
       <location filename="../../developer_mode_licenses_table.ui" line="74"/>
       <source>License file</source>
-      <translation>Lisans dosyası</translation>
+      <translation>Datoteka licence</translation>
     </message>
     <message>
       <location filename="../../developer_mode_people_table.ui" line="26"/>
       <source>People</source>
-      <translation>Kişiler</translation>
+      <translation>Osobe</translation>
     </message>
     <message>
       <location filename="../../developer_mode_people_table.ui" line="57"/>
       <source>Kind</source>
-      <translation>Tür</translation>
+      <translation>Vrsta</translation>
     </message>
     <message>
       <location filename="../../developer_mode_people_table.ui" line="62"/>
       <source>Name</source>
-      <translation>Isim</translation>
+      <translation>Ime</translation>
     </message>
     <message>
       <location filename="../../developer_mode_people_table.ui" line="67"/>
       <source>Email</source>
-      <translation>E-Posta</translation>
+      <translation>Elektronska pošta</translation>
     </message>
   </context>
   <context>
@@ -499,7 +499,7 @@ Eklenti Yöneticisinin bunları otomatik olarak kurmasını istiyor musunuz? Ekl
     <message>
       <location filename="../../developer_mode_advanced_freecad_versions.ui" line="14"/>
       <source>Advanced Version Mapping</source>
-      <translation>Gelişmiş Sürüm Eşleme</translation>
+      <translation type="unfinished">Advanced Version Mapping</translation>
     </message>
     <message>
       <location filename="../../developer_mode_advanced_freecad_versions.ui" line="20"/>
@@ -509,7 +509,7 @@ Eklenti Yöneticisinin bunları otomatik olarak kurmasını istiyor musunuz? Ekl
     <message>
       <location filename="../../developer_mode_advanced_freecad_versions.ui" line="43"/>
       <source>FreeCAD Version</source>
-      <translation>FreeCAD Sürümü</translation>
+      <translation>FreeCAD verzija</translation>
     </message>
     <message>
       <location filename="../../developer_mode_advanced_freecad_versions.ui" line="48"/>
@@ -522,23 +522,23 @@ Eklenti Yöneticisinin bunları otomatik olarak kurmasını istiyor musunuz? Ekl
     <message>
       <location filename="../../developer_mode_freecad_versions.ui" line="14"/>
       <source>Supported FreeCAD Versions</source>
-      <translation>Desteklenen FreeCAD Sürümleri</translation>
+      <translation>Podržane FreeCAD verzije</translation>
     </message>
     <message>
       <location filename="../../developer_mode_freecad_versions.ui" line="20"/>
       <source>Minimum FreeCAD Version Supported</source>
-      <translation>Desteklenen En Düşük FreeCAD Sürümü</translation>
+      <translation>Minimalna podržana FreeCAD verzija</translation>
     </message>
     <message>
       <location filename="../../developer_mode_freecad_versions.ui" line="27"/>
       <location filename="../../developer_mode_freecad_versions.ui" line="41"/>
       <source>Optional</source>
-      <translation>Isteğe bağlı</translation>
+      <translation>Opciono</translation>
     </message>
     <message>
       <location filename="../../developer_mode_freecad_versions.ui" line="34"/>
       <source>Maximum FreeCAD Version Supported</source>
-      <translation>Desteklenen En Yüksek FreeCAD Sürümü</translation>
+      <translation>Maksimalna podržana FreeCAD verzija</translation>
     </message>
     <message>
       <location filename="../../developer_mode_freecad_versions.ui" line="48"/>
@@ -551,72 +551,72 @@ Eklenti Yöneticisinin bunları otomatik olarak kurmasını istiyor musunuz? Ekl
     <message>
       <location filename="../../AddonManagerOptions.ui" line="14"/>
       <source>Addon manager options</source>
-      <translation>Eklenti yöneticisi seçenekleri</translation>
+      <translation>Opcije menadžera dodataka</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="20"/>
       <source>If this option is selected, when launching the Addon Manager,
 installed addons will be checked for available updates
 (this requires the GitPython package installed on your system)</source>
-      <translation type="unfinished">If this option is selected, when launching the Addon Manager,
-installed addons will be checked for available updates
-(this requires the GitPython package installed on your system)</translation>
+      <translation>Ako je ova opcija izabrana, prilikom pokretanja Menadžera dodataka,
+instalirani dodaci će biti provereni da li postoje dostupna ažuriranja
+(za ovo je potreban GitPython paket instaliran na vašem sistemu)</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="25"/>
       <source>Automatically check for updates at start (requires git)</source>
-      <translation type="unfinished">Automatically check for updates at start (requires git)</translation>
+      <translation>Automatski proverite ažuriranja na početku (zahteva git)</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="41"/>
       <source>Download Macro metadata (approximately 10MB)</source>
-      <translation>Makro MetaVerilerini indirin (yaklaşık 10MB)</translation>
+      <translation>Preuzmi makro metapodatke (približno 10MB)</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="373"/>
       <location filename="../../AddonManagerOptions.ui" line="386"/>
       <source>Addons</source>
-      <translation>Eklentiler</translation>
+      <translation>Dodatni moduli</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="56"/>
       <source>Cache update frequency</source>
-      <translation>Arabellek güncelleme sıklığı</translation>
+      <translation>Učestalost ažuriranja keša</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="76"/>
       <source>Manual (no automatic updates)</source>
-      <translation>Elle (otomatik güncellemeler yok)</translation>
+      <translation>Ručno (bez automatskog ažuriranja)</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="81"/>
       <source>Daily</source>
-      <translation>Günlük</translation>
+      <translation>Dnevno</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="86"/>
       <source>Weekly</source>
-      <translation>Haftalık</translation>
+      <translation>Nedeljno</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="96"/>
       <source>Hide Addons marked Python 2 Only</source>
-      <translation type="unfinished">Hide Addons marked Python 2 Only</translation>
+      <translation>Sakrij dodatke sa oznakom "Samo Python 2"</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="112"/>
       <source>Hide Addons marked Obsolete</source>
-      <translation type="unfinished">Hide Addons marked Obsolete</translation>
+      <translation>Sakrij dodatke označene kao zastareli</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="128"/>
       <source>Hide Addons that require a newer version of FreeCAD</source>
-      <translation type="unfinished">Hide Addons that require a newer version of FreeCAD</translation>
+      <translation>Sakrij dodatke koji zahtevaju noviju verziju FreeCAD-a</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="150"/>
       <source>Custom repositories</source>
-      <translation>Özel depolar</translation>
+      <translation>Sopstveno spremište</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="354"/>
@@ -626,72 +626,72 @@ installed addons will be checked for available updates
     <message>
       <location filename="../../AddonManagerOptions.ui" line="367"/>
       <source>Disable git (fall back to ZIP downloads only)</source>
-      <translation type="unfinished">Disable git (fall back to ZIP downloads only)</translation>
+      <translation>Onemogući git (vratite se samo na ZIP preuzimanja)</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="370"/>
       <source>disableGit</source>
-      <translation type="unfinished">disableGit</translation>
+      <translation>onemogući Git</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="380"/>
       <source>Activate Addon Manager options intended for developers of new Addons.</source>
-      <translation type="unfinished">Activate Addon Manager options intended for developers of new Addons.</translation>
+      <translation>Aktiviraj opcije menadžera dodataka namenjene programerima novih dodataka.</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="383"/>
       <source>Addon developer mode</source>
-      <translation type="unfinished">Addon developer mode</translation>
+      <translation>Režim programera dodataka</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="389"/>
       <source>developerMode</source>
-      <translation type="unfinished">developerMode</translation>
+      <translation>režim programera</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="204"/>
       <source>Proxy</source>
-      <translation>Vekil Sunucu</translation>
+      <translation>Proksi</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="210"/>
       <source>No proxy</source>
-      <translation>Vekil sunucu yok</translation>
+      <translation>Bez proksi</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="226"/>
       <source>User system proxy</source>
-      <translation type="unfinished">User system proxy</translation>
+      <translation>Korisnički sistemski proksi</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="239"/>
       <source>User-defined proxy:</source>
-      <translation>Kullanıcı tanımlı vekil sunucu:</translation>
+      <translation>Korisnički proksi:</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="276"/>
       <source>Python executable (optional):</source>
-      <translation type="unfinished">Python executable (optional):</translation>
+      <translation>Izvršna Python datoteka (Neobavezno):</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="295"/>
       <source>The path to the Python executable for package installation with pip. Autodetected if needed and not specified.</source>
-      <translation type="unfinished">The path to the Python executable for package installation with pip. Autodetected if needed and not specified.</translation>
+      <translation>Putanja do Python izvršne datoteke za instalaciju paketa sa pip-om. Automatski se detektuje ako je potrebno i nije navedeno.</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="308"/>
       <source>git executable (optional):</source>
-      <translation type="unfinished">git executable (optional):</translation>
+      <translation>Izvršna git datoteka (Neobavezno):</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="327"/>
       <source>The path to the git executable. Autodetected if needed and not specified.</source>
-      <translation type="unfinished">The path to the git executable. Autodetected if needed and not specified.</translation>
+      <translation>Putanja do git izvršne datoteke. Automatski se detektuje ako je potrebno a nije navedeno.</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="348"/>
       <source>Advanced Options</source>
-      <translation type="unfinished">Advanced Options</translation>
+      <translation>Napredne opcije</translation>
     </message>
   </context>
   <context>
@@ -699,37 +699,37 @@ installed addons will be checked for available updates
     <message>
       <location filename="../../package_details.ui" line="14"/>
       <source>Form</source>
-      <translation>Şekil:</translation>
+      <translation>Obrazac</translation>
     </message>
     <message>
       <location filename="../../package_details.ui" line="49"/>
       <source>Uninstalls a selected macro or workbench</source>
-      <translation type="unfinished">Uninstalls a selected macro or workbench</translation>
+      <translation>Deinstalirajte izabrani makro ili radno okruženje</translation>
     </message>
     <message>
       <location filename="../../package_details.ui" line="52"/>
       <source>Install</source>
-      <translation>Yükle</translation>
+      <translation>Instaliraj</translation>
     </message>
     <message>
       <location filename="../../package_details.ui" line="59"/>
       <source>Uninstall</source>
-      <translation>Kaldır</translation>
+      <translation>Deinstaliraj</translation>
     </message>
     <message>
       <location filename="../../package_details.ui" line="66"/>
       <source>Update</source>
-      <translation>Güncelle</translation>
+      <translation>Ažuriranje</translation>
     </message>
     <message>
       <location filename="../../package_details.ui" line="73"/>
       <source>Run Macro</source>
-      <translation>Makro Çalıştır</translation>
+      <translation>Pokreni makro</translation>
     </message>
     <message>
       <location filename="../../package_details.ui" line="80"/>
       <source>Change branch</source>
-      <translation type="unfinished">Change branch</translation>
+      <translation>Promeni granu</translation>
     </message>
   </context>
   <context>
@@ -737,32 +737,32 @@ installed addons will be checked for available updates
     <message>
       <location filename="../../PythonDependencyUpdateDialog.ui" line="14"/>
       <source>Manage Python Dependencies</source>
-      <translation>Python Bağımlılıklarını Yönet</translation>
+      <translation>Upravljanje Python zavisnostima</translation>
     </message>
     <message>
       <location filename="../../PythonDependencyUpdateDialog.ui" line="20"/>
       <source>The following Python packages have been installed locally by the Addon Manager to satisfy Addon dependencies. Installation location:</source>
-      <translation type="unfinished">The following Python packages have been installed locally by the Addon Manager to satisfy Addon dependencies. Installation location:</translation>
+      <translation>Sledeće Python pakete je lokalno instalirao Menadžer dodataka da bi zadovoljio zavisnosti dodataka. Lokacija instalacije:</translation>
     </message>
     <message>
       <location filename="../../PythonDependencyUpdateDialog.ui" line="59"/>
       <source>Package name</source>
-      <translation>Paket adı</translation>
+      <translation>Ime paketa</translation>
     </message>
     <message>
       <location filename="../../PythonDependencyUpdateDialog.ui" line="64"/>
       <source>Installed version</source>
-      <translation>Kurulu sürüm</translation>
+      <translation>Instalirana verzija</translation>
     </message>
     <message>
       <location filename="../../PythonDependencyUpdateDialog.ui" line="69"/>
       <source>Available version</source>
-      <translation type="unfinished">Available version</translation>
+      <translation>Dostupna verzija</translation>
     </message>
     <message>
       <location filename="../../PythonDependencyUpdateDialog.ui" line="74"/>
       <source>Used by</source>
-      <translation type="unfinished">Used by</translation>
+      <translation>Koristio</translation>
     </message>
     <message>
       <location filename="../../PythonDependencyUpdateDialog.ui" line="87"/>
@@ -772,7 +772,7 @@ installed addons will be checked for available updates
     <message>
       <location filename="../../PythonDependencyUpdateDialog.ui" line="99"/>
       <source>Update all available</source>
-      <translation type="unfinished">Update all available</translation>
+      <translation>Ažuriraj sve dostupno</translation>
     </message>
   </context>
   <context>
@@ -780,12 +780,12 @@ installed addons will be checked for available updates
     <message>
       <location filename="../../developer_mode_select_from_list.ui" line="14"/>
       <source>Dialog</source>
-      <translation>Pencere</translation>
+      <translation>Dijalog</translation>
     </message>
     <message>
       <location filename="../../developer_mode_select_from_list.ui" line="20"/>
       <source>TextLabel</source>
-      <translation>MetinEtiketi</translation>
+      <translation>TekstOznaka</translation>
     </message>
   </context>
   <context>
@@ -821,12 +821,12 @@ installed addons will be checked for available updates
     <message>
       <location filename="../../developer_mode_add_content.ui" line="38"/>
       <source>Preference Pack</source>
-      <translation type="unfinished">Preference Pack</translation>
+      <translation>Paket podešavanja</translation>
     </message>
     <message>
       <location filename="../../developer_mode_add_content.ui" line="43"/>
       <source>Workbench</source>
-      <translation>Tezgah</translation>
+      <translation>Radno okruženje</translation>
     </message>
     <message>
       <location filename="../../developer_mode_add_content.ui" line="51"/>
@@ -841,29 +841,29 @@ installed addons will be checked for available updates
     <message>
       <location filename="../../developer_mode_add_content.ui" line="86"/>
       <source>Main macro file</source>
-      <translation>Ana makro dosyası</translation>
+      <translation>Glavna makro datoteka</translation>
     </message>
     <message>
       <location filename="../../developer_mode_add_content.ui" line="93"/>
       <source>The file with the macro&apos;s metadata in it</source>
-      <translation type="unfinished">The file with the macro&apos;s metadata in it</translation>
+      <translation>Datoteka sa metapodacima makro-a u njoj</translation>
     </message>
     <message>
       <location filename="../../developer_mode_add_content.ui" line="100"/>
       <location filename="../../developer_mode_add_content.ui" line="161"/>
       <location filename="../../developer_mode_add_content.ui" line="193"/>
       <source>Browse...</source>
-      <translation>Gözat...</translation>
+      <translation>Potraži...</translation>
     </message>
     <message>
       <location filename="../../developer_mode_add_content.ui" line="111"/>
       <source>Preference Pack Name</source>
-      <translation>Tercih Paketi Adı</translation>
+      <translation>Ime paketa podešavanja</translation>
     </message>
     <message>
       <location filename="../../developer_mode_add_content.ui" line="125"/>
       <source>Workbench class name</source>
-      <translation>Tezgah sınıfı adı</translation>
+      <translation type="unfinished">Workbench class name</translation>
     </message>
     <message>
       <location filename="../../developer_mode_add_content.ui" line="132"/>
@@ -873,7 +873,7 @@ installed addons will be checked for available updates
     <message>
       <location filename="../../developer_mode_add_content.ui" line="145"/>
       <source>Subdirectory</source>
-      <translation>Alt dizin</translation>
+      <translation type="unfinished">Subdirectory</translation>
     </message>
     <message>
       <location filename="../../developer_mode_add_content.ui" line="154"/>
@@ -883,7 +883,7 @@ installed addons will be checked for available updates
     <message>
       <location filename="../../developer_mode_add_content.ui" line="170"/>
       <source>Icon</source>
-      <translation>Simge</translation>
+      <translation>Ikona</translation>
     </message>
     <message>
       <location filename="../../developer_mode_add_content.ui" line="179"/>
@@ -898,22 +898,22 @@ installed addons will be checked for available updates
     <message>
       <location filename="../../developer_mode_add_content.ui" line="206"/>
       <source>Tags...</source>
-      <translation>Etiketler...</translation>
+      <translation>Oznake...</translation>
     </message>
     <message>
       <location filename="../../developer_mode_add_content.ui" line="213"/>
       <source>Dependencies...</source>
-      <translation>Bağımlılık...</translation>
+      <translation>Zavisnosti...</translation>
     </message>
     <message>
       <location filename="../../developer_mode_add_content.ui" line="220"/>
       <source>FreeCAD Versions...</source>
-      <translation>FreeCAD Sürümü...</translation>
+      <translation>FreeCAD verzija...</translation>
     </message>
     <message>
       <location filename="../../developer_mode_add_content.ui" line="258"/>
       <source>Other Metadata</source>
-      <translation>Diğer meta veriler</translation>
+      <translation>Ostali metapodaci</translation>
     </message>
     <message>
       <location filename="../../developer_mode_add_content.ui" line="264"/>
@@ -923,27 +923,27 @@ installed addons will be checked for available updates
     <message>
       <location filename="../../developer_mode_add_content.ui" line="278"/>
       <source>Version</source>
-      <translation>Sürüm</translation>
+      <translation>Verzija</translation>
     </message>
     <message>
       <location filename="../../developer_mode_add_content.ui" line="285"/>
       <source>Description</source>
-      <translation>Açıklama</translation>
+      <translation>Opis</translation>
     </message>
     <message>
       <location filename="../../developer_mode_add_content.ui" line="297"/>
       <source>Semantic (1.2.3-beta) or CalVer (2022.08.30) styles supported</source>
-      <translation>Semantic (1.2.3-beta) ya da CalVer (2022.08.30) stilleri desteklenir</translation>
+      <translation>Podržani su Semantic (1.2.3-beta) ili CalVer (2022.08.30) stilovi</translation>
     </message>
     <message>
       <location filename="../../developer_mode_add_content.ui" line="304"/>
       <source>Set to today (CalVer style)</source>
-      <translation>Bugüne ayarla (CalVer stili)</translation>
+      <translation type="unfinished">Set to today (CalVer style)</translation>
     </message>
     <message>
       <location filename="../../developer_mode_add_content.ui" line="313"/>
       <source>Display Name</source>
-      <translation>İsmi Görüntüle</translation>
+      <translation type="unfinished">Display Name</translation>
     </message>
     <message>
       <location filename="../../developer_mode_add_content.ui" line="330"/>
@@ -956,27 +956,27 @@ installed addons will be checked for available updates
     <message>
       <location filename="../../add_toolbar_button_dialog.ui" line="14"/>
       <source>Add button?</source>
-      <translation>Tuş ekle?</translation>
+      <translation>Dodaj dugme?</translation>
     </message>
     <message>
       <location filename="../../add_toolbar_button_dialog.ui" line="20"/>
       <source>Add a toolbar button for this macro?</source>
-      <translation>Bu makro için bir araç çubuğu düğmesi eklensin mi?</translation>
+      <translation>Želite li dodati dugme na paleti alatki za ovaj makro?</translation>
     </message>
     <message>
       <location filename="../../add_toolbar_button_dialog.ui" line="32"/>
       <source>Yes</source>
-      <translation>Evet</translation>
+      <translation>Da</translation>
     </message>
     <message>
       <location filename="../../add_toolbar_button_dialog.ui" line="39"/>
       <source>No</source>
-      <translation>Hayır</translation>
+      <translation>Ne</translation>
     </message>
     <message>
       <location filename="../../add_toolbar_button_dialog.ui" line="46"/>
       <source>Never</source>
-      <translation>Asla</translation>
+      <translation>Nikada</translation>
     </message>
   </context>
   <context>
@@ -984,12 +984,12 @@ installed addons will be checked for available updates
     <message>
       <location filename="../../change_branch.ui" line="14"/>
       <source>Change Branch</source>
-      <translation>Branch Değiştir</translation>
+      <translation>Promeni granu</translation>
     </message>
     <message>
       <location filename="../../change_branch.ui" line="23"/>
       <source>Change to branch or tag:</source>
-      <translation type="unfinished">Change to branch or tag:</translation>
+      <translation>Promeni u granu ili oznaku:</translation>
     </message>
   </context>
   <context>
@@ -997,17 +997,17 @@ installed addons will be checked for available updates
     <message>
       <location filename="../../developer_mode_copyright_info.ui" line="14"/>
       <source>Copyright Information</source>
-      <translation>Telif Hakkı Bilgisi</translation>
+      <translation>Informacije o autorskim pravima</translation>
     </message>
     <message>
       <location filename="../../developer_mode_copyright_info.ui" line="22"/>
       <source>Copyright holder:</source>
-      <translation>Telif hakkı sahibi:</translation>
+      <translation>Nosilac autorskih prava:</translation>
     </message>
     <message>
       <location filename="../../developer_mode_copyright_info.ui" line="32"/>
       <source>Copyright year:</source>
-      <translation>Telif Hakkı Yılı:</translation>
+      <translation>Godina od kad važi autorsko pravo:</translation>
     </message>
   </context>
   <context>
@@ -1015,27 +1015,27 @@ installed addons will be checked for available updates
     <message>
       <location filename="../../developer_mode_people.ui" line="14"/>
       <source>Add Person</source>
-      <translation>Kişi Ekle</translation>
+      <translation>Dodaj osobu</translation>
     </message>
     <message>
       <location filename="../../developer_mode_people.ui" line="20"/>
       <source>A maintainer is someone with current commit access on this project. An author is anyone else you&apos;d like to give credit to.</source>
-      <translation>Geliştirici, bu projede geçerli taahhüt erişimine sahip olan kişidir. Bir yazar, kredi vermek istediğiniz herhangi bir kişidir.</translation>
+      <translation type="unfinished">A maintainer is someone with current commit access on this project. An author is anyone else you&apos;d like to give credit to.</translation>
     </message>
     <message>
       <location filename="../../developer_mode_people.ui" line="29"/>
       <source>Name:</source>
-      <translation>Adı:</translation>
+      <translation>Ime:</translation>
     </message>
     <message>
       <location filename="../../developer_mode_people.ui" line="39"/>
       <source>Email:</source>
-      <translation>E-Posta:</translation>
+      <translation>E-pošta:</translation>
     </message>
     <message>
       <location filename="../../developer_mode_people.ui" line="46"/>
       <source>Email is required for maintainers, and optional for authors.</source>
-      <translation>E-posta, geliştiriciler için gereklidir, yazarlar için isteğe bağlıdır.</translation>
+      <translation>E-pošta je neophodna za osobu odgovornu za održavanje, a neobavezno za autore.</translation>
     </message>
   </context>
   <context>
@@ -1043,42 +1043,42 @@ installed addons will be checked for available updates
     <message>
       <location filename="../../proxy_authentication.ui" line="14"/>
       <source>Proxy login required</source>
-      <translation>Vekil sunucu girişi gerekli</translation>
+      <translation>Potrebna je prijava za proksi</translation>
     </message>
     <message>
       <location filename="../../proxy_authentication.ui" line="20"/>
       <source>Proxy requires authentication</source>
-      <translation>Vekil sunucu kimlik doğrulaması gerektiriyor</translation>
+      <translation>Proksi zahteva autentifikaciju</translation>
     </message>
     <message>
       <location filename="../../proxy_authentication.ui" line="29"/>
       <source>Proxy:</source>
-      <translation>Vekil Sunucu:</translation>
+      <translation>Proksi:</translation>
     </message>
     <message>
       <location filename="../../proxy_authentication.ui" line="42"/>
       <source>Placeholder for proxy address</source>
-      <translation>Vekil sunucu adresi için yer tutucu</translation>
+      <translation type="unfinished">Placeholder for proxy address</translation>
     </message>
     <message>
       <location filename="../../proxy_authentication.ui" line="49"/>
       <source>Realm:</source>
-      <translation>Erişim Alanı:</translation>
+      <translation type="unfinished">Realm:</translation>
     </message>
     <message>
       <location filename="../../proxy_authentication.ui" line="56"/>
       <source>Placeholder for proxy realm</source>
-      <translation>Proxy alanı için yer tutucu</translation>
+      <translation type="unfinished">Placeholder for proxy realm</translation>
     </message>
     <message>
       <location filename="../../proxy_authentication.ui" line="67"/>
       <source>Username</source>
-      <translation>Kullanıcı adı</translation>
+      <translation>Korisničko ime</translation>
     </message>
     <message>
       <location filename="../../proxy_authentication.ui" line="77"/>
       <source>Password</source>
-      <translation>Şifre</translation>
+      <translation>Lozinka</translation>
     </message>
   </context>
   <context>
@@ -1086,37 +1086,37 @@ installed addons will be checked for available updates
     <message>
       <location filename="../../developer_mode_license.ui" line="14"/>
       <source>Select a license</source>
-      <translation>Bir lisans seçin</translation>
+      <translation>Izaberi licencu</translation>
     </message>
     <message>
       <location filename="../../developer_mode_license.ui" line="35"/>
       <source>About...</source>
-      <translation>Hakkında...</translation>
+      <translation>O...</translation>
     </message>
     <message>
       <location filename="../../developer_mode_license.ui" line="46"/>
       <source>License name:</source>
-      <translation>Lisans adı:</translation>
+      <translation>Naziv licence:</translation>
     </message>
     <message>
       <location filename="../../developer_mode_license.ui" line="60"/>
       <source>Path to license file:</source>
-      <translation>Lisans dosyasının yolu:</translation>
+      <translation>Putanja do datoteke licence:</translation>
     </message>
     <message>
       <location filename="../../developer_mode_license.ui" line="67"/>
       <source>(if required by license)</source>
-      <translation>(lisans gerektiriyorsa)</translation>
+      <translation>(ako to zahteva licenca)</translation>
     </message>
     <message>
       <location filename="../../developer_mode_license.ui" line="74"/>
       <source>Browse...</source>
-      <translation>Gözat...</translation>
+      <translation>Potraži...</translation>
     </message>
     <message>
       <location filename="../../developer_mode_license.ui" line="81"/>
       <source>Create...</source>
-      <translation>Oluştur...</translation>
+      <translation>Napravi...</translation>
     </message>
   </context>
   <context>
@@ -1124,17 +1124,17 @@ installed addons will be checked for available updates
     <message>
       <location filename="../../select_toolbar_dialog.ui" line="14"/>
       <source>Select Toolbar</source>
-      <translation>Araç Çubuğunu Seç</translation>
+      <translation>Izaberi paletu alatki</translation>
     </message>
     <message>
       <location filename="../../select_toolbar_dialog.ui" line="26"/>
       <source>Select a toolbar to add this macro to:</source>
-      <translation>Bu makroyu eklemek için bir araç çubuğu seçin:</translation>
+      <translation>Izaberi paletu alatki u koju ćete dodati ovaj makro:</translation>
     </message>
     <message>
       <location filename="../../select_toolbar_dialog.ui" line="36"/>
       <source>Ask every time</source>
-      <translation>Her seferinde sor</translation>
+      <translation>Pitaj svaki put</translation>
     </message>
   </context>
   <context>
@@ -1142,27 +1142,27 @@ installed addons will be checked for available updates
     <message>
       <location filename="../../toolbar_button.ui" line="14"/>
       <source>Add button?</source>
-      <translation>Tuş ekle?</translation>
+      <translation>Dodaj dugme?</translation>
     </message>
     <message>
       <location filename="../../toolbar_button.ui" line="20"/>
       <source>Add a toolbar button for this macro?</source>
-      <translation>Bu makro için bir araç çubuğu düğmesi eklensin mi?</translation>
+      <translation>Želite li dodati dugme na paleti alatki za ovaj makro?</translation>
     </message>
     <message>
       <location filename="../../toolbar_button.ui" line="32"/>
       <source>Yes</source>
-      <translation>Evet</translation>
+      <translation>Da</translation>
     </message>
     <message>
       <location filename="../../toolbar_button.ui" line="39"/>
       <source>No</source>
-      <translation>Hayır</translation>
+      <translation>Ne</translation>
     </message>
     <message>
       <location filename="../../toolbar_button.ui" line="46"/>
       <source>Never</source>
-      <translation>Asla</translation>
+      <translation>Nikada</translation>
     </message>
   </context>
 </TS>
