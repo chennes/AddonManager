@@ -275,7 +275,7 @@ class MetadataReader:
     @staticmethod
     def _determine_namespace(root: ET.Element) -> str:
         if root.tag.endswith("package"):
-            return root.tag[:-len("package")]
+            return root.tag[: -len("package")]
         raise RuntimeError("No 'package' element found in metadata file")
 
     @staticmethod

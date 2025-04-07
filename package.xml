@@ -10,32 +10,32 @@
 
     format = '1'
 >
- 
+
     <version>1.0</version>
 
     <!-- [ General ] - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    
+
     <description>Tool to install workbenches, macros, themes, etc.</description>
     <icon>resources/icons/AddonManager.svg</icon>
     <name>AddonManager</name>
 
     <!-- [ People ]  - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-    <maintainer 
-        email = 'chennes@freecad.org' 
+    <maintainer
+        email = 'chennes@freecad.org'
     >Chris Hennes</maintainer>
 
-    <author 
-        email = 'yorik@uncreated.net' 
+    <author
+        email = 'yorik@uncreated.net'
     >Yorik van Havre</author>
 
     <author>Jonathan Wiedemann</author>
 
     <author>Kurt Kremitzki</author>
-    
+
     <!-- [ Licences ]  - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-    <license 
+    <license
         file = 'LICENSE.md'
     >LGPL-2.1</license>
 
@@ -45,7 +45,7 @@
         type = 'bugtracker'
     >https://github.com/FreeCAD/AddonManager/issues</url>
 
-    <url 
+    <url
         branch = 'main'
         type = 'repository'
     >https://github.com/FreeCAD/AddonManager</url>
@@ -58,7 +58,7 @@
 
     <content>
         <other>
-            
+
             <name>AddonManager</name>
 
         </other>
