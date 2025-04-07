@@ -26,27 +26,13 @@ https://github.com/spdx/license-list-data and stored as part of the FreeCAD repo
 resource."""
 
 import json
-
-# Get whatever version of PySide we can
-try:
-    import PySide  # Use the FreeCAD wrapper
-except ImportError:
-    try:
-        import PySide6  # Outside FreeCAD, try Qt6 first
-
-        PySide = PySide6
-    except ImportError:
-        import PySide2  # Fall back to Qt5 (if this fails, Python will kill this module's import)
-
-        PySide = PySide2
-
-from PySide import QtCore
+import os.path
 
 import addonmanager_freecad_interface as fci
 
 
 class SPDXLicenseManager:
-    """A class that loads a list of licenses from an internal Qt resource and provides access to
+    """A class that loads a list of licenses from a file and provides access to
     some information about those licenses."""
 
     def __init__(self):
@@ -54,16 +40,14 @@ class SPDXLicenseManager:
         self._load_license_data()
 
     def _load_license_data(self):
-        qf = QtCore.QFile(f":/licenses/spdx.json")
-        if qf.exists():
-            qf.open(QtCore.QIODevice.ReadOnly)
-            byte_data = qf.readAll()
-            qf.close()
-
-            string_data = str(byte_data, encoding="utf-8")
+        spdx_path = f"{os.path.dirname(__file__)}/Resources/licenses/spdx.json"
+        if os.path.exists(spdx_path):
+            with open(spdx_path, "r", encoding="utf-8") as f:
+                string_data = f.read()
             raw_license_data = json.loads(string_data)
-
             self._process_raw_spdx_json(raw_license_data)
+        else:
+            raise RuntimeError(f"File {spdx_path} not found")
 
     def _process_raw_spdx_json(self, raw_license_data: dict):
         """The raw JSON data is a list of licenses, with the ID as an element of the contained
