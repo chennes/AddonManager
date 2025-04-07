@@ -24,9 +24,9 @@ import os
 import sys
 import tempfile
 import unittest
-import unittest.mock
+import unittest.mock as mock
 
-Mock = unittest.mock.MagicMock
+Mock = mock.MagicMock
 
 sys.path.append("../../")
 
@@ -322,6 +322,7 @@ class TestMetadataReader(unittest.TestCase):
 
         root = Mock()
         root.find = Mock(return_value=False)
+        root.tag = "not_what_you_were_expecting"
         with self.assertRaises(RuntimeError):
             MetadataReader._determine_namespace(root)
 

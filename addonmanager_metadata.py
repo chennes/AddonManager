@@ -274,10 +274,8 @@ class MetadataReader:
 
     @staticmethod
     def _determine_namespace(root: ET.Element) -> str:
-        accepted_namespaces = ["{https://wiki.freecad.org/Package_Metadata}", ""]
-        for ns in accepted_namespaces:
-            if root.tag == f"{ns}package":
-                return ns
+        if root.tag.endswith("package"):
+            return root.tag[:-len("package")]
         raise RuntimeError("No 'package' element found in metadata file")
 
     @staticmethod
