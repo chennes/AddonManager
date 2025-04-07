@@ -1,0 +1,67 @@
+<?xml
+    version = '1.0'
+    encoding = 'UTF-8'
+    standalone = 'no'
+?>
+<package
+    Manifest:schemaLocation = 'HTTPS://Addons.FreeCAD.Org/Manifest https://github.com/FreeCAD/FreeCAD-Addon-Manifest-Schema/releases/download/v1.6/Schema.xsd'
+    xmlns:Manifest = 'http://www.w3.org/2001/XMLSchema-instance'
+    xmlns = 'HTTPS://Addons.FreeCAD.Org/Manifest'
+
+    format = '1'
+>
+ 
+    <version>1.0</version>
+
+    <!-- [ General ] - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    
+    <description>Tool to install workbenches, macros, themes, etc.</description>
+    <icon>resources/icons/AddonManager.svg</icon>
+    <name>AddonManager</name>
+
+    <!-- [ People ]  - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <maintainer 
+        email = 'chennes@freecad.org' 
+    >Chris Hennes</maintainer>
+
+    <author 
+        email = 'yorik@uncreated.net' 
+    >Yorik van Havre</author>
+
+    <author>Jonathan Wiedemann</author>
+
+    <author>Kurt Kremitzki</author>
+    
+    <!-- [ Licences ]  - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <license 
+        file = 'LICENSE.md'
+    >LGPL-2.1</license>
+
+    <!-- [ Links ] - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <url
+        type = 'bugtracker'
+    >https://github.com/FreeCAD/AddonManager/issues</url>
+
+    <url 
+        branch = 'main'
+        type = 'repository'
+    >https://github.com/FreeCAD/AddonManager</url>
+
+    <url
+        type = 'readme'
+    >https://github.com/FreeCAD/AddonManager/blob/main/README.md</url>
+
+    <!-- [ Content ] - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <content>
+        <other>
+            
+            <name>AddonManager</name>
+
+        </other>
+    </content>
+
+</package>
