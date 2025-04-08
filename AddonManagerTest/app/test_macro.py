@@ -30,8 +30,6 @@ from unittest.mock import MagicMock
 
 sys.path.append("../../")  # So the IDE can find the
 
-import FreeCAD
-
 from addonmanager_macro import Macro
 
 
@@ -39,9 +37,7 @@ class TestMacro(unittest.TestCase):
     MODULE = "test_macro"  # file name without extension
 
     def setUp(self):
-        self.test_dir = os.path.join(
-            FreeCAD.getHomePath(), "Mod", "AddonManager", "AddonManagerTest", "data"
-        )
+        self.test_dir = os.path.join(os.path.dirname(__file__), "..", "data")
 
     def test_basic_metadata(self):
         replacements = {

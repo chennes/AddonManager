@@ -29,7 +29,6 @@ import stat
 import tempfile
 import time
 from zipfile import ZipFile
-import FreeCAD
 
 from addonmanager_git import GitManager, NoGitFound, GitFailed
 
@@ -47,9 +46,7 @@ class TestGit(unittest.TestCase):
     def setUp(self):
         """Set up the test case: called by the unit test system"""
         self.cwd = os.getcwd()
-        test_data_dir = os.path.join(
-            FreeCAD.getHomePath(), "Mod", "AddonManager", "AddonManagerTest", "data"
-        )
+        test_data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
         git_repo_zip = os.path.join(test_data_dir, "test_repo.zip")
         self.test_dir = os.path.join(
             tempfile.gettempdir(), "FreeCADTesting", "AddonManagerTests", "Git"

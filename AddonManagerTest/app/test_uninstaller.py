@@ -29,11 +29,8 @@ from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR
 import tempfile
 import unittest
 
-import FreeCAD
-
 from addonmanager_uninstaller import AddonUninstaller, MacroUninstaller
 
-from Addon import Addon
 from AddonManagerTest.app.mocks import MockAddon, MockMacro
 
 
@@ -44,9 +41,7 @@ class TestAddonUninstaller(unittest.TestCase):
 
     def setUp(self):
         """Initialize data needed for all tests"""
-        self.test_data_dir = os.path.join(
-            FreeCAD.getHomePath(), "Mod", "AddonManager", "AddonManagerTest", "data"
-        )
+        self.test_data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
         self.mock_addon = MockAddon()
         self.signals_caught = []
         self.test_object = AddonUninstaller(self.mock_addon)

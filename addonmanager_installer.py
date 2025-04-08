@@ -24,6 +24,7 @@
 """Contains the classes to manage Addon installation: intended as a stable API, safe for external
 code to call and to rely upon existing. See classes AddonInstaller and MacroInstaller for details.
 """
+import fcntl
 import json
 from datetime import datetime, timezone
 from enum import IntEnum, auto
@@ -34,19 +35,26 @@ import tempfile
 from urllib.parse import urlparse
 import zipfile
 
-import FreeCAD
+import addonmanager_freecad_interface as fci
 
-from PySide import QtCore
+try:
+    # If run from within FreeCAD, a wrapper is provided to handle the below versioning
+    from PySide import QtCore
+except ImportError:
+    try:
+        from PySide6 import QtCore
+    except ImportError:
+        from PySide2 import QtCore
 
 from Addon import Addon
 import addonmanager_utilities as utils
 from addonmanager_metadata import get_branch_from_metadata
 from addonmanager_git import initialize_git, GitFailed
 
-if FreeCAD.GuiUp:
+if fci.FreeCADGui:
     import NetworkManager  # Requires an event loop
 
-translate = FreeCAD.Qt.translate
+translate = fci.translate
 
 # pylint: disable=too-few-public-methods
 
@@ -134,9 +142,8 @@ class AddonInstaller(QtCore.QObject):
             AddonInstaller._load_local_allowed_packages_list()
             AddonInstaller._update_allowed_packages_list()
 
-        basedir = FreeCAD.getUserAppDataDir()
-        self.installation_path = os.path.join(basedir, "Mod")
-        self.macro_installation_path = FreeCAD.getUserMacroDir(True)
+        self.installation_path = fci.DataPaths().mod_dir
+        self.macro_installation_path = fci.DataPaths().macro_dir
         self.zip_download_index = None
 
     def run(self, install_method: InstallationMethod = InstallationMethod.ANY) -> bool:
@@ -160,7 +167,7 @@ class AddonInstaller(QtCore.QObject):
         except utils.ProcessInterrupted:
             pass
         except Exception as e:
-            FreeCAD.Console.PrintLog(e + "\n")
+            fci.Console.PrintLog(e + "\n")
             success = False
         if success:
             if (
@@ -188,15 +195,13 @@ class AddonInstaller(QtCore.QObject):
     @classmethod
     def _update_allowed_packages_list(cls) -> None:
         """Get a new remote copy of the allowed packages list from GitHub."""
-        FreeCAD.Console.PrintLog(
-            "Attempting to fetch remote copy of ALLOWED_PYTHON_PACKAGES.txt...\n"
-        )
+        fci.Console.PrintLog("Attempting to fetch remote copy of ALLOWED_PYTHON_PACKAGES.txt...\n")
         p = utils.blocking_get(
             "https://raw.githubusercontent.com/"
             "FreeCAD/FreeCAD-addons/master/ALLOWED_PYTHON_PACKAGES.txt"
         )
         if p:
-            FreeCAD.Console.PrintLog(
+            fci.Console.PrintLog(
                 "Overriding local ALLOWED_PYTHON_PACKAGES.txt with newer remote version\n"
             )
             p = p.decode("utf8")
@@ -206,7 +211,7 @@ class AddonInstaller(QtCore.QObject):
                 if line and len(line) > 0 and line[0] != "#":
                     cls.allowed_packages.add(line.strip().lower())
         else:
-            FreeCAD.Console.PrintLog(
+            fci.Console.PrintLog(
                 "Could not fetch remote ALLOWED_PYTHON_PACKAGES.txt, using local copy\n"
             )
 
@@ -316,12 +321,12 @@ class AddonInstaller(QtCore.QObject):
         else:
             zip_url = utils.get_zip_url(self.addon_to_install)
 
-        FreeCAD.Console.PrintLog(f"Downloading ZIP file from {zip_url}...\n")
+        fci.Console.PrintLog(f"Downloading ZIP file from {zip_url}...\n")
         parse_result = urlparse(zip_url)
         is_remote = parse_result.scheme in ["http", "https"]
 
         if is_remote:
-            if FreeCAD.GuiUp:
+            if fci.FreeCADGui:
                 self._run_zip_downloader_in_event_loop(zip_url)
             else:
                 zip_data = utils.blocking_get(zip_url)
@@ -368,7 +373,7 @@ class AddonInstaller(QtCore.QObject):
             return
         QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.AllEvents)
 
-        FreeCAD.Console.PrintLog("ZIP download complete. Installing...\n")
+        fci.Console.PrintLog("ZIP download complete. Installing...\n")
         self._finalize_zip_installation(filename)
 
     def _finalize_zip_installation(self, filename: os.PathLike):
@@ -380,7 +385,7 @@ class AddonInstaller(QtCore.QObject):
         if os.path.exists(destination):
             remove_succeeded = utils.rmdir(destination)
             if not remove_succeeded:
-                FreeCAD.Console.PrintError(f"Failed to remove {destination}, aborting update")
+                fci.Console.PrintError(f"Failed to remove {destination}, aborting update")
                 raise RuntimeError(f"Failed to remove outdated Addon from {destination}")
 
         with zipfile.ZipFile(filename, "r") as zfile:
@@ -393,21 +398,21 @@ class AddonInstaller(QtCore.QObject):
             actual_path = os.path.join(
                 destination, f"{self.addon_to_install.name}-{self.addon_to_install.branch}"
             )
-            FreeCAD.Console.PrintLog(
+            fci.Console.PrintLog(
                 f"ZIP installation moving code from {actual_path} to {destination}"
             )
             self._move_code_out_of_subdirectory(destination)
 
-        FreeCAD.Console.PrintLog("ZIP installation complete.\n")
+        fci.Console.PrintLog("ZIP installation complete.\n")
         self._finalize_successful_installation()
 
     def _code_in_branch_subdirectory(self, destination: str) -> bool:
         test_path = os.path.join(destination, self._expected_subdirectory_name())
-        FreeCAD.Console.PrintLog(f"Checking for possible zip sub-path {test_path}...")
+        fci.Console.PrintLog(f"Checking for possible zip sub-path {test_path}...")
         if os.path.isdir(test_path):
-            FreeCAD.Console.PrintLog(f"path exists.\n")
+            fci.Console.PrintLog(f"path exists.\n")
             return True
-        FreeCAD.Console.PrintLog(f"path does not exist.\n")
+        fci.Console.PrintLog(f"path does not exist.\n")
         return False
 
     def _expected_subdirectory_name(self) -> str:
@@ -517,7 +522,7 @@ class MacroInstaller(QtCore.QObject):
         super().__init__()
         self._validate_object(addon)
         self.addon_to_install = addon
-        self.installation_path = FreeCAD.getUserMacroDir(True)
+        self.installation_path = fci.DataPaths().macro_dir
 
     def run(self) -> bool:
         """Install a macro. Returns True if the macro was installed, or False if not. Emits
@@ -528,12 +533,12 @@ class MacroInstaller(QtCore.QObject):
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_install_succeeded, error_list = macro.install(temp_dir)
             if not temp_install_succeeded:
-                FreeCAD.Console.PrintError(
+                fci.Console.PrintError(
                     translate("AddonsInstaller", "Failed to install macro {}").format(macro.name)
                     + "\n"
                 )
                 for e in error_list:
-                    FreeCAD.Console.PrintError(e + "\n")
+                    fci.Console.PrintError(e + "\n")
                 self.failure.emit(self.addon_to_install, "\n".join(error_list))
                 self.finished.emit()
                 return False
@@ -561,10 +566,10 @@ class MacroInstaller(QtCore.QObject):
             with open(manifest_file, "w", encoding="utf-8") as f:
                 f.write(json.dumps(manifest, indent="  "))
         except OSError as e:
-            FreeCAD.Console.PrintWarning(
+            fci.Console.PrintWarning(
                 translate("AddonsInstaller", "Failed to create installation manifest " "file:\n")
             )
-            FreeCAD.Console.PrintWarning(manifest_file)
+            fci.Console.PrintWarning(manifest_file)
 
     @classmethod
     def _validate_object(cls, addon: object):

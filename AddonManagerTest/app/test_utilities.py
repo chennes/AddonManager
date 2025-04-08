@@ -33,8 +33,6 @@ try:
 except ImportError:
     FreeCAD = None
 
-sys.path.append("../..")
-
 from AddonManagerTest.app.mocks import MockAddon as Addon
 
 from addonmanager_utilities import (
@@ -48,8 +46,6 @@ from addonmanager_utilities import (
 
 
 class TestUtilities(unittest.TestCase):
-
-    MODULE = "test_utilities"  # file name without extension
 
     @classmethod
     def tearDownClass(cls):

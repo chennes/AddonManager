@@ -33,7 +33,6 @@ import sys
 
 sys.path.append("../../")  # So the IDE can find the imports below
 
-import FreeCAD
 from addonmanager_installer import InstallationMethod, AddonInstaller, MacroInstaller
 from addonmanager_git import GitManager, initialize_git
 from addonmanager_metadata import MetadataReader
@@ -49,9 +48,7 @@ class TestAddonInstaller(unittest.TestCase):
     def setUp(self):
         """Initialize data needed for all tests"""
         # self.start_time = time.perf_counter()
-        self.test_data_dir = os.path.join(
-            FreeCAD.getHomePath(), "Mod", "AddonManager", "AddonManagerTest", "data"
-        )
+        self.test_data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
         self.real_addon = Addon(
             "TestAddon",
             "https://github.com/FreeCAD/FreeCAD-addons",

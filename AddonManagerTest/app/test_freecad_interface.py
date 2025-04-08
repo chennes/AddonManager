@@ -33,14 +33,17 @@ from unittest.mock import patch, MagicMock
 # pylint: disable=protected-access,import-outside-toplevel
 
 
-class TestConsole(unittest.TestCase):
-    """Tests for the Console"""
+class WrapTestFreeCADImports(unittest.TestCase):
 
     def setUp(self) -> None:
         self.saved_freecad = None
+        self.saved_freecad_gui = None
         if "FreeCAD" in sys.modules:
             self.saved_freecad = sys.modules["FreeCAD"]
             sys.modules.pop("FreeCAD")
+        if "FreeCADGui" in sys.modules:
+            self.saved_freecad = sys.modules["FreeCADGui"]
+            sys.modules.pop("FreeCADGui")
         if "addonmanager_freecad_interface" in sys.modules:
             sys.modules.pop("addonmanager_freecad_interface")
         sys.path.append("../../")
@@ -48,12 +51,21 @@ class TestConsole(unittest.TestCase):
     def tearDown(self) -> None:
         if "FreeCAD" in sys.modules:
             sys.modules.pop("FreeCAD")
+        if "FreeCADGui" in sys.modules:
+            sys.modules.pop("FreeCADGui")
         if self.saved_freecad is not None:
             sys.modules["FreeCAD"] = self.saved_freecad
+        if self.saved_freecad_gui is not None:
+            sys.modules["FreeCADGui"] = self.saved_freecad_gui
+
+
+class TestConsole(WrapTestFreeCADImports):
+    """Tests for the Console"""
 
     def test_log_with_freecad(self):
         """Ensure that if FreeCAD exists, the appropriate function is called"""
         sys.modules["FreeCAD"] = unittest.mock.MagicMock()
+        sys.modules["FreeCADGui"] = unittest.mock.MagicMock()
         import addonmanager_freecad_interface as fc
 
         fc.Console.PrintLog("Test output")
@@ -99,27 +111,13 @@ class TestConsole(unittest.TestCase):
             self.assertTrue(mock_logging.error.called)
 
 
-class TestParameters(unittest.TestCase):
+class TestParameters(WrapTestFreeCADImports):
     """Tests for the Parameters"""
-
-    def setUp(self) -> None:
-        self.saved_freecad = None
-        if "FreeCAD" in sys.modules:
-            self.saved_freecad = sys.modules["FreeCAD"]
-            sys.modules.pop("FreeCAD")
-        if "addonmanager_freecad_interface" in sys.modules:
-            sys.modules.pop("addonmanager_freecad_interface")
-        sys.path.append("../../")
-
-    def tearDown(self) -> None:
-        if "FreeCAD" in sys.modules:
-            sys.modules.pop("FreeCAD")
-        if self.saved_freecad is not None:
-            sys.modules["FreeCAD"] = self.saved_freecad
 
     def test_param_get_with_freecad(self):
         """Ensure that if FreeCAD exists, the built-in FreeCAD function is called"""
         sys.modules["FreeCAD"] = unittest.mock.MagicMock()
+        sys.modules["FreeCADGui"] = unittest.mock.MagicMock()
         import addonmanager_freecad_interface as fc
 
         prefs = fc.ParamGet("some/fake/path")
@@ -162,27 +160,13 @@ class TestParameters(unittest.TestCase):
                 self.assertNotIn("test", prf.parameters)
 
 
-class TestDataPaths(unittest.TestCase):
+class TestDataPaths(WrapTestFreeCADImports):
     """Tests for the data paths"""
-
-    def setUp(self) -> None:
-        self.saved_freecad = None
-        if "FreeCAD" in sys.modules:
-            self.saved_freecad = sys.modules["FreeCAD"]
-            sys.modules.pop("FreeCAD")
-        if "addonmanager_freecad_interface" in sys.modules:
-            sys.modules.pop("addonmanager_freecad_interface")
-        sys.path.append("../../")
-
-    def tearDown(self) -> None:
-        if "FreeCAD" in sys.modules:
-            sys.modules.pop("FreeCAD")
-        if self.saved_freecad is not None:
-            sys.modules["FreeCAD"] = self.saved_freecad
 
     def test_init_with_freecad(self):
         """Ensure that if FreeCAD exists, the appropriate functions are called"""
         sys.modules["FreeCAD"] = unittest.mock.MagicMock()
+        sys.modules["FreeCADGui"] = unittest.mock.MagicMock()
         import addonmanager_freecad_interface as fc
 
         data_paths = fc.DataPaths()

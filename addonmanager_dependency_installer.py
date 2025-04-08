@@ -115,6 +115,8 @@ class DependencyInstaller(QObject):
         signal is emitted and the function exits without proceeding with any additional
         installations."""
         for pymod in self.python_requires:
+            if pymod.lower().startswith("pyside"):
+                continue  # Do not attempt to install PySide, which must be part of FreeCAD already
             if is_interruption_requested():
                 return False
             try:

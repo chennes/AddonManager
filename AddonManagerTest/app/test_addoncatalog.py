@@ -32,7 +32,7 @@ class TestAddonCatalogEntry(unittest.TestCase):
 
     def test_version_match_without_restrictions(self):
         """Given an AddonCatalogEntry that has no version restrictions, a fixed version matches."""
-        with patch("addonmanager_freecad_interface.Version") as mock_freecad:
+        with patch("AddonCatalog.fci.Version") as mock_freecad:
             mock_freecad.Version = lambda: (1, 2, 3, "dev")
             ac = AddonCatalogEntry({})
             self.assertTrue(ac.is_compatible())
@@ -40,25 +40,25 @@ class TestAddonCatalogEntry(unittest.TestCase):
     def test_version_match_with_min_no_max_good_match(self):
         """Given an AddonCatalogEntry with a minimum FreeCAD version, a version smaller than that
         does not match."""
-        with patch("addonmanager_freecad_interface.Version", return_value=(1, 2, 3, "dev")):
-            ac = AddonCatalogEntry({"freecad_min": Version(from_string="1.2")})
+        with patch("AddonCatalog.fci.Version", return_value=(1, 2, 3, "dev")):
+            ac = AddonCatalogEntry({"freecad_min": "1.2"})
             self.assertTrue(ac.is_compatible())
 
     def test_version_match_with_max_no_min_good_match(self):
         """Given an AddonCatalogEntry with a maximum FreeCAD version, a version larger than that
         does not match."""
-        with patch("addonmanager_freecad_interface.Version", return_value=(1, 2, 3, "dev")):
-            ac = AddonCatalogEntry({"freecad_max": Version(from_string="1.3")})
+        with patch("AddonCatalog.fci.Version", return_value=(1, 2, 3, "dev")):
+            ac = AddonCatalogEntry({"freecad_max": "1.3"})
             self.assertTrue(ac.is_compatible())
 
     def test_version_match_with_min_and_max_good_match(self):
         """Given an AddonCatalogEntry with both a minimum and maximum FreeCAD version, a version
         between the two matches."""
-        with patch("addonmanager_freecad_interface.Version", return_value=(1, 2, 3, "dev")):
+        with patch("AddonCatalog.fci.Version", return_value=(1, 2, 3, "dev")):
             ac = AddonCatalogEntry(
                 {
-                    "freecad_min": Version(from_string="1.1"),
-                    "freecad_max": Version(from_string="1.3"),
+                    "freecad_min": "1.1",
+                    "freecad_max": "1.3",
                 }
             )
             self.assertTrue(ac.is_compatible())
@@ -66,23 +66,23 @@ class TestAddonCatalogEntry(unittest.TestCase):
     def test_version_match_with_min_and_max_bad_match_high(self):
         """Given an AddonCatalogEntry with both a minimum and maximum FreeCAD version, a version
         higher than the maximum does not match."""
-        with patch("addonmanager_freecad_interface.Version", return_value=(1, 3, 3, "dev")):
-            ac = AddonCatalogEntry(
-                {
-                    "freecad_min": Version(from_string="1.1"),
-                    "freecad_max": Version(from_string="1.3"),
-                }
-            )
+        ac = AddonCatalogEntry(
+            {
+                "freecad_min": "1.1",
+                "freecad_max": "1.3",
+            }
+        )
+        with patch("AddonCatalog.fci.Version", return_value=(1, 3, 3, "dev")):
             self.assertFalse(ac.is_compatible())
 
     def test_version_match_with_min_and_max_bad_match_low(self):
         """Given an AddonCatalogEntry with both a minimum and maximum FreeCAD version, a version
         lower than the minimum does not match."""
-        with patch("addonmanager_freecad_interface.Version", return_value=(1, 0, 3, "dev")):
+        with patch("AddonCatalog.fci.Version", return_value=(1, 0, 3, "dev")):
             ac = AddonCatalogEntry(
                 {
-                    "freecad_min": Version(from_string="1.1"),
-                    "freecad_max": Version(from_string="1.3"),
+                    "freecad_min": "1.1",
+                    "freecad_max": "1.3",
                 }
             )
             self.assertFalse(ac.is_compatible())
@@ -209,5 +209,5 @@ class TestAddonCatalog(unittest.TestCase):
         sha = "cbce6737d7d058dca2b5ae3f2fdb8cc45b0c02bf711e75bdf5f12fb71ce87790"
         cache = {sha: "CacheData"}
         with patch("addonmanager_freecad_interface.Version", return_value=cache):
-            with patch("Addon.Addon") as addon_mock:
+            with patch("AddonCatalog.Addon") as addon_mock:
                 catalog.load_metadata_cache(cache)

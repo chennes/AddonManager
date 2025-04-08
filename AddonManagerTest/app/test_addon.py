@@ -20,19 +20,15 @@
 # *   <https://www.gnu.org/licenses/>.                                      *
 # *                                                                         *
 # ***************************************************************************
+import os
 import tempfile
 import unittest
-import os
-import sys
-
-sys.path.append("../../")
 
 from Addon import Addon, INTERNAL_WORKBENCHES
 from addonmanager_macro import Macro
 
 
 class TestAddon(unittest.TestCase):
-    MODULE = "test_addon"  # file name without extension
 
     def setUp(self):
         self.test_dir = os.path.join(os.path.dirname(__file__), "..", "data")
