@@ -1,7 +1,11 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
+import os
 import sys
 import unittest
+
+# Ensure the tests can find the correct imports
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()
