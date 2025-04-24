@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AddonCatalog",
+  "description": "A catalog of addons indexed by addon ID. Each ID maps to a list of AddonCatalogEntry objects.",
+  "type": "object",
+  "patternProperties": {
+    "^.+$": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "freecad_min": {
+            "type": "string",
+            "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[\\da-zA-Z\\-.]+)?(?:\\+[\\da-zA-Z\\-.]+)?$",
+            "description": "Minimum compatible FreeCAD version (inclusive, Semantic Versioning)"
+          },
+          "freecad_max": {
+            "type": "string",
+            "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[\\da-zA-Z\\-.]+)?(?:\\+[\\da-zA-Z\\-.]+)?$",
+            "description": "Maximum compatible FreeCAD version (inclusive, Semantic Versioning)"
+          },
+          "repository": {
+            "type": "string",
+            "format": "uri",
+            "description": "Git repository URL"
+          },
+          "git_ref": {
+            "type": "string",
+            "description": "Git reference (e.g. SHA, branch, or tag)"
+          },
+          "zip_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Direct download link for a .zip file. If git information is also present, this should correspond to a ZIP download link that will result in the same code as a checkout of the given git repo and ref."
+          },
+          "note": {
+            "type": "string",
+            "description": "Notes about this addon version. Not displayed, only for reference in the JSON catalog file."
+          },
+          "branch_display_name": {
+            "type": "string",
+            "description": "Display name for the addon version branch. If omitted, the git ref is used."
+          }
+        },
+        "anyOf": [
+          {
+            "required": ["repository", "git_ref"]
+          },
+          {
+            "required": ["zip_url"]
+          }
+        ],
+        "if": {
+          "not": {
+            "required": ["git_ref"]
+          }
+        },
+        "then": {
+          "required": ["branch_display_name"]
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
