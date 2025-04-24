@@ -89,7 +89,7 @@ class AddonCatalog:
     def _parse_raw_data(self):
         self._dictionary = {}  # Clear pre-existing contents
         for key, value in self._original_data.items():
-            if key == "_meta":  # Don't add the documentation object to the tree
+            if key in ["_meta", "$schema"]:  # Don't add the documentation objects to the tree
                 continue
             self._dictionary[key] = []
             for entry in value:
