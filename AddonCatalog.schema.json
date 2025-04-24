@@ -3,6 +3,26 @@
   "title": "AddonCatalog",
   "description": "A catalog of addons indexed by addon ID. Each ID maps to a list of AddonCatalogEntry objects.",
   "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri",
+      "description": "A link to the JSON Schema describing the structure of this file."
+    },
+    "_meta": {
+      "type": "object",
+      "description": "Metadata describing the catalog file itself.",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "schema_version": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
   "patternProperties": {
     "^.+$": {
       "type": "array",
@@ -11,52 +31,54 @@
         "properties": {
           "freecad_min": {
             "type": "string",
-            "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[\\da-zA-Z\\-.]+)?(?:\\+[\\da-zA-Z\\-.]+)?$",
-            "description": "Minimum compatible FreeCAD version (inclusive, Semantic Versioning)"
+            "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[\\da-zA-Z\\-.]+)?(?:\\+[\\da-zA-Z\\-.]+)?$"
           },
           "freecad_max": {
             "type": "string",
-            "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[\\da-zA-Z\\-.]+)?(?:\\+[\\da-zA-Z\\-.]+)?$",
-            "description": "Maximum compatible FreeCAD version (inclusive, Semantic Versioning)"
+            "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[\\da-zA-Z\\-.]+)?(?:\\+[\\da-zA-Z\\-.]+)?$"
           },
           "repository": {
             "type": "string",
-            "format": "uri",
-            "description": "Git repository URL"
+            "format": "uri"
           },
           "git_ref": {
-            "type": "string",
-            "description": "Git reference (e.g. SHA, branch, or tag)"
+            "type": "string"
           },
           "zip_url": {
             "type": "string",
-            "format": "uri",
-            "description": "Direct download link for a .zip file. If git information is also present, this should correspond to a ZIP download link that will result in the same code as a checkout of the given git repo and ref."
+            "format": "uri"
           },
           "note": {
-            "type": "string",
-            "description": "Notes about this addon version. Not displayed, only for reference in the JSON catalog file."
+            "type": "string"
           },
           "branch_display_name": {
-            "type": "string",
-            "description": "Display name for the addon version branch. If omitted, the git ref is used."
+            "type": "string"
           }
         },
         "anyOf": [
           {
-            "required": ["repository", "git_ref"]
+            "required": [
+              "repository",
+              "git_ref"
+            ]
           },
           {
-            "required": ["zip_url"]
+            "required": [
+              "zip_url"
+            ]
           }
         ],
         "if": {
           "not": {
-            "required": ["git_ref"]
+            "required": [
+              "git_ref"
+            ]
           }
         },
         "then": {
-          "required": ["branch_display_name"]
+          "required": [
+            "branch_display_name"
+          ]
         },
         "additionalProperties": false
       }
