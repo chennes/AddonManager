@@ -32,16 +32,15 @@ from typing import Dict
 from enum import Enum, auto
 import xml.etree.ElementTree
 
-from PySide import QtCore
+from PySideWrapper import QtCore
 
-import FreeCAD
 import addonmanager_utilities as utils
 from addonmanager_metadata import MetadataReader
 from Addon import Addon
 import NetworkManager
 import addonmanager_freecad_interface as fci
 
-translate = FreeCAD.Qt.translate
+translate = fci.translate
 
 #  @package AddonManager_workers
 #  \ingroup ADDONMANAGER
@@ -72,8 +71,8 @@ class UpdateMetadataCacheWorker(QtCore.QThread):
         NetworkManager.AM_NETWORK_MANAGER.completed.connect(self.download_completed)
         self.requests_completed = 0
         self.total_requests = 0
-        self.store = os.path.join(FreeCAD.getUserCachePath(), "AddonManager", "PackageMetadata")
-        FreeCAD.Console.PrintLog(f"Storing Addon Manager cache data in {self.store}\n")
+        self.store = os.path.join(fci.DataPaths().cache_dir, "AddonManager", "PackageMetadata")
+        fci.Console.PrintLog(f"Storing Addon Manager cache data in {self.store}\n")
         self.updated_repos = set()
         self.remote_cache_data = {}
 
@@ -200,10 +199,10 @@ class UpdateMetadataCacheWorker(QtCore.QThread):
             metadata = MetadataReader.from_file(new_xml_file)
         except xml.etree.ElementTree.ParseError:
             fci.Console.PrintWarning("An invalid or corrupted package.xml file was downloaded for")
-            fci.Console.PrintWarning(f" {self.name}... ignoring the bad data.\n")
+            fci.Console.PrintWarning(f" {repo.name}... ignoring the bad data.\n")
             return
         repo.set_metadata(metadata)
-        FreeCAD.Console.PrintLog(f"Downloaded package.xml for {repo.name}\n")
+        fci.Console.PrintLog(f"Downloaded package.xml for {repo.name}\n")
 
         # Grab a new copy of the icon as well: we couldn't enqueue this earlier because
         # we didn't know the path to it, which is stored in the package.xml file.
@@ -236,15 +235,15 @@ class UpdateMetadataCacheWorker(QtCore.QThread):
         try:
             f = byte_data.decode("utf-8")
         except UnicodeDecodeError as e:
-            FreeCAD.Console.PrintWarning(
+            fci.Console.PrintWarning(
                 translate(
                     "AddonsInstaller",
                     "Failed to decode {} file for Addon '{}'",
                 ).format(file_name, addon_name)
                 + "\n"
             )
-            FreeCAD.Console.PrintWarning(str(e) + "\n")
-            FreeCAD.Console.PrintWarning(
+            fci.Console.PrintWarning(str(e) + "\n")
+            fci.Console.PrintWarning(
                 translate(
                     "AddonsInstaller",
                     "Any dependency information in this file will be ignored",
@@ -264,7 +263,7 @@ class UpdateMetadataCacheWorker(QtCore.QThread):
                     wb_name = wb.strip()
                     if wb_name:
                         repo.requires.add(wb_name)
-                        FreeCAD.Console.PrintLog(
+                        fci.Console.PrintLog(
                             f"{repo.display_name} requires FreeCAD Addon '{wb_name}'\n"
                         )
 
@@ -274,7 +273,7 @@ class UpdateMetadataCacheWorker(QtCore.QThread):
                     dep = pl.strip()
                     if dep:
                         repo.python_requires.add(dep)
-                        FreeCAD.Console.PrintLog(
+                        fci.Console.PrintLog(
                             f"{repo.display_name} requires python package '{dep}'\n"
                         )
 
@@ -284,7 +283,7 @@ class UpdateMetadataCacheWorker(QtCore.QThread):
                     dep = pl.strip()
                     if dep:
                         repo.python_optional.add(dep)
-                        FreeCAD.Console.PrintLog(
+                        fci.Console.PrintLog(
                             f"{repo.display_name} optionally imports python package"
                             + f" '{pl.strip()}'\n"
                         )

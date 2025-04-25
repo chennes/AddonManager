@@ -27,33 +27,24 @@ import os
 from datetime import date
 from typing import Optional, Tuple
 
-import FreeCAD
-import FreeCADGui
+import addonmanager_freecad_interface as fci
 
-from PySide.QtWidgets import QFileDialog, QDialog
-from PySide.QtGui import QDesktopServices
-from PySide.QtCore import QUrl, QFile, QIODevice
+from PySideWrapper import QtCore, QtGui, QtWidgets
 
-try:
-    from PySide.QtGui import (
-        QRegularExpressionValidator,
-    )
-    from PySide.QtCore import QRegularExpression
-
-    RegexWrapper = QRegularExpression
-    RegexValidatorWrapper = QRegularExpressionValidator
-except ImportError:
+# QRegularExpressionValidator was only added at the very end of the PySide2
+# development cycle, so make sure to support the older QRegExp version as well.
+if hasattr(QtGui, "QRegularExpressionValidator"):
+    QRegularExpression = QtCore.QRegularExpression
+    QRegularExpressionValidator = QtGui.QRegularExpressionValidator
+    RegexWrapper = QtCore.QRegularExpression
+    RegexValidatorWrapper = QtGui.QRegularExpressionValidator
+else:
     QRegularExpressionValidator = None
     QRegularExpression = None
-    from PySide.QtGui import (
-        QRegExpValidator,
-    )
-    from PySide.QtCore import QRegExp
+    RegexWrapper = QtCore.QRegExp
+    RegexValidatorWrapper = QtGui.QRegExpValidator
 
-    RegexWrapper = QRegExp
-    RegexValidatorWrapper = QRegExpValidator
-
-translate = FreeCAD.Qt.translate
+translate = fci.translate
 
 
 class LicenseSelector:
@@ -112,10 +103,9 @@ class LicenseSelector:
             "For providing a license other than one listed",
         )
         self.path_to_addon = path_to_addon
-        self.dialog = FreeCADGui.PySideUic.loadUi(
+        self.dialog = fci.loadUi(
             os.path.join(os.path.dirname(__file__), "developer_mode_license.ui")
         )
-        self.pref = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Addons")
         for short_code, details in LicenseSelector.licenses.items():
             self.dialog.comboBox.addItem(f"{short_code}: {details[0]}", userData=short_code)
         self.dialog.comboBox.addItem(self.other_label)
@@ -129,7 +119,7 @@ class LicenseSelector:
         self.dialog.createButton.clicked.connect(self._create_clicked)
 
         # Set up the first selection to whatever the user chose last time
-        short_code = self.pref.GetString("devModeLastSelectedLicense", "LGPL-2.1-or-later")
+        short_code = fci.Preferences().get("devModeLastSelectedLicense")
         self.set_license(short_code)
 
     def exec(self, short_code: str = None, license_path: str = "") -> Optional[Tuple[str, str]]:
@@ -141,12 +131,12 @@ class LicenseSelector:
             self.set_license(short_code)
         self.dialog.pathLineEdit.setText(license_path)
         result = self.dialog.exec()
-        if result == QDialog.Accepted:
+        if result == QtWidgets.QDialog.Accepted:
             new_short_code = self.dialog.comboBox.currentData()
             new_license_path = self.dialog.pathLineEdit.text()
             if not new_short_code:
                 new_short_code = self.dialog.otherLineEdit.text()
-            self.pref.SetString("devModeLastSelectedLicense", new_short_code)
+            fci.Preferences().set("devModeLastSelectedLicense", new_short_code)
             return new_short_code, new_license_path
         return None
 
@@ -184,9 +174,9 @@ class LicenseSelector:
         short_code = self.dialog.comboBox.currentData()
         if short_code in LicenseSelector.licenses:
             url = LicenseSelector.licenses[short_code][1]
-            QDesktopServices.openUrl(QUrl(url))
+            QtGui.QDesktopServices.openUrl(QtCore.QUrl(url))
         else:
-            FreeCAD.Console.PrintWarning(
+            fci.Console.PrintWarning(
                 f"Internal Error: unrecognized license short code {short_code}\n"
             )
 
@@ -196,13 +186,13 @@ class LicenseSelector:
             self.path_to_addon,
             self.dialog.pathLineEdit.text().replace("/", os.path.sep),
         )
-        license_path, _ = QFileDialog.getOpenFileName(
+        license_path, _ = QtWidgets.QFileDialog.getOpenFileName(
             parent=self.dialog,
             caption=translate(
                 "AddonsInstaller",
                 "Select the corresponding license file in your Addon",
             ),
-            dir=start_dir,
+            dir=str(start_dir),
         )
         if license_path:
             self._set_path(self.path_to_addon, license_path)
@@ -215,7 +205,7 @@ class LicenseSelector:
         if base_dir[-1] != os.path.sep:
             base_dir += os.path.sep
         if not license_path.startswith(base_dir):
-            FreeCAD.Console.PrintError("Selected file not in Addon\n")
+            fci.Console.PrintError("Selected file not in Addon\n")
             # Eventually offer to copy it?
             return
         relative_path = license_path[len(base_dir) :]
@@ -229,27 +219,27 @@ class LicenseSelector:
             self.path_to_addon,
             self.dialog.pathLineEdit.text().replace("/", os.path.sep),
         )
-        license_path, _ = QFileDialog.getSaveFileName(
+        license_path, _ = QtWidgets.QFileDialog.getSaveFileName(
             parent=self.dialog,
             caption=translate(
                 "AddonsInstaller",
                 "Location for new license file",
             ),
-            dir=os.path.join(start_dir, "LICENSE"),
+            dir=str(os.path.join(str(start_dir), "LICENSE")),
         )
         if license_path:
-            self._set_path(start_dir, license_path)
+            self._set_path(str(start_dir), license_path)
             short_code = self._current_short_code()
-            qf = QFile(f":/licenses/{short_code}.txt")
+            qf = QtCore.QFile(f":/licenses/{short_code}.txt")
             if qf.exists():
-                qf.open(QIODevice.ReadOnly)
+                qf.open(QtCore.QIODevice.ReadOnly)
                 byte_data = qf.readAll()
                 qf.close()
 
                 string_data = str(byte_data, encoding="utf-8")
 
                 if "<%%YEAR%%>" in string_data or "<%%COPYRIGHT HOLDER%%>" in string_data:
-                    info_dlg = FreeCADGui.PySideUic.loadUi(
+                    info_dlg = fci.loadUi(
                         os.path.join(
                             os.path.dirname(__file__),
                             "developer_mode_copyright_info.ui",
@@ -260,7 +250,7 @@ class LicenseSelector:
                     )
                     info_dlg.yearLineEdit.setText(str(date.today().year))
                     result = info_dlg.exec()
-                    if result != QDialog.Accepted:
+                    if result != QtWidgets.QDialog.Accepted:
                         return  # Don't create the file, just bail out
 
                     holder = info_dlg.copyrightHolderLineEdit.text()
@@ -272,4 +262,4 @@ class LicenseSelector:
                 with open(license_path, "w", encoding="utf-8") as f:
                     f.write(string_data)
             else:
-                FreeCAD.Console.PrintError(f"Cannot create license file of type {short_code}\n")
+                fci.Console.PrintError(f"Cannot create license file of type {short_code}\n")

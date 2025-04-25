@@ -24,32 +24,10 @@
 """Defines a QWidget-derived class for displaying the view selection buttons."""
 
 from enum import IntEnum
+import addonmanager_freecad_interface as fci
+from PySideWrapper import QtCore, QtGui, QtWidgets
 
-try:
-    import FreeCAD
-
-    translate = FreeCAD.Qt.translate
-except ImportError:
-    FreeCAD = None
-
-    def translate(context: str, text: str):
-        return text
-
-
-# Get whatever version of PySide we can
-try:
-    import PySide  # Use the FreeCAD wrapper
-except ImportError:
-    try:
-        import PySide6  # Outside FreeCAD, try Qt6 first
-
-        PySide = PySide6
-    except ImportError:
-        import PySide2  # Fall back to Qt5 (if this fails, Python will kill this module's import)
-
-        PySide = PySide2
-
-from PySide import QtCore, QtGui, QtWidgets
+translate = fci.translate
 
 
 class AddonManagerDisplayStyle(IntEnum):
@@ -87,8 +65,7 @@ class WidgetViewSelector(QtWidgets.QWidget):
         elif view == AddonManagerDisplayStyle.COMPOSITE:
             self.composite_button.setChecked(True)
         else:
-            if FreeCAD is not None:
-                FreeCAD.Console.PrintWarning(f"Unrecognized display style {view}")
+            fci.Console.PrintWarning(f"Unrecognized display style {view}")
 
     def _setup_ui(self):
         self.horizontal_layout = QtWidgets.QHBoxLayout()

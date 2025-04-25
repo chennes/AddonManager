@@ -1,9 +1,7 @@
-#!/usr/bin/env python3
-
 # SPDX-License-Identifier: LGPL-2.1-or-later
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2022-2023 FreeCAD Project Association                   *
+# *   Copyright (c) 2022-2025 The FreeCAD project association AISBL         *
 # *   Copyright (c) 2015 Yorik van Havre <yorik@uncreated.net>              *
 # *                                                                         *
 # *   This file is part of FreeCAD.                                         *
@@ -32,12 +30,7 @@ import json
 from datetime import date
 from typing import Dict
 
-from PySide import QtGui, QtCore, QtWidgets
-from PySide.QtGui import QDesktopServices
-from PySide.QtCore import QUrl
-
-import FreeCAD
-import FreeCADGui
+from PySideWrapper import QtGui, QtCore, QtWidgets
 
 from addonmanager_workers_startup import (
     CreateAddonListWorker,
@@ -75,7 +68,7 @@ import NetworkManager
 
 from AddonManagerOptions import AddonManagerOptions
 
-translate = FreeCAD.Qt.translate
+translate = fci.translate
 
 
 def QT_TRANSLATE_NOOP(_, txt):
@@ -129,7 +122,7 @@ def get_icon(repo: Addon, update: bool = False) -> QtGui.QIcon:
                 path = os.path.join(os.path.dirname(repo.macro.src_filename), repo.macro.icon)
                 default_icon = QtGui.QIcon(":/icons/document-python.svg")
         elif repo.macro and repo.macro.xpm:
-            cache_path = FreeCAD.getUserCachePath()
+            cache_path = fci.DataPaths().cache_dir
             am_path = os.path.join(cache_path, "AddonManager", "MacroIcons")
             os.makedirs(am_path, exist_ok=True)
             path = os.path.join(am_path, repo.name + "_icon.xpm")
@@ -188,10 +181,11 @@ class CommandAddonManager(QtCore.QObject):
         super().__init__()
 
         QT_TRANSLATE_NOOP("QObject", "Addon Manager")
-        FreeCADGui.addPreferencePage(
-            AddonManagerOptions,
-            "Addon Manager",
-        )
+        if fci.GuiUp:
+            fci.addPreferencePage(
+                AddonManagerOptions,
+                "Addon Manager",
+            )
 
         self.item_model = None
         self.developer_mode = None
@@ -254,28 +248,25 @@ class CommandAddonManager(QtCore.QObject):
         """Shows the Addon Manager UI"""
 
         # create the dialog
-        self.dialog = FreeCADGui.PySideUic.loadUi(
-            os.path.join(os.path.dirname(__file__), "AddonManager.ui")
-        )
+        self.dialog = fci.loadUi(os.path.join(os.path.dirname(__file__), "AddonManager.ui"))
         self.dialog.setObjectName("AddonManager_Main_Window")
         # self.dialog.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, True)
 
         # cleanup the leftovers from previous runs
-        self.macro_repo_dir = FreeCAD.getUserMacroDir(True)
+        self.macro_repo_dir = fci.DataPaths().macro_dir
         self.packages_with_updates = set()
         self.startup_sequence = []
         self.cleanup_workers()
         self.update_cache = local_cache_needs_update()
 
         # restore window geometry from stored state
-        pref = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Addons")
-        w = pref.GetInt("WindowWidth", 800)
-        h = pref.GetInt("WindowHeight", 600)
+        w = fci.Preferences().get("WindowWidth")
+        h = fci.Preferences().get("WindowHeight")
         self.composite_view = CompositeView(self.dialog)
         self.button_bar = WidgetGlobalButtonBar(self.dialog)
 
         # If we are checking for updates automatically, hide the Check for updates button:
-        autocheck = pref.GetBool("AutoCheck", True)
+        autocheck = fci.Preferences().get("AutoCheck")
         if autocheck:
             self.button_bar.check_for_updates.hide()
         else:
@@ -290,8 +281,7 @@ class CommandAddonManager(QtCore.QObject):
         # set nice icons to everything, by theme with fallback to FreeCAD icons
         self.dialog.setWindowIcon(QtGui.QIcon(":/icons/AddonManager.svg"))
 
-        pref = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Addons")
-        dev_mode_active = pref.GetBool("developerMode", False)
+        dev_mode_active = fci.Preferences().get("developerMode")
 
         # enable/disable stuff
         self.button_bar.update_all_addons.setEnabled(False)
@@ -323,12 +313,13 @@ class CommandAddonManager(QtCore.QObject):
         self.composite_view.update.connect(self.update)
         self.composite_view.update_status.connect(self.status_updated)
 
-        # center the dialog over the FreeCAD window
+        # center the dialog over the FreeCAD window, if it exists
         self.dialog.resize(w, h)
-        mw = FreeCADGui.getMainWindow()
-        self.dialog.move(
-            mw.frameGeometry().topLeft() + mw.rect().center() - self.dialog.rect().center()
-        )
+        if fci.FreeCADGui:
+            mw = fci.FreeCADGui.getMainWindow()
+            self.dialog.move(
+                mw.frameGeometry().topLeft() + mw.rect().center() - self.dialog.rect().center()
+            )
 
         # begin populating the table in a set of sub-threads
         self.startup()
@@ -353,7 +344,7 @@ class CommandAddonManager(QtCore.QObject):
                     if not thread.isFinished():
                         finished = thread.wait(500)
                         if not finished:
-                            FreeCAD.Console.PrintWarning(
+                            fci.Console.PrintWarning(
                                 translate(
                                     "AddonsInstaller",
                                     "Worker process {} is taking a long time to stop...",
@@ -368,9 +359,8 @@ class CommandAddonManager(QtCore.QObject):
         """called when the window has been closed"""
 
         # save window geometry for next use
-        pref = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Addons")
-        pref.SetInt("WindowWidth", self.dialog.width())
-        pref.SetInt("WindowHeight", self.dialog.height())
+        fci.Preferences().set("WindowWidth", self.dialog.width())
+        fci.Preferences().set("WindowHeight", self.dialog.height())
 
         # ensure all threads are finished before closing
         ok_to_close = True
@@ -407,7 +397,7 @@ class CommandAddonManager(QtCore.QObject):
             self.write_macro_cache()
         else:
             self.write_cache_stopfile()
-            FreeCAD.Console.PrintLog(
+            fci.Console.PrintLog(
                 "Not writing the cache because a process was forcibly terminated and the state is "
                 "unknown.\n"
             )
@@ -478,8 +468,7 @@ class CommandAddonManager(QtCore.QObject):
             self.fetch_addon_score,
             self.select_addon,
         ]
-        pref = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Addons")
-        if pref.GetBool("DownloadMacros", True):
+        if fci.Preferences().get("DownloadMacros"):
             self.startup_sequence.append(self.load_macro_metadata)
         self.number_of_progress_regions = len(self.startup_sequence)
         self.current_progress_region = 0
@@ -499,8 +488,7 @@ class CommandAddonManager(QtCore.QObject):
             self.button_bar.refresh_local_cache.setText(
                 translate("AddonsInstaller", "Refresh local cache")
             )
-            pref = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Addons")
-            pref.SetString("LastCacheUpdate", date.today().isoformat())
+            fci.Preferences().set("LastCacheUpdate", date.today().isoformat())
             self.composite_view.package_list.item_filter.invalidateFilter()
 
     def populate_packages_table(self) -> None:
@@ -595,7 +583,7 @@ class CommandAddonManager(QtCore.QObject):
         if repo.macro is not None:
             self.macro_cache.append(repo.macro.to_cache())
         else:
-            FreeCAD.Console.PrintError(
+            fci.Console.PrintError(
                 f"Addon Manager: Internal error, cache_macro called on non-macro {repo.name}\n"
             )
 
@@ -621,7 +609,7 @@ class CommandAddonManager(QtCore.QObject):
 
     def on_button_update_cache_clicked(self) -> None:
         self.update_cache = True
-        cache_path = FreeCAD.getUserCachePath()
+        cache_path = fci.DataPaths().cache_dir
         am_path = os.path.join(cache_path, "AddonManager")
         utils.rmdir(am_path)
         self.button_bar.refresh_local_cache.setEnabled(False)
@@ -663,10 +651,9 @@ class CommandAddonManager(QtCore.QObject):
     def check_updates(self) -> None:
         """checks every installed addon for available updates"""
 
-        pref = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Addons")
-        autocheck = pref.GetBool("AutoCheck", True)
+        autocheck = fci.Preferences().get("AutoCheck")
         if not autocheck:
-            FreeCAD.Console.PrintLog(
+            fci.Console.PrintLog(
                 "Addon Manager: Skipping update check because AutoCheck user preference is False\n"
             )
             self.do_next_startup_phase()
@@ -740,8 +727,7 @@ class CommandAddonManager(QtCore.QObject):
 
     def fetch_addon_stats(self) -> None:
         """Fetch the Addon Stats JSON data from a URL"""
-        pref = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Addons")
-        url = pref.GetString("AddonsStatsURL", "https://freecad.org/addon_stats.json")
+        url = fci.Preferences().get("AddonsStatsURL")
         if url and url != "NONE":
             self.get_basic_addon_stats_worker = GetBasicAddonStatsWorker(
                 url, self.item_model.repos, self.dialog
@@ -815,7 +801,7 @@ class CommandAddonManager(QtCore.QObject):
 
     def launch_installer_gui(self, addon: Addon) -> None:
         if self.installer_gui is not None:
-            FreeCAD.Console.PrintError(
+            fci.Console.PrintError(
                 translate(
                     "AddonsInstaller",
                     "Cannot launch a new installer until the previous one has finished.",
@@ -841,7 +827,7 @@ class CommandAddonManager(QtCore.QObject):
         stop other updates"""
 
         if self.installer_gui is not None:
-            FreeCAD.Console.PrintError(
+            fci.Console.PrintError(
                 translate(
                     "AddonsInstaller",
                     "Cannot launch a new installer until the previous one has finished.",
@@ -912,32 +898,36 @@ class CommandAddonManager(QtCore.QObject):
     def execute_macro(self, repo: Addon) -> None:
         """executes a selected macro"""
 
+        if not fci.FreeCADGui:
+            fci.Console.PrintError("Cannot execute a FreeCAD Macro outside FreeCAD")
+            return
+
         macro = repo.macro
         if not macro or not macro.code:
             return
 
         if macro.is_installed():
             macro_path = os.path.join(self.macro_repo_dir, macro.filename)
-            FreeCADGui.open(str(macro_path))
+            fci.FreeCADGui.open(str(macro_path))
             self.dialog.hide()
-            FreeCADGui.SendMsgToActiveView("Run")
+            fci.FreeCADGui.SendMsgToActiveView("Run")
         else:
             with tempfile.TemporaryDirectory() as temp_dir:
                 temp_install_succeeded = macro.install(temp_dir)
                 if not temp_install_succeeded:
-                    FreeCAD.Console.PrintError(
+                    fci.Console.PrintError(
                         translate("AddonsInstaller", "Temporary installation of macro failed.")
                     )
                     return
                 macro_path = os.path.join(temp_dir, macro.filename)
-                FreeCADGui.open(str(macro_path))
+                fci.FreeCADGui.open(str(macro_path))
                 self.dialog.hide()
-                FreeCADGui.SendMsgToActiveView("Run")
+                fci.FreeCADGui.SendMsgToActiveView("Run")
 
     def remove(self, addon: Addon) -> None:
         """Remove this addon."""
         if self.installer_gui is not None:
-            FreeCAD.Console.PrintError(
+            fci.Console.PrintError(
                 translate(
                     "AddonsInstaller",
                     "Cannot launch a new installer until the previous one has finished.",
@@ -953,7 +943,7 @@ class CommandAddonManager(QtCore.QObject):
 
     def open_addons_folder(self):
         addons_folder = fci.DataPaths().mod_dir
-        QDesktopServices.openUrl(QUrl.fromLocalFile(addons_folder))
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(addons_folder))
         return
 
 

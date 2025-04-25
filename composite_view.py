@@ -33,17 +33,8 @@ from Widgets.addonmanager_widget_view_selector import AddonManagerDisplayStyle
 from addonmanager_package_details_controller import PackageDetailsController
 from package_list import PackageList
 
-# Get whatever version of PySide we can
-try:
-    import PySide  # Use the FreeCAD wrapper
-except ImportError:
-    try:
-        import PySide6 as PySide  # Outside FreeCAD, try Qt6 first
-    except ImportError:
-        # Fall back to Qt5 (if this fails, Python will kill this module's import)
-        import PySide2 as PySide
 
-from PySide import QtCore, QtWidgets
+from PySideWrapper import QtCore, QtWidgets
 
 
 class CompositeView(QtWidgets.QWidget):

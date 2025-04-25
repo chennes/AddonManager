@@ -35,7 +35,7 @@ class GitFailed(RuntimeError):
 
 
 class MockConsole:
-    """Spy for the FreeCAD.Console -- does NOT print anything out, just logs it."""
+    """Spy for the fci.Console -- does NOT print anything out, just logs it."""
 
     def __init__(self):
         self.log = []

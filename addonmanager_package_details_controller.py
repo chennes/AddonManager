@@ -26,11 +26,10 @@
 import os
 from typing import Optional
 
-from PySide import QtCore, QtWidgets
+from PySideWrapper import QtCore, QtWidgets
 
 import addonmanager_freecad_interface as fci
 
-import addonmanager_utilities as utils
 from addonmanager_metadata import (
     Version,
     get_first_supported_freecad_version,

@@ -25,31 +25,8 @@
 Manager as a whole (rather than a specific Addon). Typically inserted at the bottom of the Addon
 Manager main window."""
 
-try:
-    import FreeCAD
-
-    translate = FreeCAD.Qt.translate
-except ImportError:
-    FreeCAD = None
-
-    def translate(_: str, text: str, details: str = "", n: int = 0):
-        return text
-
-
-# Get whatever version of PySide we can
-try:
-    import PySide  # Use the FreeCAD wrapper
-except ImportError:
-    try:
-        import PySide6  # Outside FreeCAD, try Qt6 first
-
-        PySide = PySide6
-    except ImportError:
-        import PySide2  # Fall back to Qt5 (if this fails, Python will kill this module's import)
-
-        PySide = PySide2
-
-from PySide import QtGui, QtWidgets
+from addonmanager_freecad_interface import translate
+from PySideWrapper import QtGui, QtWidgets
 
 
 class WidgetGlobalButtonBar(QtWidgets.QWidget):

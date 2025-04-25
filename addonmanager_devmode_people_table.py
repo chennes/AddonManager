@@ -25,16 +25,11 @@
 
 import os
 
-from PySide.QtWidgets import QTableWidgetItem
-from PySide.QtGui import QIcon
-from PySide.QtCore import Qt
-
-import FreeCAD
-import FreeCADGui
-
+from PySideWrapper import QtCore, QtGui, QtWidgets
 from addonmanager_devmode_person_editor import PersonEditor
+import addonmanager_freecad_interface as fci
 
-translate = FreeCAD.Qt.translate
+translate = fci.translate
 
 # pylint: disable=too-few-public-methods
 
@@ -43,13 +38,15 @@ class PeopleTable:
     """A QTableWidget and associated buttons for managing the list of authors and maintainers."""
 
     def __init__(self):
-        self.widget = FreeCADGui.PySideUic.loadUi(
+        self.widget = fci.loadUi(
             os.path.join(os.path.dirname(__file__), "developer_mode_people_table.ui")
         )
 
-        self.widget.addButton.setIcon(QIcon.fromTheme("add", QIcon(":/icons/list-add.svg")))
+        self.widget.addButton.setIcon(
+            QtGui.QIcon.fromTheme("add", QtGui.QIcon(":/icons/list-add.svg"))
+        )
         self.widget.removeButton.setIcon(
-            QIcon.fromTheme("remove", QIcon(":/icons/list-remove.svg"))
+            QtGui.QIcon.fromTheme("remove", QtGui.QIcon(":/icons/list-remove.svg"))
         )
 
         self.widget.addButton.clicked.connect(self._add_clicked)
@@ -87,11 +84,11 @@ class PeopleTable:
             "author": translate("AddonsInstaller", "Author"),
         }
         self.widget.tableWidget.insertRow(row)
-        item = QTableWidgetItem(person_type_translation[person_type])
-        item.setData(Qt.UserRole, person_type)
+        item = QtWidgets.QTableWidgetItem(person_type_translation[person_type])
+        item.setData(QtCore.Qt.UserRole, person_type)
         self.widget.tableWidget.setItem(row, 0, item)
-        self.widget.tableWidget.setItem(row, 1, QTableWidgetItem(name))
-        self.widget.tableWidget.setItem(row, 2, QTableWidgetItem(email))
+        self.widget.tableWidget.setItem(row, 1, QtWidgets.QTableWidgetItem(name))
+        self.widget.tableWidget.setItem(row, 2, QtWidgets.QTableWidgetItem(email))
 
     def _add_clicked(self):
         """Callback: the Add Person button was clicked"""
@@ -111,7 +108,7 @@ class PeopleTable:
             # We only support single-selection, so can just pull the row # from
             # the first entry
             row = items[0].row()
-            person_type = self.widget.tableWidget.item(row, 0).data(Qt.UserRole)
+            person_type = self.widget.tableWidget.item(row, 0).data(QtCore.Qt.UserRole)
             name = self.widget.tableWidget.item(row, 1).text()
             email = self.widget.tableWidget.item(row, 2).text()
             self.widget.tableWidget.removeRow(row)
@@ -123,7 +120,7 @@ class PeopleTable:
     def _edit(self, item):
         """Callback: a row in the tableWidget was double-clicked"""
         row = item.row()
-        person_type = self.widget.tableWidget.item(row, 0).data(Qt.UserRole)
+        person_type = self.widget.tableWidget.item(row, 0).data(QtCore.Qt.UserRole)
         name = self.widget.tableWidget.item(row, 1).text()
         email = self.widget.tableWidget.item(row, 2).text()
 

@@ -23,14 +23,13 @@
 
 """System for checking the network connection status asynchronously."""
 
-import FreeCAD
-
-from PySide import QtCore, QtWidgets
+import addonmanager_freecad_interface as fci
+from PySideWrapper import QtCore, QtWidgets
 
 import NetworkManager
 from addonmanager_workers_utility import ConnectionChecker
 
-translate = FreeCAD.Qt.translate
+translate = fci.translate
 
 
 class ConnectionCheckerGUI(QtCore.QObject):
@@ -89,22 +88,9 @@ class ConnectionCheckerGUI(QtCore.QObject):
         # This must run on the main GUI thread
         if hasattr(self, "connection_check_message") and self.connection_check_message:
             self.connection_check_message.close()
-        if NetworkManager.HAVE_QTNETWORK:
-            QtWidgets.QMessageBox.critical(
-                None, translate("AddonsInstaller", "Connection failed"), message
-            )
-        else:
-            # pylint: disable=line-too-long
-            QtWidgets.QMessageBox.critical(
-                None,
-                translate("AddonsInstaller", "Missing dependency"),
-                translate(
-                    "AddonsInstaller",
-                    "Could not import QtNetwork -- see Report View for details. Addon Manager "
-                    "unavailable.",
-                ),
-            )
-
+        QtWidgets.QMessageBox.critical(
+            None, translate("AddonsInstaller", "Connection failed"), message
+        )
         self._disconnect_signals()
         self.check_complete.emit()
 

@@ -25,7 +25,7 @@
 
 from typing import List
 
-import FreeCAD
+import addonmanager_freecad_interface as fci
 
 from Addon import Addon
 from addonmanager_metadata import Metadata
@@ -39,8 +39,8 @@ class MetadataValidators:
     def validate_all(self, repos):
         """Developer tool: check all repos for validity and print report"""
 
-        FreeCAD.Console.PrintMessage("\n\nADDON MANAGER DEVELOPER MODE CHECKS\n")
-        FreeCAD.Console.PrintMessage("-----------------------------------\n")
+        fci.Console.PrintMessage("\n\nADDON MANAGER DEVELOPER MODE CHECKS\n")
+        fci.Console.PrintMessage("-----------------------------------\n")
 
         counter = 0
         for addon in repos:
@@ -50,15 +50,11 @@ class MetadataValidators:
             elif addon.repo_type == Addon.Kind.MACRO:
                 if addon.macro.parsed:
                     if len(addon.macro.icon) == 0 and len(addon.macro.xpm) == 0:
-                        FreeCAD.Console.PrintMessage(
-                            f"Macro '{addon.name}' does not have an icon\n"
-                        )
+                        fci.Console.PrintMessage(f"Macro '{addon.name}' does not have an icon\n")
             else:
-                FreeCAD.Console.PrintMessage(
-                    f"Addon '{addon.name}' does not have a package.xml file\n"
-                )
+                fci.Console.PrintMessage(f"Addon '{addon.name}' does not have a package.xml file\n")
 
-        FreeCAD.Console.PrintMessage("-----------------------------------\n\n")
+        fci.Console.PrintMessage("-----------------------------------\n\n")
 
     def validate_package_xml(self, addon: Addon):
         """Check the package.xml file for the specified Addon"""
@@ -75,9 +71,9 @@ class MetadataValidators:
         errors.extend(self.validate_content(addon))
 
         if len(errors) > 0:
-            FreeCAD.Console.PrintError(f"Errors found in package.xml file for '{addon.name}'\n")
+            fci.Console.PrintError(f"Errors found in package.xml file for '{addon.name}'\n")
             for error in errors:
-                FreeCAD.Console.PrintError(f"   * {error}\n")
+                fci.Console.PrintError(f"   * {error}\n")
 
     def validate_content(self, addon: Addon) -> List[str]:
         """Validate the Content items for this Addon"""

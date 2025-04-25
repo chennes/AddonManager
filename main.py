@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2022-2024 FreeCAD Project Association                   *
+# *   Copyright (c) 2025 The FreeCAD project association AISBL              *
 # *                                                                         *
 # *   This file is part of FreeCAD.                                         *
 # *                                                                         *
@@ -21,30 +21,33 @@
 # *                                                                         *
 # ***************************************************************************
 
-from enum import Enum, auto
+import AddonManager
 
-import addonmanager_freecad_interface as fci
-from PySideWrapper import QtGui
+import sys
 
+# Check if PySide6 is used
+QApplication = None
+try:
+    from PySide6 import QtCore, QtWidgets
+    from PySide6.QtWidgets import QApplication, QWidget
+except ImportError:
+    from PySide2 import QtCore, QtWidgets
+    from PySide2.QtWidgets import QApplication
 
-def is_darkmode() -> bool:
-    """Heuristics to determine if we are in a darkmode stylesheet"""
-    if fci.FreeCADGui:
-        pl = fci.FreeCADGui.getMainWindow().palette()
-        return pl.color(QtGui.QPalette.Window).lightness() < 128
-    return False
-
-
-def warning_color_string() -> str:
-    """A shade of red, adapted to darkmode if possible. Targets a minimum 7:1 contrast ratio."""
-    return "rgb(255,105,97)" if is_darkmode() else "rgb(215,0,21)"
-
-
-def bright_color_string() -> str:
-    """A shade of green, adapted to darkmode if possible. Targets a minimum 7:1 contrast ratio."""
-    return "rgb(48,219,91)" if is_darkmode() else "rgb(36,138,61)"
+app = None
+if QApplication:
+    # Ensure there is only one QApplication instance
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication(sys.argv)
 
 
-def attention_color_string() -> str:
-    """A shade of orange, adapted to darkmode if possible. Targets a minimum 7:1 contrast ratio."""
-    return "rgb(255,179,64)" if is_darkmode() else "rgb(255,149,0)"
+def run_addon_manager():
+    command = AddonManager.CommandAddonManager()
+    command.Activated()
+
+
+if __name__ == "__main__":
+    QtCore.QTimer.singleShot(0, run_addon_manager)
+    app.exec()
+    sys.exit()

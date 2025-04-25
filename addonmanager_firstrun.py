@@ -25,13 +25,9 @@
 
 import os
 
-from PySide import QtCore, QtWidgets
-from PySide.QtGui import QPixmap
 
-import FreeCAD
-import FreeCADGui
-
-import addonmanager_utilities as utils
+from PySideWrapper import QtWidgets
+import addonmanager_freecad_interface as fci
 
 # pylint: disable=too-few-public-methods
 
@@ -42,16 +38,13 @@ class FirstRunDialog:
     data, and possibly installs things that run code not affiliated with FreeCAD itself."""
 
     def __init__(self):
-        self.pref = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Addons")
-        self.readWarning = self.pref.GetBool("readWarning2022", False)
+        self.readWarning = fci.Preferences().get("readWarning2022")
 
     def exec(self) -> bool:
         """Display a first-run dialog if needed, and return True to indicate the Addon Manager
         should continue loading, or False if the user cancelled the dialog and wants to exit."""
         if not self.readWarning:
-            warning_dialog = FreeCADGui.PySideUic.loadUi(
-                os.path.join(os.path.dirname(__file__), "first_run.ui")
-            )
+            warning_dialog = fci.loadUi(os.path.join(os.path.dirname(__file__), "first_run.ui"))
 
             # Set signal handlers for accept/reject buttons
             warning_dialog.buttonContinue.clicked.connect(warning_dialog.accept)
@@ -61,6 +54,6 @@ class FirstRunDialog:
             if warning_dialog.exec() == QtWidgets.QDialog.Accepted:
                 # Store warning as read/accepted
                 self.readWarning = True
-                self.pref.SetBool("readWarning2022", True)
+                fci.Preferences().set("readWarning2022", True)
 
         return self.readWarning

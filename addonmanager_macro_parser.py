@@ -71,7 +71,7 @@ class MacroParser:
             "xpm": "",
         }
         self.remaining_item_map = {}
-        self.console = None if FreeCAD is None else FreeCAD.Console
+        self.console = None if FreeCAD is None else fci.Console
         self.current_thread = DummyThread() if QtCore is None else QtCore.QThread.currentThread()
         if code:
             self.fill_details_from_code(code)

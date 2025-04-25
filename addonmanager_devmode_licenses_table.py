@@ -25,15 +25,13 @@
 
 import os
 
-from PySide.QtWidgets import QTableWidgetItem
-from PySide.QtGui import QIcon
+from PySideWrapper import QtGui, QtWidgets
 
-import FreeCAD
-import FreeCADGui
+import addonmanager_freecad_interface as fci
 
 from addonmanager_devmode_license_selector import LicenseSelector
 
-translate = FreeCAD.Qt.translate
+translate = fci.translate
 
 # pylint: disable=too-few-public-methods
 
@@ -42,13 +40,15 @@ class LicensesTable:
     """A QTableWidget and associated buttons for managing the list of authors and maintainers."""
 
     def __init__(self):
-        self.widget = FreeCADGui.PySideUic.loadUi(
+        self.widget = fci.loadUi(
             os.path.join(os.path.dirname(__file__), "developer_mode_licenses_table.ui")
         )
 
-        self.widget.addButton.setIcon(QIcon.fromTheme("add", QIcon(":/icons/list-add.svg")))
+        self.widget.addButton.setIcon(
+            QtGui.QIcon.fromTheme("add", QtGui.QIcon(":/icons/list-add.svg"))
+        )
         self.widget.removeButton.setIcon(
-            QIcon.fromTheme("remove", QIcon(":/icons/list-remove.svg"))
+            QtGui.QIcon.fromTheme("remove", QtGui.QIcon(":/icons/list-remove.svg"))
         )
 
         self.widget.addButton.clicked.connect(self._add_clicked)
@@ -79,8 +79,8 @@ class LicensesTable:
     def _add_row(self, row, shortcode, path):
         """Add this license to the tableWidget at row given"""
         self.widget.tableWidget.insertRow(row)
-        self.widget.tableWidget.setItem(row, 0, QTableWidgetItem(shortcode))
-        self.widget.tableWidget.setItem(row, 1, QTableWidgetItem(path))
+        self.widget.tableWidget.setItem(row, 0, QtWidgets.QTableWidgetItem(shortcode))
+        self.widget.tableWidget.setItem(row, 1, QtWidgets.QTableWidgetItem(path))
 
     def _add_clicked(self):
         """Callback: the Add License button was clicked"""

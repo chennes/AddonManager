@@ -25,36 +25,27 @@
 
 import keyword
 
-from PySide.QtGui import (
-    QValidator,
-)
+from PySideWrapper import QtCore, QtGui
 
-# QRegularExpressionValidator was only added at the very end of the PySide
+
+# QRegularExpressionValidator was only added at the very end of the PySide2
 # development cycle, so make sure to support the older QRegExp version as well.
-try:
-    from PySide.QtGui import (
-        QRegularExpressionValidator,
-    )
-    from PySide.QtCore import QRegularExpression
-
-    RegexWrapper = QRegularExpression
-    RegexValidatorWrapper = QRegularExpressionValidator
-except ImportError:
+if hasattr(QtGui, "QRegularExpressionValidator"):
+    QRegularExpression = QtCore.QRegularExpression
+    QRegularExpressionValidator = QtGui.QRegularExpressionValidator
+    RegexWrapper = QtCore.QRegularExpression
+    RegexValidatorWrapper = QtGui.QRegularExpressionValidator
+else:
     QRegularExpressionValidator = None
     QRegularExpression = None
-    from PySide.QtGui import (
-        QRegExpValidator,
-    )
-    from PySide.QtCore import QRegExp
-
-    RegexWrapper = QRegExp
-    RegexValidatorWrapper = QRegExpValidator
+    RegexWrapper = QtCore.QRegExp
+    RegexValidatorWrapper = QtGui.QRegExpValidator
 
 
 # pylint: disable=too-few-public-methods
 
 
-class NameValidator(QValidator):
+class NameValidator(QtGui.QValidator):
     """Simple validator to exclude characters that are not valid in filenames."""
 
     invalid = '/\\?%*:|"<>'
@@ -63,8 +54,8 @@ class NameValidator(QValidator):
         """Check the value against the validator"""
         for char in value:
             if char in NameValidator.invalid:
-                return QValidator.Invalid
-        return QValidator.Acceptable
+                return QtGui.QValidator.Invalid
+        return QtGui.QValidator.Acceptable
 
     def fixup(self, value: str) -> str:
         """Remove invalid characters from value"""
@@ -75,21 +66,21 @@ class NameValidator(QValidator):
         return result
 
 
-class PythonIdentifierValidator(QValidator):
+class PythonIdentifierValidator(QtGui.QValidator):
     """Validates whether input is a valid Python identifier."""
 
     def validate(self, value: str, _: int):
         """The function that does the validation."""
         if not value:
-            return QValidator.Intermediate
+            return QtGui.QValidator.Intermediate
 
         if not value.isidentifier():
-            return QValidator.Invalid  # Includes an illegal character of some sort
+            return QtGui.QValidator.Invalid  # Includes an illegal character of some sort
 
         if keyword.iskeyword(value):
-            return QValidator.Intermediate  # They can keep typing and it might become valid
+            return QtGui.QValidator.Intermediate  # They can keep typing and it might become valid
 
-        return QValidator.Acceptable
+        return QtGui.QValidator.Acceptable
 
 
 class SemVerValidator(RegexValidatorWrapper):
@@ -140,7 +131,7 @@ class CalVerValidator(RegexValidatorWrapper):
         return cls.calver_re.match(value).hasMatch()
 
 
-class VersionValidator(QValidator):
+class VersionValidator(QtGui.QValidator):
     """Implements the officially-recommended regex validator for Semantic version numbers, and a
     decent approximation of the same thing for CalVer-style version numbers."""
 
@@ -155,12 +146,12 @@ class VersionValidator(QValidator):
         semver_result = self.semver.validate(value, position)
         calver_result = self.calver.validate(value, position)
 
-        if semver_result[0] == QValidator.Acceptable:
+        if semver_result[0] == QtGui.QValidator.Acceptable:
             return semver_result
-        if calver_result[0] == QValidator.Acceptable:
+        if calver_result[0] == QtGui.QValidator.Acceptable:
             return calver_result
-        if semver_result[0] == QValidator.Intermediate:
+        if semver_result[0] == QtGui.QValidator.Intermediate:
             return semver_result
-        if calver_result[0] == QValidator.Intermediate:
+        if calver_result[0] == QtGui.QValidator.Intermediate:
             return calver_result
-        return QValidator.Invalid, value, position
+        return QtGui.QValidator.Invalid, value, position

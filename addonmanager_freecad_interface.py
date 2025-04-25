@@ -42,7 +42,7 @@ try:
     if not hasattr(FreeCAD, "Console"):
         raise ImportError("Unrecognized FreeCAD version")
 
-    Console = FreeCAD.Console
+    Console = fci.Console
     ParamGet = FreeCAD.ParamGet
     Version = FreeCAD.Version
     getUserAppDataDir = FreeCAD.getUserAppDataDir
@@ -51,12 +51,15 @@ try:
     translate = FreeCAD.Qt.translate
     loadUi = None
     GuiUp = FreeCAD.GuiUp
+    get_python_exe = FreeCAD.get_python_exe
 
     if GuiUp:
         import FreeCADGui
 
         if hasattr(FreeCADGui, "PySideUic"):
             loadUi = FreeCADGui.PySideUic.loadUi
+
+        addPreferencePage = FreeCADGui.addPreferencePage
     else:
         FreeCADGui = None
 
@@ -91,6 +94,10 @@ except ImportError:
             window = loader.load(file)
             file.close()
             return window
+
+        def addPreferencePage(_options_class, _name: str):
+            """Don't do anything with a preference page right now"""
+            pass
 
     def translate(_context: str, string: str, _desc: str = "") -> str:
         return string

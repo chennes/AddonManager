@@ -34,20 +34,7 @@ except ImportError:
         return text
 
 
-# Get whatever version of PySide we can
-try:
-    import PySide  # Use the FreeCAD wrapper
-except ImportError:
-    try:
-        import PySide6  # Outside FreeCAD, try Qt6 first
-
-        PySide = PySide6
-    except ImportError:
-        import PySide2  # Fall back to Qt5 (if this fails, Python will kill this module's import)
-
-        PySide = PySide2
-
-from PySide import QtCore, QtGui, QtWidgets
+from PySideWrapper import QtCore, QtGui, QtWidgets
 
 
 class WidgetSearch(QtWidgets.QWidget):

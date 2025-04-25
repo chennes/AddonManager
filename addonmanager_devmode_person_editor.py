@@ -26,12 +26,11 @@
 import os
 from typing import Tuple  # Needed until Py 3.9, when tuple supports this directly
 
-from PySide.QtWidgets import QDialog
+from PySideWrapper import QtWidgets
 
-import FreeCAD
-import FreeCADGui
+import addonmanager_freecad_interface as fci
 
-translate = FreeCAD.Qt.translate
+translate = fci.translate
 
 
 class PersonEditor:
@@ -39,7 +38,7 @@ class PersonEditor:
 
     def __init__(self):
 
-        self.dialog = FreeCADGui.PySideUic.loadUi(
+        self.dialog = fci.loadUi(
             os.path.join(os.path.dirname(__file__), "developer_mode_people.ui")
         )
         self.dialog.comboBox.clear()
@@ -53,7 +52,7 @@ class PersonEditor:
         email address. Email may be None. If the others are None it's because the user cancelled
         the interaction."""
         result = self.dialog.exec()
-        if result == QDialog.Accepted:
+        if result == QtWidgets.QDialog.Accepted:
             return (
                 self.dialog.comboBox.currentData(),
                 self.dialog.nameLineEdit.text(),
@@ -65,7 +64,7 @@ class PersonEditor:
         """Configure the dialog"""
         index = self.dialog.comboBox.findData(person_type)
         if index == -1:
-            FreeCAD.Console.PrintWarning(f"Internal Error: unrecognized person type {person_type}")
+            fci.Console.PrintWarning(f"Internal Error: unrecognized person type {person_type}")
             index = 0
         self.dialog.comboBox.setCurrentIndex(index)
         self.dialog.nameLineEdit.setText(name)
