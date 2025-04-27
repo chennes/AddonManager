@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2022-2023 FreeCAD Project Association                   *
+# *   Copyright (c) 2022-2025 The FreeCAD project association AISBL         *
 # *                                                                         *
 # *   This file is part of FreeCAD.                                         *
 # *                                                                         *
@@ -77,7 +77,7 @@ def _days_between_updates() -> int:
 
 
 def _cache_exists() -> bool:
-    cache_path = fci.getUserCachePath()
+    cache_path = fci.DataPaths().cache_dir
     am_path = os.path.join(cache_path, "AddonManager")
     return os.path.exists(am_path)
 
@@ -94,12 +94,12 @@ def _last_update_was_interrupted(reset_status: bool) -> bool:
             )
         )
         return True
+    return False
 
 
 def _custom_repo_list_changed() -> bool:
-    pref = fci.ParamGet("User parameter:BaseApp/Preferences/Addons")
-    stored_hash = pref.GetString("CustomRepoHash", "")
-    custom_repos = pref.GetString("CustomRepositories", "")
+    stored_hash = fci.Preferences().get("CustomRepoHash")
+    custom_repos = fci.Preferences().get("CustomRepositories")
     if custom_repos:
         hasher = hashlib.sha1()
         hasher.update(custom_repos.encode("utf-8"))
@@ -107,7 +107,7 @@ def _custom_repo_list_changed() -> bool:
     else:
         new_hash = ""
     if new_hash != stored_hash:
-        pref.SetString("CustomRepoHash", new_hash)
+        fci.Preferences().set("CustomRepoHash", new_hash)
         fci.Console.PrintMessage(
             translate(
                 "AddonsInstaller",

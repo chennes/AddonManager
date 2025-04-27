@@ -50,5 +50,6 @@ def run_addon_manager():
 
 if __name__ == "__main__":
     QtCore.QTimer.singleShot(0, run_addon_manager)
+    app.setQuitOnLastWindowClosed(False)
     app.exec()
     sys.exit()

@@ -51,15 +51,13 @@ class ConnectionCheckerGUI(QtCore.QObject):
 
     def start(self):
         """Start the connection check"""
-        self.connection_checker.start()
         self.connection_checker.success.connect(self._check_succeeded)
         self.connection_checker.failure.connect(self._network_connection_failed)
         self.signals_connected = True
+        self.connection_checker.start()
 
         # If it takes longer than a half second to check the connection, show a message:
-        self.connection_message_timer = QtCore.QTimer.singleShot(
-            500, self._show_connection_check_message
-        )
+        QtCore.QTimer.singleShot(500, self._show_connection_check_message)
 
     def _show_connection_check_message(self):
         """Display a message informing the user that the check is in process"""
