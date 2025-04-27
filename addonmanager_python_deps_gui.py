@@ -91,6 +91,7 @@ class CheckForPythonPackageUpdatesWorker(QtCore.QThread):
 
     def __init__(self):
         QtCore.QThread.__init__(self)
+        self.setObjectName("CheckForPythonPackageUpdatesWorker")
 
     def run(self):
         """Usually not called directly: instead, instantiate this class and call its start()
@@ -263,6 +264,7 @@ class PythonPackageManager:
         showing in most cases."""
 
         self.worker_thread = QtCore.QThread()
+        self.worker_thread.setObjectName("CreateListFromPip worker thread")
         self.worker_object = PythonPackageManager.PipRunner(self.vendor_path)
         self.worker_object.moveToThread(self.worker_thread)
         self.worker_object.finished.connect(self._worker_finished)

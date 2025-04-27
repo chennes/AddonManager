@@ -195,6 +195,7 @@ class UpdateAllGUI(QtCore.QObject):
         self.active_installer.finished.connect(self._update_finished)
 
         self.worker_thread = QtCore.QThread()
+        self.worker_thread.setObjectName("UpdateAllGUI worker thread")
         self.active_installer.moveToThread(self.worker_thread)
         self.worker_thread.started.connect(self.active_installer.run)
         self.worker_thread.start()

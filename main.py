@@ -21,8 +21,6 @@
 # *                                                                         *
 # ***************************************************************************
 
-import AddonManager
-
 import sys
 
 # Check if PySide6 is used
@@ -43,6 +41,9 @@ if QApplication:
 
 
 def run_addon_manager():
+    import AddonManager  # Must not be imported until there is a QApplication instance
+
+    QtCore.QThread.currentThread().setObjectName("Main GUI thread")
     command = AddonManager.CommandAddonManager()
     command.Activated()
 

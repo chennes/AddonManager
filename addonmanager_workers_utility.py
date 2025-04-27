@@ -49,6 +49,7 @@ class ConnectionChecker(QtCore.QThread):
 
     def __init__(self):
         QtCore.QThread.__init__(self)
+        self.setObjectName("ConnectionChecker")
         self.done = False
         self.request_id = None
         self.data = None

@@ -329,6 +329,7 @@ class AddonInstallerGUI(QtCore.QObject):
         self.dependency_installer.finished.connect(self._dependencies_finished)
 
         self.dependency_worker_thread = QtCore.QThread(self)
+        self.dependency_worker_thread.setObjectName("Dependency Installer Thread")
         self.dependency_installer.moveToThread(self.dependency_worker_thread)
         self.dependency_worker_thread.started.connect(self.dependency_installer.run)
 
@@ -445,6 +446,7 @@ class AddonInstallerGUI(QtCore.QObject):
     def install(self) -> None:
         """Installs or updates a workbench, macro, or package"""
         self.worker_thread = QtCore.QThread()
+        self.worker_thread.setObjectName("AddonInstallerGUI worker thread")
         self.installer.moveToThread(self.worker_thread)
         self.installer.finished.connect(self.worker_thread.quit)
         self.worker_thread.started.connect(self.installer.run)
@@ -551,6 +553,7 @@ class MacroInstallerGUI(QtCore.QObject):
         boxes. If installation proceeds successfully to completion, emits the success() signal."""
 
         self.worker_thread = QtCore.QThread()
+        self.worker_thread.setObjectName("MacroInstallerGUI worker thread")
         self.installer.moveToThread(self.worker_thread)
         self.installer.finished.connect(self.worker_thread.quit)
         self.installer.success.connect(self._base_installation_success)

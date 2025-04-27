@@ -57,6 +57,7 @@ class AddonUninstallerGUI(QtCore.QObject):
         self.uninstaller.success.connect(self._succeeded)
         self.uninstaller.failure.connect(self._failed)
         self.worker_thread = QtCore.QThread()
+        self.worker_thread.setObjectName("AddonUninstallerGUI worker thread")
         self.uninstaller.moveToThread(self.worker_thread)
         self.uninstaller.finished.connect(self.worker_thread.quit)
         self.worker_thread.started.connect(self.uninstaller.run)

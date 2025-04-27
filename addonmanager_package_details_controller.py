@@ -133,6 +133,9 @@ class PackageDetailsController(QtCore.QObject):
             self.ui.button_bar.check_for_update.setEnabled(True)
             if not self.update_check_thread:
                 self.update_check_thread = QtCore.QThread()
+                self.update_check_thread.setObjectName(
+                    "PackageDetailsController update check thread"
+                )
             self.check_for_update_worker = CheckSingleUpdateWorker(repo)
             self.check_for_update_worker.moveToThread(self.update_check_thread)
             self.update_check_thread.finished.connect(self.check_for_update_worker.deleteLater)

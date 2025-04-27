@@ -66,6 +66,7 @@ class UpdateMetadataCacheWorker(QtCore.QThread):
     def __init__(self, repos):
 
         QtCore.QThread.__init__(self)
+        self.setObjectName("UpdateMetadataCacheWorker")
         self.repos = repos
         self.requests: Dict[int, (Addon, UpdateMetadataCacheWorker.RequestType)] = {}
         NetworkManager.AM_NETWORK_MANAGER.completed.connect(self.download_completed)
