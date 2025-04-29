@@ -49,21 +49,26 @@ translate = fci.translate
 
 #  A list of internal workbenches that can be used as a dependency of an Addon
 INTERNAL_WORKBENCHES = {
-    "bim": "BIM",
     "assembly": "Assembly",
+    "bim": "BIM",
+    "cam": "CAM",
     "draft": "Draft",
     "fem": "FEM",
+    "import": "Import",
+    "material": "Material",
     "mesh": "Mesh",
     "openscad": "OpenSCAD",
     "part": "Part",
     "partdesign": "PartDesign",
-    "cam": "CAM",
     "plot": "Plot",
     "points": "Points",
+    "reverseengineering": "ReverseEngineering",
     "robot": "Robot",
     "sketcher": "Sketcher",
     "spreadsheet": "Spreadsheet",
     "techdraw": "TechDraw",
+    "tux": "Tux",
+    "web": "Web",
 }
 
 
@@ -416,7 +421,7 @@ class Addon:
 
         for dep in metadata.depend:
             if dep.dependency_type == DependencyType.internal:
-                if dep.package in INTERNAL_WORKBENCHES:
+                if dep.package.strip().lower() in INTERNAL_WORKBENCHES:
                     self.requires.add(dep.package)
                 else:
                     fci.Console.PrintWarning(
@@ -815,7 +820,7 @@ class MissingDependencies:
                     except ImportError:
                         # Plot might fail for a number of reasons
                         self.wbs.append(dep)
-                        fci.Console.PrintLog("Failed to import Plot module")
+                        fci.Console.PrintLog("Failed to import Plot module\n")
                 else:
                     self.wbs.append(dep)
 
