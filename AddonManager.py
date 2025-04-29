@@ -63,6 +63,8 @@ from addonmanager_firstrun import FirstRunDialog
 from addonmanager_connection_checker import ConnectionCheckerGUI
 from addonmanager_devmode_metadata_checker import MetadataValidators
 
+from addonmanager_metadata import Metadata, MetadataReader
+
 import NetworkManager
 
 from AddonManagerOptions import AddonManagerOptions
@@ -247,6 +249,10 @@ class CommandAddonManager(QtCore.QObject):
         self.dialog = fci.loadUi(os.path.join(os.path.dirname(__file__), "AddonManager.ui"))
         self.dialog.setObjectName("AddonManager_Main_Window")
         # self.dialog.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, True)
+
+        metadata = MetadataReader.from_file(os.path.join(os.path.dirname(__file__), "package.xml"))
+        am_version = str(metadata.version)
+        self.dialog.setWindowTitle(translate("AddonsInstaller", "Addon Manager v") + am_version)
 
         # cleanup the leftovers from previous runs
         self.macro_repo_dir = fci.DataPaths().macro_dir
