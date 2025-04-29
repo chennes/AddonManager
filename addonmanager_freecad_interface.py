@@ -38,6 +38,7 @@ import tempfile
 
 try:
     import FreeCAD
+    from freecad.utils import get_python_exe
 
     if not hasattr(FreeCAD, "Console"):
         raise ImportError("Unrecognized FreeCAD version")
@@ -51,7 +52,6 @@ try:
     translate = FreeCAD.Qt.translate
     loadUi = None
     GuiUp = FreeCAD.GuiUp
-    get_python_exe = FreeCAD.get_python_exe
 
     if GuiUp:
         import FreeCADGui
