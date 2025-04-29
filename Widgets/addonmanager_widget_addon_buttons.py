@@ -24,6 +24,7 @@
 """Defines a QWidget-derived class for displaying the single-addon buttons."""
 
 from enum import Enum, auto
+import os
 
 try:
     import FreeCAD
@@ -91,7 +92,10 @@ class WidgetAddonButtons(QtWidgets.QWidget):
         self.back.setVisible(show)
 
     def _set_icons(self):
-        self.back.setIcon(QtGui.QIcon.fromTheme("back", QtGui.QIcon(":/icons/button_left.svg")))
+        icon_path = os.path.join(os.path.dirname(__file__), "..", "Resources", "icons")
+        self.back.setIcon(
+            QtGui.QIcon.fromTheme("back", QtGui.QIcon(os.path.join(icon_path, "button_left.svg")))
+        )
 
     def retranslateUi(self, _):
         self.check_for_update.setText(translate("AddonsInstaller", "Check for update"))

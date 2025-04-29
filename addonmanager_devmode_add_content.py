@@ -380,11 +380,12 @@ class EditDependencies:
         self.dialog = fci.loadUi(
             os.path.join(os.path.dirname(__file__), "developer_mode_dependencies.ui")
         )
+        icon_path = os.path.join(os.path.dirname(__file__), "Resources", "icons")
         self.dialog.addDependencyToolButton.setIcon(
-            QtGui.QIcon.fromTheme("add", QtGui.QIcon(":/icons/list-add.svg"))
+            QtGui.QIcon.fromTheme("add", QtGui.QIcon(os.path.join(icon_path, "list-add.svg")))
         )
         self.dialog.removeDependencyToolButton.setIcon(
-            QtGui.QIcon.fromTheme("remove", QtGui.QIcon(":/icons/list-remove.svg"))
+            QtGui.QIcon.fromTheme("remove", QtGui.QIcon(os.path.join(icon_path, "list-remove.svg")))
         )
         self.dialog.addDependencyToolButton.clicked.connect(self._add_dependency_clicked)
         self.dialog.removeDependencyToolButton.clicked.connect(self._remove_dependency_clicked)

@@ -49,7 +49,6 @@ from addonmanager_uninstaller_gui import AddonUninstallerGUI
 from addonmanager_update_all_gui import UpdateAllGUI
 import addonmanager_utilities as utils
 import addonmanager_freecad_interface as fci
-import AddonManager_rc  # pylint: disable=unused-import
 from composite_view import CompositeView
 from Widgets.addonmanager_widget_global_buttons import WidgetGlobalButtonBar
 from Widgets.addonmanager_widget_progress_bar import Progress
@@ -105,22 +104,22 @@ def get_icon(repo: Addon, update: bool = False) -> QtGui.QIcon:
     """Returns an icon for an Addon. Uses a cached icon if possible, unless update is True,
     in which case the icon is regenerated."""
 
+    icon_path = os.path.join(os.path.dirname(__file__), "Resources", "icons")
+    path = ""
+
     if not update and repo.icon and not repo.icon.isNull() and repo.icon.isValid():
         return repo.icon
 
-    path = ":/icons/" + repo.name.replace(" ", "_")
-    default_icon = QtGui.QIcon(":/icons/document-package.svg")
+    default_icon = QtGui.QIcon(os.path.join(icon_path, "document-package.svg"))
     if repo.repo_type == Addon.Kind.WORKBENCH:
-        path += "_workbench_icon.svg"
-        default_icon = QtGui.QIcon(":/icons/document-package.svg")
+        default_icon = QtGui.QIcon(os.path.join(icon_path, "document-package.svg"))
     elif repo.repo_type == Addon.Kind.MACRO:
         if repo.macro and repo.macro.icon:
+            default_icon = QtGui.QIcon(os.path.join(icon_path, "document-python.svg"))
             if os.path.isabs(repo.macro.icon):
                 path = repo.macro.icon
-                default_icon = QtGui.QIcon(":/icons/document-python.svg")
             else:
                 path = os.path.join(os.path.dirname(repo.macro.src_filename), repo.macro.icon)
-                default_icon = QtGui.QIcon(":/icons/document-python.svg")
         elif repo.macro and repo.macro.xpm:
             cache_path = fci.DataPaths().cache_dir
             am_path = os.path.join(cache_path, "AddonManager", "MacroIcons")
@@ -131,20 +130,17 @@ def get_icon(repo: Addon, update: bool = False) -> QtGui.QIcon:
                     f.write(repo.macro.xpm)
             default_icon = QtGui.QIcon(repo.macro.xpm)
         else:
-            path += "_macro_icon.svg"
-            default_icon = QtGui.QIcon(":/icons/document-python.svg")
+            default_icon = QtGui.QIcon(os.path.join(icon_path, "document-python.svg"))
     elif repo.repo_type == Addon.Kind.PACKAGE:
         # The cache might not have been downloaded yet, check to see if it's there...
         if os.path.isfile(repo.get_cached_icon_filename()):
             path = repo.get_cached_icon_filename()
         elif repo.contains_workbench():
-            path += "_workbench_icon.svg"
-            default_icon = QtGui.QIcon(":/icons/document-package.svg")
+            default_icon = QtGui.QIcon(os.path.join(icon_path, "document-package.svg"))
         elif repo.contains_macro():
-            path += "_macro_icon.svg"
-            default_icon = QtGui.QIcon(":/icons/document-python.svg")
+            default_icon = QtGui.QIcon(os.path.join(icon_path, "document-python.svg"))
         else:
-            default_icon = QtGui.QIcon(":/icons/document-package.svg")
+            default_icon = QtGui.QIcon(os.path.join(icon_path, "document-package.svg"))
 
     if QtCore.QFile.exists(path):
         addon_icon = QtGui.QIcon(path)
@@ -279,7 +275,8 @@ class CommandAddonManager(QtCore.QObject):
         self.dialog.layout().addWidget(self.button_bar)
 
         # set nice icons to everything, by theme with fallback to FreeCAD icons
-        self.dialog.setWindowIcon(QtGui.QIcon(":/icons/AddonManager.svg"))
+        icon_path = os.path.join(os.path.dirname(__file__), "Resources", "icons")
+        self.dialog.setWindowIcon(QtGui.QIcon(os.path.join(icon_path, "addon_manager.svg")))
 
         dev_mode_active = fci.Preferences().get("developerMode")
 
@@ -406,7 +403,8 @@ class CommandAddonManager(QtCore.QObject):
             # display restart dialog
             m = QtWidgets.QMessageBox()
             m.setWindowTitle(translate("AddonsInstaller", "Addon manager"))
-            m.setWindowIcon(QtGui.QIcon(":/icons/AddonManager.svg"))
+            icon_path = os.path.join(os.path.dirname(__file__), "Resources", "icons")
+            m.setWindowIcon(QtGui.QIcon(os.path.join(icon_path, "addon_manager.svg")))
             m.setText(
                 translate(
                     "AddonsInstaller",

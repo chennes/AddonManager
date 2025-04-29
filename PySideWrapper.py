@@ -25,9 +25,9 @@
 FreeCAD wrapper, if that is available."""
 
 try:
-    from PySide import QtCore, QtGui, QtNetwork, QtWidgets
+    from PySide import QtCore, QtGui, QtNetwork, QtSvg, QtWidgets
 except ImportError:
     try:
-        from PySide6 import QtCore, QtGui, QtNetwork, QtWidgets
+        from PySide6 import QtCore, QtGui, QtNetwork, QtSvg, QtWidgets
     except ImportError:
-        from PySide2 import QtCore, QtGui, QtNetwork, QtWidgets
+        from PySide2 import QtCore, QtGui, QtNetwork, QtSvg, QtWidgets

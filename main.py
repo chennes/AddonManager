@@ -20,7 +20,7 @@
 # *   <https://www.gnu.org/licenses/>.                                      *
 # *                                                                         *
 # ***************************************************************************
-
+import os
 import sys
 
 # Check if PySide6 is used
@@ -30,7 +30,7 @@ try:
     from PySide6.QtWidgets import QApplication, QWidget
 except ImportError:
     from PySide2 import QtCore, QtWidgets
-    from PySide2.QtWidgets import QApplication
+    from PySide2.QtWidgets import QApplication, QWidget
 
 app = None
 if QApplication:
@@ -38,6 +38,17 @@ if QApplication:
     app = QApplication.instance()
     if app is None:
         app = QApplication(sys.argv)
+
+
+def setup_translations():
+    translation_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "Resources", "translations"
+    )
+    translator = QtCore.QTranslator()
+    for file in os.listdir(translation_path):
+        if file.endswith(".qm"):
+            translator.load(file, translation_path)
+    QtCore.QCoreApplication.installTranslator(translator)
 
 
 def run_addon_manager():
@@ -51,5 +62,6 @@ def run_addon_manager():
 if __name__ == "__main__":
     QtCore.QTimer.singleShot(0, run_addon_manager)
     app.setQuitOnLastWindowClosed(False)
+    setup_translations()
     app.exec()
     sys.exit()

@@ -529,7 +529,7 @@ class NetworkManager(QtCore.QObject):
     def __reply_finished(self) -> None:
         """Called when a reply has been completed: this makes sure the data has been read and
         any notifications have been called."""
-        reply = self.sender()
+        reply: QtNetwork.QNetworkReply = self.sender()
         if not reply:
             # This can happen during a cancellation operation: silently do nothing
             return
@@ -568,7 +568,6 @@ class NetworkManager(QtCore.QObject):
                 data = reply.readAll()
                 self.completed.emit(index, response_code, data)
         else:
-            fci.Console.PrintWarning(f"Request failed: {reply.error()} \n")
             if index in self.monitored_connections:
                 self.progress_complete.emit(index, response_code, "")
             else:

@@ -5,7 +5,9 @@
 import os
 import AddonManager
 
-FreeCADGui.addLanguagePath(
-    ":/translations"
-)  # TODO: This doesn't mean anything for an external addon
+if __file__:
+    FreeCADGui.addLanguagePath(os.path.join(os.path.dirname(__file__), "Resources", "translations"))
+else:
+    FreeCAD.Console.Warning("__file__ not defined, cannot set language path\n")
+
 FreeCADGui.addCommand("Std_AddonMgr", AddonManager.CommandAddonManager())

@@ -157,7 +157,7 @@ def rmdir(path: str) -> bool:
             # NOTE: the onerror argument was deprecated in Python 3.12, replaced by onexc -- replace
             # when earlier versions are no longer supported.
             shutil.rmtree(path, onerror=remove_readonly)
-    except (WindowsError, PermissionError, OSError):
+    except (PermissionError, OSError):
         return False
     return True
 
@@ -165,6 +165,8 @@ def rmdir(path: str) -> bool:
 def remove_readonly(func, path, _) -> None:
     """Remove a read-only file."""
 
+    if not os.path.exists(path):
+        return  # Nothing to do
     os.chmod(path, stat.S_IWRITE)
     func(path)
 
@@ -207,7 +209,7 @@ def restart_freecad():
         return
 
     args = QtWidgets.QApplication.arguments()[1:]
-    if fci.FreeCADGui.getMainWindow().close():
+    if fci.FreeCADGui and fci.FreeCADGui.getMainWindow().close():
         QtCore.QProcess.startDetached(QtWidgets.QApplication.applicationFilePath(), args)
 
 

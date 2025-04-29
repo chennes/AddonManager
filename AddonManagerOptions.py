@@ -42,12 +42,12 @@ class AddonManagerOptions:
         self.form = fci.loadUi(os.path.join(os.path.dirname(__file__), "AddonManagerOptions.ui"))
         self.table_model = CustomRepoDataModel()
         self.form.customRepositoriesTableView.setModel(self.table_model)
-
+        icon_path = os.path.join(os.path.dirname(__file__), "Resources", "icons")
         self.form.addCustomRepositoryButton.setIcon(
-            QtGui.QIcon.fromTheme("add", QtGui.QIcon(":/icons/list-add.svg"))
+            QtGui.QIcon.fromTheme("add", QtGui.QIcon(os.path.join(icon_path, "list-add.svg")))
         )
         self.form.removeCustomRepositoryButton.setIcon(
-            QtGui.QIcon.fromTheme("remove", QtGui.QIcon(":/icons/list-remove.svg"))
+            QtGui.QIcon.fromTheme("remove", QtGui.QIcon(os.path.join(icon_path, "list-remove.svg")))
         )
 
         self.form.customRepositoriesTableView.horizontalHeader().setStretchLastSection(False)

@@ -323,7 +323,8 @@ class PythonPackageManager:
             )
             if len(package_details["available_version"]) > 0:
                 update_buttons.append(QtWidgets.QPushButton(translate("AddonsInstaller", "Update")))
-                update_buttons[-1].setIcon(QtGui.QIcon(":/icons/button_up.svg"))
+                icon_path = os.path.join(os.path.dirname(__file__), "Resources", "icons")
+                update_buttons[-1].setIcon(QtGui.QIcon(os.path.join(icon_path, "button_up.svg")))
                 update_buttons[-1].clicked.connect(partial(self._update_package, package_name))
                 self.dlg.tableWidget.setCellWidget(counter, 4, update_buttons[-1])
                 update_counter += 1

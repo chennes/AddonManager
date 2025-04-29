@@ -26,7 +26,7 @@
 import os
 
 
-from PySideWrapper import QtWidgets
+from PySideWrapper import QtCore, QtGui, QtSvg, QtWidgets
 import addonmanager_freecad_interface as fci
 
 # pylint: disable=too-few-public-methods
@@ -45,6 +45,18 @@ class FirstRunDialog:
         should continue loading, or False if the user cancelled the dialog and wants to exit."""
         if not self.readWarning:
             warning_dialog = fci.loadUi(os.path.join(os.path.dirname(__file__), "first_run.ui"))
+
+            # Set warning pixmap location:
+            svg_path = os.path.join(
+                os.path.dirname(__file__), "Resources", "icons", "addon_manager_with_warning.svg"
+            )
+            renderer = QtSvg.QSvgRenderer(svg_path)
+            pixmap = QtGui.QPixmap(100, 100)
+            pixmap.fill(QtCore.Qt.transparent)
+            painter = QtGui.QPainter(pixmap)
+            renderer.render(painter)
+            painter.end()
+            warning_dialog.warningIconLabel.setPixmap(pixmap)
 
             # Set signal handlers for accept/reject buttons
             warning_dialog.buttonContinue.clicked.connect(warning_dialog.accept)

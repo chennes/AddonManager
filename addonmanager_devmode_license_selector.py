@@ -230,7 +230,8 @@ class LicenseSelector:
         if license_path:
             self._set_path(str(start_dir), license_path)
             short_code = self._current_short_code()
-            qf = QtCore.QFile(f":/licenses/{short_code}.txt")
+            license_path = os.path.join(os.path.dirname(__file__), "Resources", "licenses")
+            qf = QtCore.QFile(os.path.join(license_path, f"{short_code}.txt"))
             if qf.exists():
                 qf.open(QtCore.QIODevice.ReadOnly)
                 byte_data = qf.readAll()

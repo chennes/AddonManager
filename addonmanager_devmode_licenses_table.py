@@ -43,12 +43,12 @@ class LicensesTable:
         self.widget = fci.loadUi(
             os.path.join(os.path.dirname(__file__), "developer_mode_licenses_table.ui")
         )
-
+        icon_path = os.path.join(os.path.dirname(__file__), "Resources", "icons")
         self.widget.addButton.setIcon(
-            QtGui.QIcon.fromTheme("add", QtGui.QIcon(":/icons/list-add.svg"))
+            QtGui.QIcon.fromTheme("add", QtGui.QIcon(os.path.join(icon_path, "list-add.svg")))
         )
         self.widget.removeButton.setIcon(
-            QtGui.QIcon.fromTheme("remove", QtGui.QIcon(":/icons/list-remove.svg"))
+            QtGui.QIcon.fromTheme("remove", QtGui.QIcon(os.path.join(icon_path, "list-remove.svg")))
         )
 
         self.widget.addButton.clicked.connect(self._add_clicked)

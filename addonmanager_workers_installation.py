@@ -307,6 +307,8 @@ class UpdateMetadataCacheWorker(QtCore.QThread):
     def process_icon(self, repo: Addon, data: QtCore.QByteArray):
         """Convert icon data into a valid icon file and store it"""
         cache_file = repo.get_cached_icon_filename()
+        path = os.path.dirname(os.path.abspath(cache_file))
+        os.makedirs(path, exist_ok=True)
         with open(cache_file, "wb") as icon_file:
             icon_file.write(data.data())
             repo.cached_icon_filename = cache_file

@@ -131,11 +131,12 @@ class DeveloperMode:
         self.dialog.versionLineEdit.setValidator(VersionValidator())
         self.dialog.minPythonLineEdit.setValidator(VersionValidator())
 
+        icon_path = os.path.join(os.path.dirname(__file__), "Resources", "icons")
         self.dialog.addContentItemToolButton.setIcon(
-            QtGui.QIcon.fromTheme("add", QtGui.QIcon(":/icons/list-add.svg"))
+            QtGui.QIcon.fromTheme("add", QtGui.QIcon(os.path.join(icon_path, "list-add.svg")))
         )
         self.dialog.removeContentItemToolButton.setIcon(
-            QtGui.QIcon.fromTheme("remove", QtGui.QIcon(":/icons/list-remove.svg"))
+            QtGui.QIcon.fromTheme("remove", QtGui.QIcon(os.path.join(icon_path, "list-remove.svg")))
         )
 
     def show(self, parent=None, path: str = None):
