@@ -31,12 +31,14 @@ under the LGPLv2.1 license (as stated above)."""
 
 import datetime
 import os
+from typing import Optional
 
-import FreeCAD
+import addonmanager_freecad_interface as fci
 from addonmanager_git import initialize_git, GitManager
 from addonmanager_utilities import get_readme_url
+from addonmanager_metadata import License, Metadata, Url, UrlType, Version
 
-translate = FreeCAD.Qt.translate
+translate = fci.translate
 
 # pylint: disable=too-few-public-methods
 
@@ -55,7 +57,7 @@ class Predictor:
 
     def __init__(self):
         self.path = None
-        self.metadata = FreeCAD.Metadata()
+        self.metadata = Metadata()
         self.license_data = None
         self.readme_data = None
         self.license_file = ""
@@ -63,7 +65,7 @@ class Predictor:
         if not self.git_manager:
             raise Exception("Cannot use Developer Mode without git installed")
 
-    def predict_metadata(self, path: str) -> FreeCAD.Metadata:
+    def predict_metadata(self, path: str) -> Optional[Metadata]:
         """Create a predicted Metadata object based on the contents of the passed-in directory"""
         if not os.path.isdir(path):
             return None
@@ -177,8 +179,8 @@ class Predictor:
         addon = AddonSlice(remote, branch)
         readme = get_readme_url(addon)
 
-        self.metadata.addUrl("repository", remote, branch)
-        self.metadata.addUrl("readme", readme)
+        self.metadata.url.append(Url(remote, UrlType.repository, branch))
+        self.metadata.url.append(Url(readme, UrlType.readme))
 
     def _predict_license(self):
         """Predict the license based on any existing license file."""
@@ -238,7 +240,7 @@ class Predictor:
         if self.license_data:
             for shortcode, test_data in known_strings.items():
                 if shortcode.lower() in self.license_data.lower():
-                    self.metadata.addLicense(shortcode, self.license_file)
+                    self.metadata.license.append(License(name=shortcode, file=self.license_file))
                     return
                 for test_text in test_data:
                     # Do the comparison without regard to whitespace or capitalization
@@ -246,7 +248,9 @@ class Predictor:
                         "".join(test_text.split()).lower()
                         in "".join(self.license_data.split()).lower()
                     ):
-                        self.metadata.addLicense(shortcode, self.license_file)
+                        self.metadata.license.append(
+                            License(name=shortcode, file=self.license_file)
+                        )
                         return
 
     def _predict_version(self):
@@ -255,7 +259,7 @@ class Predictor:
         month = datetime.date.today().month
         day = datetime.date.today().day
         version_string = f"{year}.{month:>02}.{day:>02}"
-        self.metadata.Version = version_string
+        self.metadata.version = Version(from_string=version_string)
 
     def _load_readme(self):
         """Load in any existing readme"""

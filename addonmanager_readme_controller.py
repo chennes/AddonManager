@@ -23,9 +23,9 @@
 
 """A Qt Widget for displaying Addon README information"""
 
-import FreeCAD
 from Addon import Addon
 import addonmanager_utilities as utils
+import addonmanager_freecad_interface as fci
 
 from enum import IntEnum, Enum, auto
 from html.parser import HTMLParser
@@ -33,9 +33,9 @@ from typing import Optional
 
 import NetworkManager
 
-translate = FreeCAD.Qt.translate
+translate = fci.translate
 
-from PySide import QtCore, QtGui
+from PySideWrapper import QtCore, QtGui
 
 
 class ReadmeDataType(IntEnum):
@@ -111,7 +111,7 @@ class ReadmeController(QtCore.QObject):
             if code == 200:
                 self._process_resource_download(self.resource_requests[index], data.data())
             else:
-                FreeCAD.Console.PrintLog(f"Failed to load {self.resource_requests[index]}\n")
+                fci.Console.PrintLog(f"Failed to load {self.resource_requests[index]}\n")
                 self.resource_failures.append(self.resource_requests[index])
             del self.resource_requests[index]
             if not self.resource_requests:
@@ -159,7 +159,7 @@ class ReadmeController(QtCore.QObject):
                 final_url = self._create_markdown_url(url)
             else:
                 final_url = self._create_full_url(url)
-        FreeCAD.Console.PrintLog(f"Loading {final_url} in the system browser")
+        fci.Console.PrintLog(f"Loading {final_url} in the system browser")
         QtGui.QDesktopServices.openUrl(final_url)
 
     def _create_full_url(self, url: str) -> str:

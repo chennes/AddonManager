@@ -61,29 +61,11 @@ import tempfile
 from typing import Dict, List, Optional
 from urllib.parse import urlparse
 
-try:
-    from PySide import QtCore
-
-    HAVE_FREECAD = True
-except ImportError:
-    HAVE_FREECAD = False
-    try:
-        from PySide6 import QtCore
-    except ImportError:
-        from PySide2 import QtCore
-
 import addonmanager_freecad_interface as fci
 
-translate = fci.translate
+from PySideWrapper import QtCore, QtNetwork, QtWidgets
 
-if fci.GuiUp:
-    try:
-        from PySide import QtWidgets, QtNetwork
-    except ImportError:
-        try:
-            from PySide6 import QtWidgets, QtNetwork
-        except ImportError:
-            from PySide2 import QtWidgets, QtNetwork
+translate = fci.translate
 
 
 # This is the global instance of the NetworkManager that outside code
@@ -180,7 +162,7 @@ class NetworkManager(QtCore.QObject):
         """Set up the proxy based on user preferences or prompts on command line"""
 
         # Set up the proxy, if necessary:
-        if HAVE_FREECAD:
+        if fci.FreeCAD:
             (
                 noProxyCheck,
                 systemProxyCheck,
@@ -292,7 +274,7 @@ class NetworkManager(QtCore.QObject):
             proxy_string = input("Enter your proxy server (host:port): ")
         else:
             print(f"Got {result}, expected 1, 2, or 3.")
-            app.quit()
+            exit(1)
         return noProxyCheck, systemProxyCheck, userProxyCheck, proxy_string
 
     def __aboutToQuit(self):
@@ -467,7 +449,7 @@ class NetworkManager(QtCore.QObject):
         """If proxy authentication is required, attempt to authenticate. If the GUI is running this displays
         a window asking for credentials. If the GUI is not running, it prompts on the command line.
         """
-        if HAVE_FREECAD and fci.GuiUp:
+        if fci.FreeCAD and fci.GuiUp:
             proxy_authentication = fci.loadUi(
                 os.path.join(os.path.dirname(__file__), "proxy_authentication.ui")
             )
@@ -499,19 +481,13 @@ class NetworkManager(QtCore.QObject):
 
     def __on_ssl_error(self, reply: str, errors: List[str] = None):
         """Called when an SSL error occurs: prints the error information."""
-        if HAVE_FREECAD:
-            fci.Console.PrintWarning(
-                translate("AddonsInstaller", "Error with encrypted connection") + "\n:"
-            )
-            fci.Console.PrintWarning(reply)
-            if errors is not None:
-                for error in errors:
-                    fci.Console.PrintWarning(error)
-        else:
-            print("Error with encrypted connection")
-            if errors is not None:
-                for error in errors:
-                    print(error)
+        fci.Console.PrintWarning(
+            translate("AddonsInstaller", "Error with encrypted connection") + "\n:"
+        )
+        fci.Console.PrintWarning(reply)
+        if errors is not None:
+            for error in errors:
+                fci.Console.PrintWarning(error)
 
     def __download_progress(self, bytesReceived: int, bytesTotal: int) -> None:
         """Monitors download progress and emits a progress_made signal"""
@@ -548,15 +524,12 @@ class NetworkManager(QtCore.QObject):
         try:
             f.write(buffer.data())
         except OSError as e:
-            if HAVE_FREECAD:
-                fci.Console.PrintError(f"Network Manager internal error: {str(e)}")
-            else:
-                print(f"Network Manager internal error: {str(e)}")
+            fci.Console.PrintError(f"Network Manager internal error: {str(e)}")
 
     def __reply_finished(self) -> None:
         """Called when a reply has been completed: this makes sure the data has been read and
         any notifications have been called."""
-        reply = self.sender()
+        reply: QtNetwork.QNetworkReply = self.sender()
         if not reply:
             # This can happen during a cancellation operation: silently do nothing
             return
@@ -595,7 +568,6 @@ class NetworkManager(QtCore.QObject):
                 data = reply.readAll()
                 self.completed.emit(index, response_code, data)
         else:
-            fci.Console.PrintWarning(f"Request failed: {reply.error()} \n")
             if index in self.monitored_connections:
                 self.progress_complete.emit(index, response_code, "")
             else:

@@ -28,7 +28,9 @@ import datetime
 
 import io
 import re
-from typing import Any, Tuple, Optional
+from typing import Any, Tuple
+
+import addonmanager_freecad_interface as fci
 
 try:
     from PySide import QtCore
@@ -71,7 +73,6 @@ class MacroParser:
             "xpm": "",
         }
         self.remaining_item_map = {}
-        self.console = None if FreeCAD is None else FreeCAD.Console
         self.current_thread = DummyThread() if QtCore is None else QtCore.QThread.currentThread()
         if code:
             self.fill_details_from_code(code)
@@ -114,10 +115,7 @@ class MacroParser:
                 self._process_line(line, content_lines)
             except SyntaxError as e:
                 err_string = f"Syntax error when parsing macro {self.name}:\n{str(e)}"
-                if self.console:
-                    self.console.PrintWarning(err_string)
-                else:
-                    print(err_string)
+                fci.Console.PrintWarning(err_string)
 
     def _process_line(self, line: str, content_lines: io.StringIO):
         """Given a single line of the macro file, see if it matches one of our items,

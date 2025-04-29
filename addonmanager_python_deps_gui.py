@@ -91,6 +91,7 @@ class CheckForPythonPackageUpdatesWorker(QtCore.QThread):
 
     def __init__(self):
         QtCore.QThread.__init__(self)
+        self.setObjectName("CheckForPythonPackageUpdatesWorker")
 
     def run(self):
         """Usually not called directly: instead, instantiate this class and call its start()
@@ -263,6 +264,7 @@ class PythonPackageManager:
         showing in most cases."""
 
         self.worker_thread = QtCore.QThread()
+        self.worker_thread.setObjectName("CreateListFromPip worker thread")
         self.worker_object = PythonPackageManager.PipRunner(self.vendor_path)
         self.worker_object.moveToThread(self.worker_thread)
         self.worker_object.finished.connect(self._worker_finished)
@@ -321,7 +323,8 @@ class PythonPackageManager:
             )
             if len(package_details["available_version"]) > 0:
                 update_buttons.append(QtWidgets.QPushButton(translate("AddonsInstaller", "Update")))
-                update_buttons[-1].setIcon(QtGui.QIcon(":/icons/button_up.svg"))
+                icon_path = os.path.join(os.path.dirname(__file__), "Resources", "icons")
+                update_buttons[-1].setIcon(QtGui.QIcon(os.path.join(icon_path, "button_up.svg")))
                 update_buttons[-1].clicked.connect(partial(self._update_package, package_name))
                 self.dlg.tableWidget.setCellWidget(counter, 4, update_buttons[-1])
                 update_counter += 1

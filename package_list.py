@@ -25,9 +25,8 @@
 import datetime
 import threading
 
-import FreeCAD
-
-from PySide import QtCore, QtGui, QtWidgets
+import addonmanager_freecad_interface as fci
+from PySideWrapper import QtCore, QtGui, QtWidgets
 
 from Addon import Addon
 
@@ -42,7 +41,7 @@ from Widgets.addonmanager_widget_filter_selector import StatusFilter, Filter
 from Widgets.addonmanager_widget_progress_bar import Progress, WidgetProgressBar
 from addonmanager_licenses import get_license_manager
 
-translate = FreeCAD.Qt.translate
+translate = fci.translate
 
 
 # pylint: disable=too-few-public-methods
@@ -75,10 +74,9 @@ class PackageList(QtWidgets.QWidget):
         self.ui.progress_bar.stop_clicked.connect(self.stop_loading)
 
         # Set up the view the same as the last time:
-        pref = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Addons")
-        package_type = pref.GetInt("PackageTypeSelection", 0)
-        status = pref.GetInt("StatusSelection", 0)
-        search_string = pref.GetString("SearchString", "")
+        package_type = fci.Preferences().get("PackageTypeSelection")
+        status = fci.Preferences().get("StatusSelection")
+        search_string = fci.Preferences().get("SearchString")
         self.ui.view_bar.filter_selector.set_contents_filter(package_type)
         self.ui.view_bar.filter_selector.set_status_filter(status)
         if search_string:
@@ -96,19 +94,18 @@ class PackageList(QtWidgets.QWidget):
         self.item_filter.setSortRole(SortOptions.Alphabetical)
         self.item_filter.sort(0, QtCore.Qt.AscendingOrder)
 
-        pref = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Addons")
-        style = pref.GetInt("ViewStyle", AddonManagerDisplayStyle.EXPANDED)
+        style = fci.Preferences().get("ViewStyle")
         self.set_view_style(style)
         self.ui.view_bar.view_selector.set_current_view(style)
 
-        self.item_filter.setHidePy2(pref.GetBool("HidePy2", False))
-        self.item_filter.setHideObsolete(pref.GetBool("HideObsolete", False))
-        self.item_filter.setHideNonOSIApproved(pref.GetBool("HideNonOSIApproved", False))
-        self.item_filter.setHideNonFSFLibre(pref.GetBool("HideNonFSFFreeLibre", False))
+        self.item_filter.setHidePy2(fci.Preferences().get("HidePy2"))
+        self.item_filter.setHideObsolete(fci.Preferences().get("HideObsolete"))
+        self.item_filter.setHideNonOSIApproved(fci.Preferences().get("HideNonOSIApproved"))
+        self.item_filter.setHideNonFSFLibre(fci.Preferences().get("HideNonFSFFreeLibre"))
         self.item_filter.setHideNewerFreeCADRequired(
-            pref.GetBool("HideNewerFreeCADRequired", False)
+            fci.Preferences().get("HideNewerFreeCADRequired")
         )
-        self.item_filter.setHideUnlicensed(pref.GetBool("HideUnlicensed", False))
+        self.item_filter.setHideUnlicensed(fci.Preferences().get("HideUnlicensed"))
 
     def select_addon(self, addon_name: str):
         for index, addon in enumerate(self.item_model.repos):
@@ -117,12 +114,12 @@ class PackageList(QtWidgets.QWidget):
                 if self.item_filter.filterAcceptsRow(index):
                     self.ui.listPackages.setCurrentIndex(row_index)
                 else:
-                    FreeCAD.Console.PrintLog(
+                    fci.Console.PrintLog(
                         f"Addon {addon_name} is not visible given current "
                         "filter: not selecting it."
                     )
                 return
-        FreeCAD.Console.PrintLog(f"Could not find addon '{addon_name}' to select it")
+        fci.Console.PrintLog(f"Could not find addon '{addon_name}' to select it")
 
     def on_listPackages_clicked(self, index: QtCore.QModelIndex):
         """Determine what addon was selected and emit the itemSelected signal with it as
@@ -136,9 +133,8 @@ class PackageList(QtWidgets.QWidget):
 
         self.item_filter.setStatusFilter(new_filter.status_filter)
         self.item_filter.setPackageFilter(new_filter.content_filter)
-        pref = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Addons")
-        pref.SetInt("StatusSelection", new_filter.status_filter)
-        pref.SetInt("PackageTypeSelection", new_filter.content_filter)
+        fci.Preferences().set("StatusSelection", new_filter.status_filter)
+        fci.Preferences().set("PackageTypeSelection", new_filter.content_filter)
         self.item_filter.invalidateFilter()
 
     def set_view_style(self, style: AddonManagerDisplayStyle) -> None:
@@ -157,8 +153,7 @@ class PackageList(QtWidgets.QWidget):
         if self.item_model:
             self.item_model.layoutChanged.emit()
 
-        pref = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Addons")
-        pref.SetInt("ViewStyle", style)
+        fci.Preferences().set("ViewStyle", style)
 
     def set_loading(self, is_loading: bool) -> None:
         """Set the loading status of this package list: when a package list is loading, it shows
@@ -664,7 +659,7 @@ class PackageListFilter(QtCore.QSortFilterProxyModel):
 
             if self.hide_unlicensed:
                 if not data.license or data.license in ["UNLICENSED", "UNLICENCED"]:
-                    FreeCAD.Console.PrintLog(f"Hiding {data.name} because it has no license set\n")
+                    fci.Console.PrintLog(f"Hiding {data.name} because it has no license set\n")
                     return False
 
             # If it is not an OSI-approved license, check to see if we are hiding those
@@ -691,14 +686,14 @@ class PackageListFilter(QtCore.QSortFilterProxyModel):
                     if not fsf_libre and license_manager.is_fsf_libre(license_id):
                         fsf_libre = True
                 if self.hide_non_OSI_approved and not osi_approved:
-                    # FreeCAD.Console.PrintLog(
+                    # fci.Console.PrintLog(
                     #    f"Hiding addon {data.name} because its license, {licenses_to_check}, "
                     #    f"is "
                     #    f"not OSI approved\n"
                     # )
                     return False
                 if self.hide_non_FSF_libre and not fsf_libre:
-                    # FreeCAD.Console.PrintLog(
+                    # fci.Console.PrintLog(
                     #    f"Hiding addon {data.name} because its license, {licenses_to_check},  is "
                     #    f"not FSF Libre\n"
                     # )
@@ -716,7 +711,7 @@ class PackageListFilter(QtCore.QSortFilterProxyModel):
 
             first_supported_version = get_first_supported_freecad_version(data.metadata)
             if first_supported_version is not None:
-                current_fc_version = Version(from_list=FreeCAD.Version())
+                current_fc_version = Version(from_list=fci.Version())
                 if first_supported_version > current_fc_version:
                     return False
 

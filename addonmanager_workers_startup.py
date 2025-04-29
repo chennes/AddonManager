@@ -67,6 +67,7 @@ class CreateAddonListWorker(QtCore.QThread):
 
     def __init__(self):
         QtCore.QThread.__init__(self)
+        self.setObjectName("CreateAddonListWorker")
 
         # reject_listed addons
         self.macros_reject_list = []
@@ -440,6 +441,7 @@ class LoadPackagesFromCacheWorker(QtCore.QThread):
 
     def __init__(self, cache_file: str):
         QtCore.QThread.__init__(self)
+        self.setObjectName("LoadPackagesFromCacheWorker")
         self.cache_file = cache_file
         self.metadata_cache_path = os.path.join(
             fci.DataPaths().cache_dir, "AddonManager", "PackageMetadata"
@@ -479,6 +481,7 @@ class LoadMacrosFromCacheWorker(QtCore.QThread):
 
     def __init__(self, cache_file: str):
         QtCore.QThread.__init__(self)
+        self.setObjectName("LoadMacrosFromCacheWorker")
         self.cache_file = cache_file
 
     def run(self):
@@ -531,6 +534,7 @@ class CheckWorkbenchesForUpdatesWorker(QtCore.QThread):
     def __init__(self, repos: List[Addon]):
 
         QtCore.QThread.__init__(self)
+        self.setObjectName("CheckWorkbenchesForUpdatesWorker")
         self.repos = repos
         self.current_thread = None
         self.moddir = fci.DataPaths().mod_dir
@@ -746,6 +750,7 @@ class CacheMacroCodeWorker(QtCore.QThread):
 
     def __init__(self, repos: List[Addon]) -> None:
         QtCore.QThread.__init__(self)
+        self.setObjectName("CacheMacroCodeWorker")
         self.repos = repos
         self.workers = []
         self.terminators = []
@@ -893,6 +898,7 @@ class GetMacroDetailsWorker(QtCore.QThread):
     def __init__(self, repo):
 
         QtCore.QThread.__init__(self)
+        self.setObjectName("GetMacroDetailsWorker")
         self.macro = repo.macro
 
     def run(self):
@@ -930,6 +936,7 @@ class GetBasicAddonStatsWorker(QtCore.QThread):
 
     def __init__(self, url: str, addons: List[Addon], parent: QtCore.QObject = None):
         super().__init__(parent)
+        self.setObjectName("GetBasicAddonStatsWorker")
         self.url = url
         self.addons = addons
 
@@ -962,6 +969,7 @@ class GetAddonScoreWorker(QtCore.QThread):
 
     def __init__(self, url: str, addons: List[Addon], parent: QtCore.QObject = None):
         super().__init__(parent)
+        self.setObjectName("GetAddonScoreWorker")
         self.url = url
         self.addons = addons
 

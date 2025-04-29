@@ -1,3 +1,4 @@
 # SPDX License ID: LGPL-2.1
 .idea
 __pycache*
+.DS_Store

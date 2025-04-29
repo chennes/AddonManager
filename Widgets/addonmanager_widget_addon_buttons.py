@@ -24,6 +24,7 @@
 """Defines a QWidget-derived class for displaying the single-addon buttons."""
 
 from enum import Enum, auto
+import os
 
 try:
     import FreeCAD
@@ -36,20 +37,7 @@ except ImportError:
         return text
 
 
-# Get whatever version of PySide we can
-try:
-    import PySide  # Use the FreeCAD wrapper
-except ImportError:
-    try:
-        import PySide6  # Outside FreeCAD, try Qt6 first
-
-        PySide = PySide6
-    except ImportError:
-        import PySide2  # Fall back to Qt5 (if this fails, Python will kill this module's import)
-
-        PySide = PySide2
-
-from PySide import QtCore, QtGui, QtWidgets
+from PySideWrapper import QtGui, QtWidgets
 
 
 class ButtonBarDisplayMode(Enum):
@@ -104,7 +92,10 @@ class WidgetAddonButtons(QtWidgets.QWidget):
         self.back.setVisible(show)
 
     def _set_icons(self):
-        self.back.setIcon(QtGui.QIcon.fromTheme("back", QtGui.QIcon(":/icons/button_left.svg")))
+        icon_path = os.path.join(os.path.dirname(__file__), "..", "Resources", "icons")
+        self.back.setIcon(
+            QtGui.QIcon.fromTheme("back", QtGui.QIcon(os.path.join(icon_path, "button_left.svg")))
+        )
 
     def retranslateUi(self, _):
         self.check_for_update.setText(translate("AddonsInstaller", "Check for update"))

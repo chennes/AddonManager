@@ -33,6 +33,7 @@
         "https://raw.githubusercontent.com/FreeCAD/FreeCAD-addons/master/.gitmodules",
     "ProxyUrl": "",
     "RemoteIconCacheURL": "https://addons.freecad.org/icon_cache.zip",
+    "SearchString": "",
     "SelectedAddon": "",
     "ShowBranchSwitcher": false,
     "StatusSelection": 0,

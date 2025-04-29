@@ -38,6 +38,7 @@ import tempfile
 
 try:
     import FreeCAD
+    from freecad.utils import get_python_exe
 
     if not hasattr(FreeCAD, "Console"):
         raise ImportError("Unrecognized FreeCAD version")
@@ -57,6 +58,8 @@ try:
 
         if hasattr(FreeCADGui, "PySideUic"):
             loadUi = FreeCADGui.PySideUic.loadUi
+
+        addPreferencePage = FreeCADGui.addPreferencePage
     else:
         FreeCADGui = None
 
@@ -92,8 +95,12 @@ except ImportError:
             file.close()
             return window
 
-    def translate(_context: str, string: str, _desc: str = "") -> str:
-        return string
+        def addPreferencePage(_options_class, _name: str):
+            """Don't do anything with a preference page right now"""
+            pass
+
+    def translate(context: str, sourceText: str, disambiguation: str = "", n: int = -1) -> str:
+        return QtCore.QCoreApplication.translate(context, sourceText, disambiguation, n)
 
     def Version():
         return 1, 1, 0, "dev"
@@ -207,7 +214,7 @@ class DataPaths:
             if self.macro_dir is None:
                 self.macro_dir = tempfile.mkdtemp()
             if self.home_dir is None:
-                self.home_dir = os.path.join(os.path.dirname(__file__), "..", "..")
+                self.home_dir = os.path.join(os.path.dirname(__file__))
 
     def __del__(self):
         self.reference_count -= 1

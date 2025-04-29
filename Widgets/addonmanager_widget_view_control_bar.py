@@ -23,27 +23,15 @@
 
 """Defines a class derived from QWidget for displaying the bar at the top of the addons list."""
 
-from enum import IntEnum, auto
+from enum import IntEnum
+import os
 
 try:
     import FreeCAD
 except ImportError:
     FreeCAD = None
 
-# Get whatever version of PySide we can
-try:
-    import PySide  # Use the FreeCAD wrapper
-except ImportError:
-    try:
-        import PySide6  # Outside FreeCAD, try Qt6 first
-
-        PySide = PySide6
-    except ImportError:
-        import PySide2  # Fall back to Qt5 (if this fails, Python will kill this module's import)
-
-        PySide = PySide2
-
-from PySide import QtCore, QtGui, QtWidgets
+from PySideWrapper import QtCore, QtGui, QtWidgets
 from .addonmanager_widget_view_selector import WidgetViewSelector
 from .addonmanager_widget_filter_selector import WidgetFilterSelector
 from .addonmanager_widget_search import WidgetSearch
@@ -94,8 +82,11 @@ class WidgetViewControlBar(QtWidgets.QWidget):
         self.filter_selector = WidgetFilterSelector(self)
         self.sort_selector = QtWidgets.QComboBox(self)
         self.sort_order_button = QtWidgets.QToolButton(self)
+        icon_path = os.path.join(os.path.dirname(__file__), "..", "Resources", "icons")
         self.sort_order_button.setIcon(
-            QtGui.QIcon.fromTheme("ascending", QtGui.QIcon(":/icons/sort_ascending.svg"))
+            QtGui.QIcon.fromTheme(
+                "ascending", QtGui.QIcon(os.path.join(icon_path, "sort_ascending.svg"))
+            )
         )
         self.search = WidgetSearch(self)
         self.horizontal_layout.addWidget(self.view_selector)
@@ -117,16 +108,19 @@ class WidgetViewControlBar(QtWidgets.QWidget):
         self._set_sort_order_icon()
 
     def _set_sort_order_icon(self):
+        icon_path = os.path.join(os.path.dirname(__file__), "..", "Resources", "icons")
         if self.sort_order == QtCore.Qt.AscendingOrder:
             self.sort_order_button.setIcon(
                 QtGui.QIcon.fromTheme(
-                    "view-sort-ascending", QtGui.QIcon(":/icons/sort_ascending.svg")
+                    "view-sort-ascending",
+                    QtGui.QIcon(os.path.join(icon_path, "sort_ascending.svg")),
                 )
             )
         else:
             self.sort_order_button.setIcon(
                 QtGui.QIcon.fromTheme(
-                    "view-sort-descending", QtGui.QIcon(":/icons/sort_descending.svg")
+                    "view-sort-descending",
+                    QtGui.QIcon(os.path.join(icon_path, "sort_descending.svg")),
                 )
             )
 

@@ -27,22 +27,8 @@ import os
 import datetime
 import subprocess
 
-import FreeCAD
-import FreeCADGui
-from freecad.utils import get_python_exe
+import addonmanager_freecad_interface as fci
 
-from PySide.QtWidgets import (
-    QFileDialog,
-    QListWidgetItem,
-    QDialog,
-    QSizePolicy,
-    QMessageBox,
-)
-from PySide.QtGui import (
-    QIcon,
-    QPixmap,
-)
-from PySide.QtCore import Qt
 from addonmanager_git import GitManager, NoGitFound
 
 from addonmanager_devmode_add_content import AddContent
@@ -50,14 +36,18 @@ from addonmanager_devmode_validators import NameValidator, VersionValidator
 from addonmanager_devmode_predictor import Predictor
 from addonmanager_devmode_people_table import PeopleTable
 from addonmanager_devmode_licenses_table import LicensesTable
-import addonmanager_utilities as utils
+from addonmanager_utilities import get_python_exe
 
-translate = FreeCAD.Qt.translate
+from addonmanager_metadata import Metadata, MetadataReader
+
+from PySideWrapper import QtCore, QtGui, QtWidgets
+
+translate = fci.translate
 
 # pylint: disable=too-few-public-methods
 
-ContentTypeRole = Qt.UserRole
-ContentIndexRole = Qt.UserRole + 1
+ContentTypeRole = QtCore.Qt.UserRole
+ContentIndexRole = QtCore.Qt.UserRole + 1
 
 
 class AddonGitInterface:
@@ -71,7 +61,7 @@ class AddonGitInterface:
             try:
                 AddonGitInterface.git_manager = GitManager()
             except NoGitFound:
-                FreeCAD.Console.PrintLog("No git found, Addon Manager Developer Mode disabled.")
+                fci.Console.PrintLog("No git found, Addon Manager Developer Mode disabled.")
                 return
 
         self.path = path
@@ -115,20 +105,21 @@ class DeveloperMode:
             "maintainer": translate("AddonsInstaller", "Maintainer"),
             "author": translate("AddonsInstaller", "Author"),
         }
-        self.dialog = FreeCADGui.PySideUic.loadUi(
-            os.path.join(os.path.dirname(__file__), "developer_mode.ui")
-        )
+        self.dialog = fci.loadUi(os.path.join(os.path.dirname(__file__), "developer_mode.ui"))
         self.people_table = PeopleTable()
         self.licenses_table = LicensesTable()
-        large_size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        large_size_policy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
+        )
         large_size_policy.setHorizontalStretch(2)
-        small_size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        small_size_policy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
+        )
         small_size_policy.setHorizontalStretch(1)
         self.people_table.widget.setSizePolicy(large_size_policy)
         self.licenses_table.widget.setSizePolicy(small_size_policy)
         self.dialog.peopleAndLicenseshorizontalLayout.addWidget(self.people_table.widget)
         self.dialog.peopleAndLicenseshorizontalLayout.addWidget(self.licenses_table.widget)
-        self.pref = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Addons")
         self.current_mod: str = ""
         self.git_interface = None
         self.has_toplevel_icon = False
@@ -140,11 +131,12 @@ class DeveloperMode:
         self.dialog.versionLineEdit.setValidator(VersionValidator())
         self.dialog.minPythonLineEdit.setValidator(VersionValidator())
 
+        icon_path = os.path.join(os.path.dirname(__file__), "Resources", "icons")
         self.dialog.addContentItemToolButton.setIcon(
-            QIcon.fromTheme("add", QIcon(":/icons/list-add.svg"))
+            QtGui.QIcon.fromTheme("add", QtGui.QIcon(os.path.join(icon_path, "list-add.svg")))
         )
         self.dialog.removeContentItemToolButton.setIcon(
-            QIcon.fromTheme("remove", QIcon(":/icons/list-remove.svg"))
+            QtGui.QIcon.fromTheme("remove", QtGui.QIcon(os.path.join(icon_path, "list-remove.svg")))
         )
 
     def show(self, parent=None, path: str = None):
@@ -153,8 +145,8 @@ class DeveloperMode:
             self.dialog.setParent(parent)
         if path and os.path.exists(path):
             self.dialog.pathToAddonComboBox.setEditText(path)
-        elif self.pref.HasGroup("recentModsList"):
-            recent_mods_group = self.pref.GetGroup("recentModsList")
+        elif fci.Preferences().HasGroup("recentModsList"):
+            recent_mods_group = fci.Preferences().GetGroup("recentModsList")
             entry = recent_mods_group.GetString("Mod0", "")
             if entry:
                 self._populate_dialog(entry)
@@ -166,7 +158,7 @@ class DeveloperMode:
             self._clear_all_fields()
 
         result = self.dialog.exec()
-        if result == QDialog.Accepted:
+        if result == QtWidgets.QDialog.Accepted:
             self._sync_metadata_to_ui()
             now = datetime.date.today()
             self.metadata.Date = str(now)
@@ -183,22 +175,13 @@ class DeveloperMode:
         metadata_path = os.path.join(path_to_repo, "package.xml")
         if os.path.exists(metadata_path):
             try:
-                self.metadata = FreeCAD.Metadata(metadata_path)
-            except FreeCAD.Base.XMLBaseException as e:
-                FreeCAD.Console.PrintError(
+                self.metadata = MetadataReader.from_file(metadata_path)
+            except RuntimeError as e:
+                fci.Console.PrintError(
                     translate(
                         "AddonsInstaller",
-                        "XML failure while reading metadata from file {}",
+                        "Failure while reading metadata from file {}",
                     ).format(metadata_path)
-                    + "\n\n"
-                    + str(e)
-                    + "\n\n"
-                )
-            except FreeCAD.Base.RuntimeError as e:
-                FreeCAD.Console.PrintError(
-                    translate("AddonsInstaller", "Invalid metadata in file {}").format(
-                        metadata_path
-                    )
                     + "\n\n"
                     + str(e)
                     + "\n\n"
@@ -233,7 +216,7 @@ class DeveloperMode:
                 branch_from_local_path = self.git_interface.branch
                 if branch_from_metadata != branch_from_local_path:
                     # pylint: disable=line-too-long
-                    FreeCAD.Console.PrintWarning(
+                    fci.Console.PrintWarning(
                         translate(
                             "AddonsInstaller",
                             "WARNING: Path specified in package.xml metadata does not match currently checked-out branch.",
@@ -275,7 +258,7 @@ class DeveloperMode:
                     info.append(translate("AddonsInstaller", "Files") + ": " + ", ".join(item.File))
                 contents_string += ", ".join(info)
 
-                item = QListWidgetItem(contents_string)
+                item = QtWidgets.QListWidgetItem(contents_string)
                 item.setData(ContentTypeRole, content_type)
                 item.setData(ContentIndexRole, counter)
                 self.dialog.contentsListWidget.addItem(item)
@@ -283,7 +266,7 @@ class DeveloperMode:
 
     def _populate_icon_from_metadata(self, metadata):
         """Use the passed metadata object to populate the icon fields"""
-        self.dialog.iconDisplayLabel.setPixmap(QPixmap())
+        self.dialog.iconDisplayLabel.setPixmap(QtGui.QPixmap())
         icon = metadata.Icon
         icon_path = None
         if icon:
@@ -303,14 +286,14 @@ class DeveloperMode:
                         break
 
         if icon_path and os.path.isfile(icon_path):
-            icon_data = QIcon(icon_path)
+            icon_data = QtGui.QIcon(icon_path)
             if not icon_data.isNull():
                 self.dialog.iconDisplayLabel.setPixmap(icon_data.pixmap(32, 32))
         self.dialog.iconPathLineEdit.setText(icon)
 
     def _predict_metadata(self):
         """If there is no metadata, try to guess at values for it"""
-        self.metadata = FreeCAD.Metadata()
+        self.metadata = Metadata()
         predictor = Predictor()
         self.metadata = predictor.predict_metadata(self.current_mod)
 
@@ -336,7 +319,7 @@ class DeveloperMode:
         self.dialog.documentationURLLineEdit.clear()
         self.dialog.discussionURLLineEdit.clear()
         self.dialog.minPythonLineEdit.clear()
-        self.dialog.iconDisplayLabel.setPixmap(QPixmap())
+        self.dialog.iconDisplayLabel.setPixmap(QtGui.QPixmap())
         self.dialog.iconPathLineEdit.clear()
 
     def _setup_dialog_signals(self):
@@ -365,7 +348,7 @@ class DeveloperMode:
         object. Only overwrites known data fields: unknown metadata will be retained."""
 
         if not self.metadata:
-            self.metadata = FreeCAD.Metadata()
+            self.metadata = Metadata()
 
         self.metadata.Name = self.dialog.displayNameLineEdit.text()
         self.metadata.Description = self.dialog.descriptionTextEdit.document().toPlainText()
@@ -424,8 +407,8 @@ class DeveloperMode:
         processed by the parsing code and used to fill in the contents of the rest of the
         dialog."""
 
-        start_dir = os.path.join(FreeCAD.getUserAppDataDir(), "Mod")
-        mod_dir = QFileDialog.getExistingDirectory(
+        start_dir = fci.DataPaths.mod_dir
+        mod_dir = QtWidgets.QFileDialog.getExistingDirectory(
             parent=self.dialog,
             caption=translate(
                 "AddonsInstaller",
@@ -457,7 +440,7 @@ class DeveloperMode:
         top one. Does not trigger any signals."""
         combo = self.dialog.pathToAddonComboBox
         combo.blockSignals(True)
-        recent_mods_group = self.pref.GetGroup("recentModsList")
+        recent_mods_group = fci.Preferences().GetGroup("recentModsList")
         recent_mods = set()
         combo.clear()
         for i in range(10):
@@ -474,8 +457,8 @@ class DeveloperMode:
         """Update the list of recent mods, storing at most ten, with path at the top of the
         list."""
         recent_mod_paths = [path]
-        if self.pref.HasGroup("recentModsList"):
-            recent_mods_group = self.pref.GetGroup("recentModsList")
+        if fci.Preferences().HasGroup("recentModsList"):
+            recent_mods_group = fci.Preferences().GetGroup("recentModsList")
 
             # This group has a maximum of ten entries, sorted by last-accessed date
             for i in range(0, 10):
@@ -485,10 +468,10 @@ class DeveloperMode:
                     recent_mod_paths.append(entry)
 
             # Remove the whole thing, so we can recreate it from scratch
-            self.pref.RemGroup("recentModsList")
+            fci.Preferences().RemGroup("recentModsList")
 
         if recent_mod_paths:
-            recent_mods_group = self.pref.GetGroup("recentModsList")
+            recent_mods_group = fci.Preferences().GetGroup("recentModsList")
             for i, mod in zip(range(10), recent_mod_paths):
                 entry_name = f"Mod{i}"
                 recent_mods_group.SetString(entry_name, mod)
@@ -553,7 +536,7 @@ class DeveloperMode:
 
     def _detect_min_python_clicked(self):
         if not self._ensure_vermin_loaded():
-            FreeCAD.Console.PrintWarning(
+            fci.Console.PrintWarning(
                 translate(
                     "AddonsInstaller",
                     "No Vermin, cancelling operation.",
@@ -562,7 +545,7 @@ class DeveloperMode:
                 + "\n"
             )
             return
-        FreeCAD.Console.PrintMessage(
+        fci.Console.PrintMessage(
             translate("AddonsInstaller", "Scanning Addon for Python version compatibility")
             + "...\n"
         )
@@ -584,19 +567,19 @@ class DeveloperMode:
                                 major = int(py3[0].strip())
                                 minor = int(py3[1].strip())
                                 if major == 3:
-                                    FreeCAD.Console.PrintLog(
+                                    fci.Console.PrintLog(
                                         f"Detected Python 3.{minor} required by {filename}\n"
                                     )
                                     required_minor_version = max(required_minor_version, minor)
         self.dialog.minPythonLineEdit.setText(f"3.{required_minor_version}")
-        QMessageBox.information(
+        QtWidgets.QMessageBox.information(
             self.dialog,
             translate("AddonsInstaller", "Minimum Python Version Detected"),
             translate(
                 "AddonsInstaller",
                 "Vermin auto-detected a required version of Python 3.{}",
             ).format(required_minor_version),
-            QMessageBox.Ok,
+            QtWidgets.QMessageBox.Ok,
         )
 
     def _ensure_vermin_loaded(self) -> bool:
@@ -605,22 +588,22 @@ class DeveloperMode:
             import vermin
         except ImportError:
             # pylint: disable=line-too-long
-            response = QMessageBox.question(
+            response = QtWidgets.QMessageBox.question(
                 self.dialog,
                 translate("AddonsInstaller", "Install Vermin?"),
                 translate(
                     "AddonsInstaller",
                     "Auto-detecting the required version of Python for this Addon requires Vermin (https://pypi.org/project/vermin/). OK to install?",
                 ),
-                QMessageBox.Yes | QMessageBox.Cancel,
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel,
             )
-            if response == QMessageBox.Cancel:
+            if response == QtWidgets.QMessageBox.Cancel:
                 return False
-            FreeCAD.Console.PrintMessage(
+            fci.Console.PrintMessage(
                 translate("AddonsInstaller", "Attempting to install Vermin from PyPi") + "...\n"
             )
             python_exe = get_python_exe()
-            vendor_path = os.path.join(FreeCAD.getUserAppDataDir(), "AdditionalPythonPackages")
+            vendor_path = os.path.join(fci.DataPaths().data_dir, "AdditionalPythonPackages")
             if not os.path.exists(vendor_path):
                 os.makedirs(vendor_path)
 
@@ -638,9 +621,9 @@ class DeveloperMode:
                 capture_output=True,
                 check=True,
             )
-            FreeCAD.Console.PrintMessage(proc.stdout.decode())
+            fci.Console.PrintMessage(proc.stdout.decode())
             if proc.returncode != 0:
-                QMessageBox.critical(
+                QtWidgets.QMessageBox.critical(
                     self.dialog,
                     translate("AddonsInstaller", "Installation failed"),
                     translate(
@@ -648,14 +631,14 @@ class DeveloperMode:
                         "Failed to install Vermin -- check Report View for details.",
                         "'Vermin' is the name of a Python package, do not translate",
                     ),
-                    QMessageBox.Cancel,
+                    QtWidgets.QMessageBox.Cancel,
                 )
                 return False
         try:
             # pylint: disable=import-outside-toplevel
             import vermin
         except ImportError:
-            QMessageBox.critical(
+            QtWidgets.QMessageBox.critical(
                 self.dialog,
                 translate("AddonsInstaller", "Installation failed"),
                 translate(
@@ -663,14 +646,14 @@ class DeveloperMode:
                     "Failed to import vermin after installation -- cannot scan Addon.",
                     "'vermin' is the name of a Python package, do not translate",
                 ),
-                QMessageBox.Cancel,
+                QtWidgets.QMessageBox.Cancel,
             )
             return False
         return True
 
     def _browse_for_icon_clicked(self):
         """Callback: when the "Browse..." button for the icon field is clicked"""
-        new_icon_path, _ = QFileDialog.getOpenFileName(
+        new_icon_path, _ = QtWidgets.QFileDialog.getOpenFileName(
             parent=self.dialog,
             caption=translate(
                 "AddonsInstaller",
@@ -688,7 +671,7 @@ class DeveloperMode:
             base_path += os.path.sep
 
         if not icon_path.startswith(base_path):
-            FreeCAD.Console.PrintError(
+            fci.Console.PrintError(
                 translate("AddonsInstaller", "{} is not a subdirectory of {}").format(
                     new_icon_path, self.current_mod
                 )

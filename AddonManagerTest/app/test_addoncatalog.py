@@ -211,3 +211,16 @@ class TestAddonCatalog(unittest.TestCase):
         with patch("addonmanager_freecad_interface.Version", return_value=cache):
             with patch("AddonCatalog.Addon") as addon_mock:
                 catalog.load_metadata_cache(cache)
+
+    def test_documentation_not_added(self):
+        """Ensure that the documentation objects don't get added to the catalog"""
+        data = {
+            "$schema": "https://raw.githubusercontent.com/FreeCAD/AddonManager/refs/heads/main/AddonCatalog.schema.json",
+            "_meta": {"description": "Meta", "schema_version": "1.0.0"},
+            "AnAddon": [{"git_ref": "main"}],
+        }
+        catalog = AddonCatalog(data)
+        ids = catalog.get_available_addon_ids()
+        self.assertNotIn("_meta", ids)
+        self.assertNotIn("$schema", ids)
+        self.assertIn("AnAddon", ids)

@@ -22,22 +22,9 @@
 # ***************************************************************************
 import re
 
-import FreeCAD
+import addonmanager_freecad_interface as fci
 
-# Get whatever version of PySide we can
-try:
-    import PySide  # Use the FreeCAD wrapper
-except ImportError:
-    try:
-        import PySide6  # Outside FreeCAD, try Qt6 first
-
-        PySide = PySide6
-    except ImportError:
-        import PySide2  # Fall back to Qt5 (if this fails, Python will kill this module's import)
-
-        PySide = PySide2
-
-from PySide import QtCore, QtGui, QtWidgets
+from PySideWrapper import QtCore, QtGui, QtWidgets
 
 from typing import Optional
 
@@ -77,7 +64,7 @@ class WidgetReadmeBrowser(QtWidgets.QTextBrowser):
                 self.setHtml(html)
             except ImportError:
                 self.setText(md)
-                FreeCAD.Console.Warning(
+                fci.Console.Warning(
                     "Qt < 5.15 and no `import markdown` -- falling back to plain text display\n"
                 )
         self.setGeometry(geometry)

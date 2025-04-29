@@ -23,6 +23,8 @@
 
 """Defines a QWidget-derived class for displaying the view selection buttons."""
 
+import os
+
 try:
     import FreeCAD
 
@@ -34,20 +36,7 @@ except ImportError:
         return text
 
 
-# Get whatever version of PySide we can
-try:
-    import PySide  # Use the FreeCAD wrapper
-except ImportError:
-    try:
-        import PySide6  # Outside FreeCAD, try Qt6 first
-
-        PySide = PySide6
-    except ImportError:
-        import PySide2  # Fall back to Qt5 (if this fails, Python will kill this module's import)
-
-        PySide = PySide2
-
-from PySide import QtCore, QtGui, QtWidgets
+from PySideWrapper import QtCore, QtGui, QtWidgets
 
 
 class WidgetSearch(QtWidgets.QWidget):
@@ -81,17 +70,22 @@ class WidgetSearch(QtWidgets.QWidget):
 
         if text_filter:
             test_regex = QtCore.QRegularExpression(text_filter)
+            icon_path = os.path.join(os.path.dirname(__file__), "..", "Resources", "icons")
             if test_regex.isValid():
                 self.filter_validity_label.setToolTip(
                     translate("AddonsInstaller", "Filter is valid")
                 )
-                icon = QtGui.QIcon.fromTheme("ok", QtGui.QIcon(":/icons/edit_OK.svg"))
+                icon = QtGui.QIcon.fromTheme(
+                    "ok", QtGui.QIcon(os.path.join(icon_path, "edit_OK.svg"))
+                )
                 self.filter_validity_label.setPixmap(icon.pixmap(16, 16))
             else:
                 self.filter_validity_label.setToolTip(
                     translate("AddonsInstaller", "Filter regular expression is invalid")
                 )
-                icon = QtGui.QIcon.fromTheme("cancel", QtGui.QIcon(":/icons/edit_Cancel.svg"))
+                icon = QtGui.QIcon.fromTheme(
+                    "ok", QtGui.QIcon(os.path.join(icon_path, "edit_Cancel.svg"))
+                )
                 self.filter_validity_label.setPixmap(icon.pixmap(16, 16))
             self.filter_validity_label.show()
         else:

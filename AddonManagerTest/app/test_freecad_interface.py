@@ -66,6 +66,7 @@ class TestConsole(WrapTestFreeCADImports):
         """Ensure that if FreeCAD exists, the appropriate function is called"""
         sys.modules["FreeCAD"] = unittest.mock.MagicMock()
         sys.modules["FreeCADGui"] = unittest.mock.MagicMock()
+        sys.modules["freecad.utils"] = unittest.mock.MagicMock()
         import addonmanager_freecad_interface as fc
 
         fc.Console.PrintLog("Test output")

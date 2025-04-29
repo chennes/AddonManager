@@ -25,23 +25,12 @@
 
 import os
 
-import FreeCAD
-import FreeCADGui
+import addonmanager_freecad_interface as fci
 
-from PySide import QtCore
-from PySide.QtGui import QIcon
-from PySide.QtWidgets import (
-    QWidget,
-    QCheckBox,
-    QComboBox,
-    QDialog,
-    QHeaderView,
-    QRadioButton,
-    QLineEdit,
-    QTextEdit,
-)
 
-translate = FreeCAD.Qt.translate
+from PySideWrapper import QtCore, QtGui, QtWidgets
+
+translate = fci.translate
 
 # pylint: disable=too-few-public-methods
 
@@ -50,25 +39,23 @@ class AddonManagerOptions:
     """A class containing a form element that is inserted as a FreeCAD preference page."""
 
     def __init__(self, _=None):
-        self.form = FreeCADGui.PySideUic.loadUi(
-            os.path.join(os.path.dirname(__file__), "AddonManagerOptions.ui")
-        )
+        self.form = fci.loadUi(os.path.join(os.path.dirname(__file__), "AddonManagerOptions.ui"))
         self.table_model = CustomRepoDataModel()
         self.form.customRepositoriesTableView.setModel(self.table_model)
-
+        icon_path = os.path.join(os.path.dirname(__file__), "Resources", "icons")
         self.form.addCustomRepositoryButton.setIcon(
-            QIcon.fromTheme("add", QIcon(":/icons/list-add.svg"))
+            QtGui.QIcon.fromTheme("add", QtGui.QIcon(os.path.join(icon_path, "list-add.svg")))
         )
         self.form.removeCustomRepositoryButton.setIcon(
-            QIcon.fromTheme("remove", QIcon(":/icons/list-remove.svg"))
+            QtGui.QIcon.fromTheme("remove", QtGui.QIcon(os.path.join(icon_path, "list-remove.svg")))
         )
 
         self.form.customRepositoriesTableView.horizontalHeader().setStretchLastSection(False)
         self.form.customRepositoriesTableView.horizontalHeader().setSectionResizeMode(
-            0, QHeaderView.Stretch
+            0, QtWidgets.QHeaderView.Stretch
         )
         self.form.customRepositoriesTableView.horizontalHeader().setSectionResizeMode(
-            1, QHeaderView.ResizeToContents
+            1, QtWidgets.QHeaderView.ResizeToContents
         )
 
         self.form.addCustomRepositoryButton.clicked.connect(self._add_custom_repo_clicked)
@@ -84,7 +71,7 @@ class AddonManagerOptions:
 
     def recursive_widget_saver(self, widget):
         """Writes out the data for this widget and all of its children, recursively."""
-        if isinstance(widget, QWidget):
+        if isinstance(widget, QtWidgets.QWidget):
             # See if it's one of ours:
             pref_path = widget.property("prefPath")
             pref_entry = widget.property("prefEntry")
@@ -92,20 +79,20 @@ class AddonManagerOptions:
                 pref_path = pref_path.data()
                 pref_entry = pref_entry.data()
                 pref_access_string = f"User parameter:BaseApp/Preferences/{str(pref_path,'utf-8')}"
-                pref = FreeCAD.ParamGet(pref_access_string)
-                if isinstance(widget, QCheckBox):
+                pref = fci.FreeCAD.ParamGet(pref_access_string)
+                if isinstance(widget, QtWidgets.QCheckBox):
                     checked = widget.isChecked()
                     pref.SetBool(str(pref_entry, "utf-8"), checked)
-                elif isinstance(widget, QRadioButton):
+                elif isinstance(widget, QtWidgets.QRadioButton):
                     checked = widget.isChecked()
                     pref.SetBool(str(pref_entry, "utf-8"), checked)
-                elif isinstance(widget, QComboBox):
+                elif isinstance(widget, QtWidgets.QComboBox):
                     new_index = widget.currentIndex()
                     pref.SetInt(str(pref_entry, "utf-8"), new_index)
-                elif isinstance(widget, QTextEdit):
+                elif isinstance(widget, QtWidgets.QTextEdit):
                     text = widget.toPlainText()
                     pref.SetString(str(pref_entry, "utf-8"), text)
-                elif isinstance(widget, QLineEdit):
+                elif isinstance(widget, QtWidgets.QLineEdit):
                     text = widget.text()
                     pref.SetString(str(pref_entry, "utf-8"), text)
                 elif widget.metaObject().className() == "Gui::PrefFileChooser":
@@ -126,7 +113,7 @@ class AddonManagerOptions:
 
     def recursive_widget_loader(self, widget):
         """Loads the data for this widget and all of its children, recursively."""
-        if isinstance(widget, QWidget):
+        if isinstance(widget, QtWidgets.QWidget):
             # See if it's one of ours:
             pref_path = widget.property("prefPath")
             pref_entry = widget.property("prefEntry")
@@ -134,19 +121,19 @@ class AddonManagerOptions:
                 pref_path = pref_path.data()
                 pref_entry = pref_entry.data()
                 pref_access_string = f"User parameter:BaseApp/Preferences/{str(pref_path,'utf-8')}"
-                pref = FreeCAD.ParamGet(pref_access_string)
-                if isinstance(widget, QCheckBox):
+                pref = fci.FreeCAD.ParamGet(pref_access_string)
+                if isinstance(widget, QtWidgets.QCheckBox):
                     widget.setChecked(pref.GetBool(str(pref_entry, "utf-8")))
-                elif isinstance(widget, QRadioButton):
+                elif isinstance(widget, QtWidgets.QRadioButton):
                     if pref.GetBool(str(pref_entry, "utf-8")):
                         widget.setChecked(True)
-                elif isinstance(widget, QComboBox):
+                elif isinstance(widget, QtWidgets.QComboBox):
                     new_index = pref.GetInt(str(pref_entry, "utf-8"))
                     widget.setCurrentIndex(new_index)
-                elif isinstance(widget, QTextEdit):
+                elif isinstance(widget, QtWidgets.QTextEdit):
                     text = pref.GetString(str(pref_entry, "utf-8"))
                     widget.setText(text)
-                elif isinstance(widget, QLineEdit):
+                elif isinstance(widget, QtWidgets.QLineEdit):
                     text = pref.GetString(str(pref_entry, "utf-8"))
                     widget.setText(text)
                 elif widget.metaObject().className() == "Gui::PrefFileChooser":
@@ -194,7 +181,7 @@ class CustomRepoDataModel(QtCore.QAbstractTableModel):
     def __init__(self):
         super().__init__()
         pref_access_string = "User parameter:BaseApp/Preferences/Addons"
-        self.pref = FreeCAD.ParamGet(pref_access_string)
+        self.pref = fci.FreeCAD.ParamGet(pref_access_string)
         self.load_model()
 
     def load_model(self):
@@ -300,14 +287,14 @@ class CustomRepositoryDialog:
     """A dialog for setting up a custom repository, with branch information"""
 
     def __init__(self):
-        self.dialog = FreeCADGui.PySideUic.loadUi(
+        self.dialog = fci.loadUi(
             os.path.join(os.path.dirname(__file__), "AddonManagerOptions_AddCustomRepository.ui")
         )
 
     def exec(self):
         """Run the dialog modally, and return either None or a tuple or (url,branch)"""
         result = self.dialog.exec()
-        if result == QDialog.Accepted:
+        if result == QtWidgets.QDialog.Accepted:
             url = self.dialog.urlLineEdit.text()
             branch = self.dialog.branchLineEdit.text()
             return (url, branch)

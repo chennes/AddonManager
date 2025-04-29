@@ -23,14 +23,16 @@
 
 from enum import Enum, auto
 
-import FreeCADGui
-from PySide import QtGui
+import addonmanager_freecad_interface as fci
+from PySideWrapper import QtGui
 
 
 def is_darkmode() -> bool:
     """Heuristics to determine if we are in a darkmode stylesheet"""
-    pl = FreeCADGui.getMainWindow().palette()
-    return pl.color(QtGui.QPalette.Window).lightness() < 128
+    if fci.FreeCADGui:
+        pl = fci.FreeCADGui.getMainWindow().palette()
+        return pl.color(QtGui.QPalette.Window).lightness() < 128
+    return False
 
 
 def warning_color_string() -> str:

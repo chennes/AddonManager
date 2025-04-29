@@ -24,32 +24,11 @@
 """Defines a QWidget-derived class for displaying the view selection buttons."""
 
 from enum import IntEnum
+import os
+import addonmanager_freecad_interface as fci
+from PySideWrapper import QtCore, QtGui, QtWidgets
 
-try:
-    import FreeCAD
-
-    translate = FreeCAD.Qt.translate
-except ImportError:
-    FreeCAD = None
-
-    def translate(context: str, text: str):
-        return text
-
-
-# Get whatever version of PySide we can
-try:
-    import PySide  # Use the FreeCAD wrapper
-except ImportError:
-    try:
-        import PySide6  # Outside FreeCAD, try Qt6 first
-
-        PySide = PySide6
-    except ImportError:
-        import PySide2  # Fall back to Qt5 (if this fails, Python will kill this module's import)
-
-        PySide = PySide2
-
-from PySide import QtCore, QtGui, QtWidgets
+translate = fci.translate
 
 
 class AddonManagerDisplayStyle(IntEnum):
@@ -87,17 +66,17 @@ class WidgetViewSelector(QtWidgets.QWidget):
         elif view == AddonManagerDisplayStyle.COMPOSITE:
             self.composite_button.setChecked(True)
         else:
-            if FreeCAD is not None:
-                FreeCAD.Console.PrintWarning(f"Unrecognized display style {view}")
+            fci.Console.PrintWarning(f"Unrecognized display style {view}")
 
     def _setup_ui(self):
+        icon_path = os.path.join(os.path.dirname(__file__), "..", "Resources", "icons")
         self.horizontal_layout = QtWidgets.QHBoxLayout()
         self.horizontal_layout.setContentsMargins(0, 0, 0, 0)
         self.horizontal_layout.setSpacing(2)
         self.compact_button = QtWidgets.QToolButton(self)
         self.compact_button.setObjectName("compact_button")
         self.compact_button.setIcon(
-            QtGui.QIcon.fromTheme("back", QtGui.QIcon(":/icons/compact_view.svg"))
+            QtGui.QIcon.fromTheme("back", QtGui.QIcon(os.path.join(icon_path, "compact_view.svg")))
         )
         self.compact_button.setCheckable(True)
         self.compact_button.setAutoExclusive(True)
@@ -108,7 +87,9 @@ class WidgetViewSelector(QtWidgets.QWidget):
         self.expanded_button.setChecked(True)
         self.expanded_button.setAutoExclusive(True)
         self.expanded_button.setIcon(
-            QtGui.QIcon.fromTheme("expanded_view", QtGui.QIcon(":/icons/expanded_view.svg"))
+            QtGui.QIcon.fromTheme(
+                "expanded_view", QtGui.QIcon(os.path.join(icon_path, "expanded_view.svg"))
+            )
         )
 
         self.composite_button = QtWidgets.QToolButton(self)
@@ -125,7 +106,9 @@ class WidgetViewSelector(QtWidgets.QWidget):
             self.composite_button.setChecked(True)
         self.composite_button.setAutoExclusive(True)
         self.composite_button.setIcon(
-            QtGui.QIcon.fromTheme("composite_button", QtGui.QIcon(":/icons/composite_view.svg"))
+            QtGui.QIcon.fromTheme(
+                "composite_button", QtGui.QIcon(os.path.join(icon_path, "composite_view.svg"))
+            )
         )
         self.horizontal_layout.addWidget(self.compact_button)
         self.horizontal_layout.addWidget(self.expanded_button)

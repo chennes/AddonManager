@@ -13,21 +13,26 @@
 		<workbench>
 			<classname>MyFirstWorkbench</classname>
 			<icon>Resources/icons/PackageIcon.svg</icon>
-			<depend>BIM</depend>
 			<depend>Assembly</depend>
+			<depend>BIM</depend>
+			<depend>CAM</depend>
 			<depend>DraftWB</depend>
 			<depend>FEM WB</depend>
+			<depend>Import</depend>
+			<depend>Material</depend>
 			<depend>MeshWorkbench</depend>
 			<depend>OpenSCAD Workbench</depend>
 			<depend>Part WORKBENCH</depend>
 			<depend>PartDesign WB</depend>
-			<depend>CAM</depend>
 			<depend>Plot</depend>
 			<depend>POINTS</depend>
+			<depend>ReverseEngineering</depend>
 			<depend>ROBOTWB</depend>
 			<depend>Sketcher workbench</depend>
 			<depend>Spreadsheet</depend>
 			<depend>TechDraw</depend>
+			<depend>Tux</depend>
+			<depend>Web</depend>
 		</workbench>
 	</content>
 
