@@ -56,6 +56,7 @@ def run_addon_manager():
 
     QtCore.QThread.currentThread().setObjectName("Main GUI thread")
     command = AddonManager.CommandAddonManager()
+    command.finished.connect(sys.exit)
     command.Activated()
 
 
@@ -64,4 +65,3 @@ if __name__ == "__main__":
     app.setQuitOnLastWindowClosed(False)
     setup_translations()
     app.exec()
-    sys.exit()
