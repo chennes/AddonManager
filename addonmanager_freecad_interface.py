@@ -32,13 +32,46 @@ from addonmanager_freecad_interface import Console, DataPaths, Preferences
 import json
 import logging
 import os
+import platform
+import shutil
 import tempfile
 
 # pylint: disable=too-few-public-methods
 
 try:
     import FreeCAD
-    from freecad.utils import get_python_exe
+
+    try:
+        from freecad.utils import get_python_exe
+    except ImportError:
+        # This was only added in FreeCAD 1.0 -- to support FreeCAD 0.21 a backup strategy must be
+        # used. This code is borrowed from FreeCAD 1.1dev.
+        def get_python_exe():
+            prefs = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/PythonConsole")
+            python_exe = prefs.GetString("ExternalPythonExecutable", "Not set")
+            fc_dir = FreeCAD.getHomePath()
+            if not python_exe or python_exe == "Not set" or not os.path.exists(python_exe):
+                python_exe = os.path.join(fc_dir, "bin", "python3")
+                if "Windows" in platform.system():
+                    python_exe += ".exe"
+
+            if not python_exe or not os.path.exists(python_exe):
+                python_exe = os.path.join(fc_dir, "bin", "python")
+                if "Windows" in platform.system():
+                    python_exe += ".exe"
+
+            if not python_exe or not os.path.exists(python_exe):
+                python_exe = shutil.which("python3")
+
+            if not python_exe or not os.path.exists(python_exe):
+                python_exe = shutil.which("python")
+
+            if not python_exe or not os.path.exists(python_exe):
+                return ""
+
+            python_exe = python_exe.replace("/", os.path.sep)
+            prefs.SetString("ExternalPythonExecutable", python_exe)
+            return python_exe
 
     if not hasattr(FreeCAD, "Console"):
         raise ImportError("Unrecognized FreeCAD version")
@@ -104,6 +137,9 @@ except ImportError:
 
     def Version():
         return 1, 1, 0, "dev"
+
+    def get_python_exe():
+        return shutil.which("python3")
 
     class ConsoleReplacement:
         """If FreeCAD's Console is not available, create a replacement by redirecting FreeCAD

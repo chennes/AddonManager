@@ -49,14 +49,6 @@ except ImportError:
 
 import addonmanager_freecad_interface as fci
 
-try:
-    from freecad.utils import get_python_exe
-except ImportError:
-
-    def get_python_exe():
-        """Use shutil.which to find python executable"""
-        return shutil.which("python")
-
 
 if fci.FreeCADGui:
 
@@ -597,7 +589,7 @@ def create_pip_call(args: List[str]) -> List[str]:
         call_args = [python_exe, "-m", "pip", "--disable-pip-version-check"]
         call_args.extend(args)
     else:
-        python_exe = get_python_exe()
+        python_exe = fci.get_python_exe()
         if not python_exe:
             raise RuntimeError("Could not locate Python executable on this system")
         call_args = [python_exe, "-m", "pip", "--disable-pip-version-check"]

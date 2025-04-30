@@ -51,9 +51,6 @@
             <property name="scaledContents">
               <bool>false</bool>
             </property>
-            <property name="pixmap">
-              <pixmap resource="../AddonManager.qrc">:/icons/AddonMgrWithWarning.svg</pixmap>
-            </property>
           </widget>
         </item>
         <item>
