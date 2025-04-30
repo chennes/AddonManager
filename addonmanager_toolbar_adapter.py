@@ -87,7 +87,6 @@ class ToolbarAdapter:
 
     @staticmethod
     def create_custom_command(
-        cls,
         toolbar,
         filename,
         menu_text,
@@ -132,6 +131,6 @@ class ToolbarAdapter:
         return self.params.GetGroups()
 
     @staticmethod
-    def find_custom_command(cls, filename):
+    def find_custom_command(filename):
         """Wrap calls to FreeCADGui.Command.findCustomCommand so it can be faked in testing."""
         return fci.FreeCADGui.Command.findCustomCommand(filename)
