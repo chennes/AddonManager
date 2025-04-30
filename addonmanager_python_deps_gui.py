@@ -64,14 +64,6 @@ except ImportError:
         return loader.load(ui_file)
 
 
-try:
-    from freecad.utils import get_python_exe
-except ImportError:
-
-    def get_python_exe():
-        return shutil.which("python")
-
-
 import addonmanager_utilities as utils
 
 translate = fci.translate
