@@ -1,5 +1,4 @@
 IF (BUILD_GUI)
-    PYSIDE_WRAP_RC(AddonManager_QRC_SRCS Resources/AddonManager.qrc)
     add_subdirectory(Widgets)
 ENDIF (BUILD_GUI)
 
@@ -82,6 +81,89 @@ ENDIF (BUILD_GUI)
 
 SOURCE_GROUP("" FILES ${AddonManager_SRCS})
 
+SET(AddonManagerResourceFilesIcons
+    Resources/icons/addon_manager.svg
+    Resources/icons/addon_manager_with_warning.svg
+    Resources/icons/button_left.svg
+    Resources/icons/button_valid.svg
+    Resources/icons/compact_view.svg
+    Resources/icons/composite_view.svg
+    Resources/icons/debug-stop.svg
+    Resources/icons/document-package.svg
+    Resources/icons/document-python.svg
+    Resources/icons/expanded_view.svg
+    Resources/icons/process-stop.svg
+    Resources/icons/sort_ascending.svg
+    Resources/icons/sort_descending.svg
+    Resources/icons/view-refresh.svg
+)
+
+SET(AddonManagerResourceFilesTranslations
+    Resources/translations/AddonManager_af.qm
+    Resources/translations/AddonManager_ar.qm
+    Resources/translations/AddonManager_be.qm
+    Resources/translations/AddonManager_bg.qm
+    Resources/translations/AddonManager_ca.qm
+    Resources/translations/AddonManager_cs.qm
+    Resources/translations/AddonManager_da.qm
+    Resources/translations/AddonManager_de.qm
+    Resources/translations/AddonManager_el.qm
+    Resources/translations/AddonManager_es-AR.qm
+    Resources/translations/AddonManager_es-ES.qm
+    Resources/translations/AddonManager_eu.qm
+    Resources/translations/AddonManager_fi.qm
+    Resources/translations/AddonManager_fil.qm
+    Resources/translations/AddonManager_fr.qm
+    Resources/translations/AddonManager_gl.qm
+    Resources/translations/AddonManager_hr.qm
+    Resources/translations/AddonManager_hu.qm
+    Resources/translations/AddonManager_id.qm
+    Resources/translations/AddonManager_it.qm
+    Resources/translations/AddonManager_ja.qm
+    Resources/translations/AddonManager_ka.qm
+    Resources/translations/AddonManager_kab.qm
+    Resources/translations/AddonManager_ko.qm
+    Resources/translations/AddonManager_lt.qm
+    Resources/translations/AddonManager_nl.qm
+    Resources/translations/AddonManager_no.qm
+    Resources/translations/AddonManager_pl.qm
+    Resources/translations/AddonManager_pt-BR.qm
+    Resources/translations/AddonManager_pt-PT.qm
+    Resources/translations/AddonManager_ro.qm
+    Resources/translations/AddonManager_ru.qm
+    Resources/translations/AddonManager_sk.qm
+    Resources/translations/AddonManager_sl.qm
+    Resources/translations/AddonManager_sr-CS.qm
+    Resources/translations/AddonManager_sr.qm
+    Resources/translations/AddonManager_sv-SE.qm
+    Resources/translations/AddonManager_tr.qm
+    Resources/translations/AddonManager_uk.qm
+    Resources/translations/AddonManager_val-ES.qm
+    Resources/translations/AddonManager_vi.qm
+    Resources/translations/AddonManager_zh-CN.qm
+    Resources/translations/AddonManager_zh-TW.qm
+)
+
+LIST(APPEND AddonManager_SRCS
+    ${AddonManagerResourceFilesIcons}
+    ${AddonManagerResourceFilesLicenses}
+    ${AddonManagerResourceFilesTranslations}
+)
+
+SET(AddonManagerResourceFilesLicenses
+    Resources/licenses/Apache-2.0.txt
+    Resources/licenses/BSD-2-Clause.txt
+    Resources/licenses/BSD-3-Clause.txt
+    Resources/licenses/CC0-1.0.txt
+    Resources/licenses/GPL-2.0-or-later.txt
+    Resources/licenses/GPL-3.0-or-later.txt
+    Resources/licenses/LGPL-2.1-or-later.txt
+    Resources/licenses/LGPL-3.0-or-later.txt
+    Resources/licenses/MIT.txt
+    Resources/licenses/MPL-2.0.txt
+    Resources/licenses/spdx.json
+)
+
 SET(AddonManagerTests_SRCS
     AddonManagerTest/__init__.py
     AddonManagerTest/test_information.md
@@ -157,7 +239,7 @@ IF (BUILD_GUI)
 ENDIF (BUILD_GUI)
 
 ADD_CUSTOM_TARGET(AddonManager ALL
-    SOURCES ${AddonManager_SRCS} ${AddonManager_QRC_SRCS}
+    SOURCES ${AddonManager_SRCS}
 )
 
 ADD_CUSTOM_TARGET(AddonManagerTests ALL
@@ -165,24 +247,9 @@ ADD_CUSTOM_TARGET(AddonManagerTests ALL
 )
 
 fc_copy_sources(AddonManager "${CMAKE_BINARY_DIR}/Mod/AddonManager" ${AddonManager_SRCS})
-
 fc_copy_sources(AddonManagerTests "${CMAKE_BINARY_DIR}/Mod/AddonManager" ${AddonManagerTests_ALL})
 
-IF (BUILD_GUI)
-    fc_target_copy_resource(AddonManager
-        ${CMAKE_CURRENT_BINARY_DIR}
-        ${CMAKE_BINARY_DIR}/Mod/AddonManager
-        AddonManager_rc.py)
-ENDIF (BUILD_GUI)
-
-INSTALL(
-    FILES
-        ${AddonManager_SRCS}
-        ${AddonManager_QRC_SRCS}
-    DESTINATION
-        Mod/AddonManager
-)
-
+INSTALL(FILES ${AddonManager_SRCS} DESTINATION Mod/AddonManager)
 INSTALL(FILES ${AddonManagerTests_SRCS} DESTINATION Mod/AddonManager/AddonManagerTest)
 INSTALL(FILES ${AddonManagerTestsApp_SRCS} DESTINATION Mod/AddonManager/AddonManagerTest/app)
 INSTALL(FILES ${AddonManagerTestsGui_SRCS} DESTINATION Mod/AddonManager/AddonManagerTest/gui)
