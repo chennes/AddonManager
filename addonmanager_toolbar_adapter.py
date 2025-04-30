@@ -25,7 +25,7 @@ class ToolbarAdapter:
     def __init__(self):
         if self.params is None:
             self.params = fci.ParamGet("User parameter:BaseApp/Workbench/Global/Toolbar")
-        if isinstance(self.params, fci.ParametersReplacement):
+        if fci.FreeCAD is not None:
             raise RuntimeError("ToolbarAdapter can only be used when run from within FreeCAD")
 
     def get_toolbars(self):
