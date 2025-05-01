@@ -36,7 +36,6 @@ from addonmanager_devmode_validators import NameValidator, VersionValidator
 from addonmanager_devmode_predictor import Predictor
 from addonmanager_devmode_people_table import PeopleTable
 from addonmanager_devmode_licenses_table import LicensesTable
-from addonmanager_utilities import get_python_exe
 
 from addonmanager_metadata import Metadata, MetadataReader
 
@@ -602,7 +601,7 @@ class DeveloperMode:
             fci.Console.PrintMessage(
                 translate("AddonsInstaller", "Attempting to install Vermin from PyPi") + "...\n"
             )
-            python_exe = get_python_exe()
+            python_exe = fci.get_python_exe()
             vendor_path = os.path.join(fci.DataPaths().data_dir, "AdditionalPythonPackages")
             if not os.path.exists(vendor_path):
                 os.makedirs(vendor_path)

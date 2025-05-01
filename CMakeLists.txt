@@ -144,12 +144,6 @@ SET(AddonManagerResourceFilesTranslations
     Resources/translations/AddonManager_zh-TW.qm
 )
 
-LIST(APPEND AddonManager_SRCS
-    ${AddonManagerResourceFilesIcons}
-    ${AddonManagerResourceFilesLicenses}
-    ${AddonManagerResourceFilesTranslations}
-)
-
 SET(AddonManagerResourceFilesLicenses
     Resources/licenses/Apache-2.0.txt
     Resources/licenses/BSD-2-Clause.txt
@@ -162,6 +156,12 @@ SET(AddonManagerResourceFilesLicenses
     Resources/licenses/MIT.txt
     Resources/licenses/MPL-2.0.txt
     Resources/licenses/spdx.json
+)
+
+LIST(APPEND AddonManager_SRCS
+    ${AddonManagerResourceFilesIcons}
+    ${AddonManagerResourceFilesLicenses}
+    ${AddonManagerResourceFilesTranslations}
 )
 
 SET(AddonManagerTests_SRCS

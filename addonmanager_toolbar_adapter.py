@@ -23,10 +23,10 @@ class ToolbarAdapter:
     params = None
 
     def __init__(self):
-        if self.params is None:
-            self.params = fci.ParamGet("User parameter:BaseApp/Workbench/Global/Toolbar")
-        if fci.FreeCAD is not None:
+        if fci.FreeCAD is None:
             raise RuntimeError("ToolbarAdapter can only be used when run from within FreeCAD")
+        if self.params is None:
+            self.params = fci.FreeCAD.ParamGet("User parameter:BaseApp/Workbench/Global/Toolbar")
 
     def get_toolbars(self):
         """Get a list of toolbars: the result is a set of parameter groups, each representing a toolbar."""
@@ -45,7 +45,7 @@ class ToolbarAdapter:
         # unique.
 
         # First, the displayed name
-        custom_toolbar_name = QT_TRANSLATE_NOOP("Workbench", "Auto-Created Macro Toolbar")
+        custom_toolbar_name = str(QT_TRANSLATE_NOOP("Workbench", "Auto-Created Macro Toolbar"))
         custom_toolbars = self.params.GetGroups()
         name_taken = self.check_for_toolbar(custom_toolbar_name)
         if name_taken:
@@ -87,7 +87,6 @@ class ToolbarAdapter:
 
     @staticmethod
     def create_custom_command(
-        cls,
         toolbar,
         filename,
         menu_text,
@@ -132,6 +131,6 @@ class ToolbarAdapter:
         return self.params.GetGroups()
 
     @staticmethod
-    def find_custom_command(cls, filename):
+    def find_custom_command(filename):
         """Wrap calls to FreeCADGui.Command.findCustomCommand so it can be faked in testing."""
         return fci.FreeCADGui.Command.findCustomCommand(filename)
