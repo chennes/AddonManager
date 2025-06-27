@@ -27,6 +27,7 @@ sources and compatible versions. Added in FreeCAD 1.1 to replace .gitmodules."""
 import base64
 import os
 import tempfile
+import xml.etree.ElementTree
 from dataclasses import dataclass
 import json
 from hashlib import sha256
@@ -206,13 +207,29 @@ class AddonCatalog:
             if not entry.is_compatible():
                 continue
             if not branch_display_name or entry.branch_display_name == branch_display_name:
+                addondir = os.path.join(fci.DataPaths().mod_dir, addon_id)
+                last_modified = None
+                if os.path.exists(addondir) and os.listdir(addondir):
+                    # make sure the folder exists and it contains files!
+                    state = Addon.Status.UNCHECKED
+                    if os.path.exists(os.path.join(addondir, "package.xml")):
+                        last_modified = os.path.getmtime(os.path.join(addondir, "package.xml"))
+                else:
+                    state = Addon.Status.NOT_INSTALLED
                 url = entry.repository if entry.repository else entry.zip_url
                 if entry.git_ref:
-                    addon = Addon(addon_id, url, branch=entry.git_ref)
+                    addon = Addon(addon_id, url, state, branch=entry.git_ref)
                 else:
-                    addon = Addon(addon_id, url)
+                    addon = Addon(addon_id, url, state)
                 if entry.metadata:
-                    self._load_addon_metadata(addon, entry.metadata)
+                    try:
+                        self._load_addon_metadata(addon, entry.metadata)
+                    except xml.etree.ElementTree.ParseError:
+                        fci.Console.PrintWarning(
+                            "An invalid or corrupted package.xml file was installed for"
+                        )
+                if last_modified:
+                    addon.updated_timestamp = last_modified
                 return addon
         raise ValueError(
             f"Addon '{addon_id}' has no compatible branches named '{branch_display_name}'"
