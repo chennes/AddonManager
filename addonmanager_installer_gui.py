@@ -83,7 +83,7 @@ class AddonInstallerGUI(QtCore.QObject):
         self.installer.success.connect(self._installation_succeeded)
         self.installer.failure.connect(self._installation_failed)
 
-    def __del__(self):
+    def shutdown(self):
         try:
             self._stop_thread(self.worker_thread)
             self._stop_thread(self.dependency_worker_thread)

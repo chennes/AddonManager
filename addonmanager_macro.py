@@ -23,7 +23,7 @@
 # ***************************************************************************
 
 """Unified handler for FreeCAD macros that can be obtained from different sources."""
-
+import base64
 import os
 import re
 import io
@@ -31,7 +31,6 @@ import codecs
 import shutil
 from html import unescape
 from typing import Dict, Tuple, List, Union, Optional
-import urllib.parse
 
 from addonmanager_macro_parser import MacroParser
 import addonmanager_utilities as utils
@@ -72,10 +71,12 @@ class Macro:
         self.src_filename = ""
         self.filename_from_url = ""
         self.author = ""
-        self.icon = ""
-        self.icon_source = None
+        self.icon = ""  # This is the raw data as set in the macro's code: it is typically a URL
+        self.icon_source_url = ""
+        self.icon_data = None
         self.xpm = ""  # Possible alternate icon data
         self.other_files = []
+        self.other_files_data = {}  # Base64-encoded data loaded from "other files"
         self.parsed = False
         self._console = fci.Console
         if Macro.blocking_get is None:
@@ -90,14 +91,19 @@ class Macro:
         reference to it."""
         instance = Macro(cache_dict["name"])
         for key, value in cache_dict.items():
+            if key == "icon_data" and value is not None:
+                value = base64.b64decode(value)
             instance.__dict__[key] = value
         return instance
 
     def to_cache(self) -> Dict:
-        """For cache purposes all public members of the class are returned"""
+        """For cache purposes all public members of the class are returned. The binary icon data is
+        base64-encoded."""
         cache_dict = {}
         for key, value in self.__dict__.items():
-            if key[0] != "_":
+            if key == "icon_data" and value is not None:
+                cache_dict[key] = base64.b64encode(value).decode("utf-8")
+            elif key[0] != "_":
                 cache_dict[key] = value
         return cache_dict
 
@@ -127,6 +133,9 @@ class Macro:
         with open(filename, errors="replace", encoding="utf-8") as f:
             self.code = f.read()
             self.fill_details_from_code(self.code)
+        if self.other_files:
+            if self.on_git:
+                self.load_other_files(os.path.dirname(filename) or ".")
 
     def fill_details_from_code(self, code: str) -> None:
         """Read the passed-in code and parse it for known metadata elements"""
@@ -134,7 +143,6 @@ class Macro:
         for key, value in parser.parse_results.items():
             if value:
                 self.__dict__[key] = value
-        self.clean_icon()
         self.parsed = True
 
     def fill_details_from_wiki(self, url):
@@ -189,9 +197,8 @@ class Macro:
             code = "".join(code)
         self.code = code
         self.fill_details_from_code(self.code)
-        if not self.icon and not self.xpm:
+        if not self.icon and not self.xpm and not self.icon_data:
             self.parse_wiki_page_for_icon(p)
-        self.clean_icon()
 
         if not self.author:
             self.author = self.parse_desc("Author: ")
@@ -235,38 +242,6 @@ class Macro:
             code = code.replace(b"\xc2\xa0".decode("utf-8"), " ")
         return code
 
-    def clean_icon(self):
-        """Downloads the macro's icon from whatever source is specified and stores a local
-        copy, potentially updating the internal icon location to that local storage."""
-        if self.icon.startswith("http://") or self.icon.startswith("https://"):
-            self._console.PrintLog(f"Attempting to fetch macro icon from {self.icon}\n")
-            parsed_url = urllib.parse.urlparse(self.icon)
-            p = Macro.blocking_get(self.icon)
-            if p:
-                cache_path = fci.DataPaths().cache_dir
-                am_path = os.path.join(cache_path, "AddonManager", "MacroIcons")
-                os.makedirs(am_path, exist_ok=True)
-                _, _, filename = parsed_url.path.rpartition("/")
-                base, _, extension = filename.rpartition(".")
-                if base.lower().startswith("file:"):
-                    self._console.PrintMessage(
-                        f"Cannot use specified icon for {self.name}, {self.icon} "
-                        "is not a direct download link\n"
-                    )
-                    self.icon = ""
-                else:
-                    constructed_name = os.path.join(am_path, base + "." + extension)
-                    with open(constructed_name, "wb") as f:
-                        f.write(p)
-                    self.icon_source = self.icon
-                    self.icon = constructed_name
-            else:
-                self._console.PrintLog(
-                    f"MACRO DEVELOPER WARNING: failed to download icon from {self.icon}"
-                    f" for macro {self.name}\n"
-                )
-                self.icon = ""
-
     def parse_desc(self, line_start: str) -> Union[str, None]:
         """Get data from the wiki for the value specified by line_start."""
         components = self.desc.split(">")
@@ -275,6 +250,27 @@ class Macro:
                 end = component.find("<")
                 return component[len(line_start) : end]
         return None
+
+    def load_other_files(self, base_directory: str):
+        """Loop over the list of "other files" and load them into our data store"""
+        for other_file in self.other_files:
+            if not other_file:
+                continue
+            if other_file == self.icon:
+                self.other_files_data[other_file] = "ICON"  # Don't waste space storing it twice
+                continue
+            if other_file.startswith("/"):
+                # Some macros had a leading slash even though they can't use an absolute path. Strip
+                # it off.
+                other_file = other_file[1:]
+            src_file = os.path.normpath(os.path.join(base_directory, other_file))
+            if not os.path.isfile(src_file):
+                self._console.PrintWarning(f"Could not load {other_file} for macro {self.name}\n")
+                continue
+            with open(src_file, "rb") as f:
+                self.other_files_data[other_file.replace(os.pathsep, "/")] = base64.b64encode(
+                    f.read()
+                ).decode("utf-8")
 
     def install(self, macro_dir: str) -> Tuple[bool, List[str]]:
         """Install a macro and all its related files
@@ -317,43 +313,25 @@ class Macro:
             xpm_file = os.path.join(base_dir, self.name + "_icon.xpm")
             with open(xpm_file, "w", encoding="utf-8") as f:
                 f.write(self.xpm)
-        if self.icon:
-            if os.path.isabs(self.icon):
-                dst_file = os.path.normpath(os.path.join(macro_dir, os.path.basename(self.icon)))
-                try:
-                    shutil.copy(self.icon, dst_file)
-                except OSError:
-                    warnings.append(f"Failed to copy icon to {dst_file}")
-            elif self.icon not in self.other_files:
-                self.other_files.append(self.icon)
+        if self.icon and self.icon_data:
+            filename = self.icon.rsplit("/", 1)[-1]
+            with open(os.path.join(macro_dir, filename), "wb") as f:
+                f.write(base64.b64decode(self.icon_data))
 
     def _copy_other_files(self, macro_dir, warnings) -> bool:
         """Copy any specified "other files" into the installation directory"""
         base_dir = os.path.dirname(self.src_filename)
-        for other_file in self.other_files:
-            if not other_file:
+        for filename, data in self.other_files_data.items():
+            if not filename or not data or data == "ICON":
                 continue
-            if os.path.isabs(other_file):
-                dst_dir = macro_dir
-            else:
-                dst_dir = os.path.join(macro_dir, os.path.dirname(other_file))
-            if not os.path.isdir(dst_dir):
-                try:
-                    os.makedirs(dst_dir)
-                except OSError:
-                    warnings.append(f"Failed to create {dst_dir}")
-                    return False
-            if os.path.isabs(other_file):
-                src_file = other_file
-                dst_file = os.path.normpath(os.path.join(macro_dir, os.path.basename(other_file)))
-            else:
-                src_file = os.path.normpath(os.path.join(base_dir, other_file))
-                dst_file = os.path.normpath(os.path.join(macro_dir, other_file))
-            self._fetch_single_file(other_file, src_file, dst_file, warnings)
+            filename = filename.replace("/", os.path.sep)
+            full_path = os.path.join(macro_dir, filename)
             try:
-                shutil.copy(src_file, dst_file)
-            except OSError:
-                warnings.append(f"Failed to copy {src_file} to {dst_file}")
+                os.makedirs(os.path.dirname(full_path), exist_ok=True)
+                with open(full_path, "wb") as f:
+                    f.write(base64.b64decode(data))
+            except (OSError, UnicodeDecodeError) as e:
+                warnings.append(f"Failed to create {filename}")
         return True  # No fatal errors, but some files may have failed to copy
 
     def _fetch_single_file(self, other_file, src_file, dst_file, warnings):

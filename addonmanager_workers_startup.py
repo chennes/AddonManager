@@ -88,16 +88,16 @@ class CreateAddonListWorker(QtCore.QThread):
         self.current_thread = QtCore.QThread.currentThread()
         try:
             self._get_custom_addons()
-            if CreateAddonListWorker.new_catalog_available():
-                self.get_remote_addon_catalog()
-                self.progress_made.emit("Remote catalog fetched", 50, 100)
-            else:
-                self.get_local_addon_catalog()
-                self.progress_made.emit("Local catalog loaded", 10, 100)
-            self._retrieve_macros_from_git()
-            self.progress_made.emit("git macros fetched", 75, 100)
-            self._retrieve_macros_from_wiki()
-            self.progress_made.emit("Wiki macros fetched", 100, 100)
+            self.progress_made.emit("Custom addons loaded", 5, 100)
+
+            addon_cache = self.get_cache("addon_catalog")
+            self.process_addon_cache(addon_cache)
+            self.progress_made.emit("Addon catalog loaded", 20, 100)
+
+            macro_cache = self.get_cache("macro")
+            self.process_macro_cache(macro_cache)
+            self.progress_made.emit("Macros loaded", 100, 100)
+
         except ConnectionError as e:
             fci.Console.PrintError("Failed to connect to FreeCAD addon remote resource:\n")
             fci.Console.PrintError(str(e) + "\n")
@@ -154,50 +154,76 @@ class CreateAddonListWorker(QtCore.QThread):
 
                 self.addon_repo.emit(repo)
 
-    def get_remote_addon_catalog(self):
-        url = fci.Preferences().get("AddonCatalogURL")
+    def get_cache(self, cache_name: str) -> str:
+        cache_file_name = cache_name + "_cache.json"
+        full_path = os.path.join(fci.DataPaths().cache_dir, "AddonManager", cache_file_name)
+        have_local_cache = os.path.isfile(full_path)
+        remote_update_available = CreateAddonListWorker.new_cache_available(cache_name)
+        if remote_update_available or not have_local_cache:
+            try:
+                return self.get_remote_cache(cache_name)
+            except (RuntimeError, FileNotFoundError, ConnectionError) as e:
+                if have_local_cache:
+                    fci.Console.PrintWarning(
+                        f"Failed to load remote cache, using local cache instead: {full_path}"
+                    )
+                    return self.get_local_cache(full_path)
+                else:
+                    fci.Console.PrintError(f"Failed to load remote cache: {str(e)}\n")
+                    return ""
+        else:
+            return self.get_local_cache(full_path)
+
+    @staticmethod
+    def get_remote_cache(cache_name: str) -> str:
+        url = fci.Preferences().get(f"{cache_name}_cache_url")
         p = NetworkManager.AM_NETWORK_MANAGER.blocking_get(url, 30000)
         if not p:
-            fci.Console.PrintError(
-                f"The Addon Manager failed to fetch the addon catalog from {url}. Using cached copy (if available).\n"
-            )
-            self.get_local_addon_catalog()
-            return
+            raise RuntimeError(f"The Addon Manager failed to fetch {url}.\n")
 
         zip_data = p.data()
         sha256 = hashlib.sha256(zip_data).hexdigest()
-        fci.Preferences().set("LastFetchedAddonCatalogHash", sha256)
+        fci.Preferences().set(f"last_fetched_{cache_name}_cache_hash", sha256)
 
         with zipfile.ZipFile(io.BytesIO(zip_data)) as zip_file:
-            if "cache.json" in zip_file.namelist():
-                with zip_file.open("cache.json") as target_file:
-                    catalog_text_data = target_file.read()
-                cached_catalog_file = os.path.join(
-                    fci.DataPaths().cache_dir, "AddonManager", "addon_catalog_cache.json"
+            if f"{cache_name}_cache.json" in zip_file.namelist():
+                with zip_file.open(f"{cache_name}_cache.json") as target_file:
+                    cache_text_data = target_file.read()
+                cached_file = os.path.join(
+                    fci.DataPaths().cache_dir, "AddonManager", f"{cache_name}_cache.json"
                 )
-                os.makedirs(os.path.dirname(cached_catalog_file), exist_ok=True)
-                with open(cached_catalog_file, "wb") as f:
-                    f.write(catalog_text_data)
+                os.makedirs(os.path.dirname(cached_file), exist_ok=True)
+                with open(cached_file, "wb") as f:
+                    f.write(cache_text_data)
             else:
                 raise FileNotFoundError(f"cache.json not found in ZIP")
-        self.process_addon_catalog(catalog_text_data.decode("utf-8"))
+        return cache_text_data.decode("utf-8")
 
-    def get_local_addon_catalog(self):
-        cached_catalog_file = os.path.join(
-            fci.DataPaths().cache_dir, "AddonManager", "addon_catalog_cache.json"
-        )
+    @staticmethod
+    def get_local_cache(cache_file: str) -> str:
         try:
-            with open(cached_catalog_file, encoding="utf-8") as f:
-                catalog_text_data = f.read()
+            with open(cache_file, encoding="utf-8") as f:
+                return f.read()
         except RuntimeError as e:
             fci.Console.PrintError(
-                f"The Addon Manager failed to load the cached addon catalog from {cached_catalog_file}.\n"
+                f"The Addon Manager failed to load the cached addon catalog from {cache_file}.\n"
             )
             fci.Console.PrintError(str(e) + "\n")
-            return
-        self.process_addon_catalog(catalog_text_data)
+            return ""
 
-    def process_addon_catalog(self, catalog_text_data):
+    @staticmethod
+    def new_cache_available(cache_name: str) -> bool:
+        """Downloads and checks the hash of the remote catalog and compares it to our last-fetched hash"""
+        hash_url = fci.Preferences().get(f"{cache_name}_cache_url") + ".sha256"
+        p = NetworkManager.AM_NETWORK_MANAGER.blocking_get(hash_url, 5000)
+        if not p:
+            raise RuntimeError(f"Failed to fetch the hash from {hash_url}\n")
+        sha256 = p.data().decode("utf8")
+        if sha256 != fci.Preferences().get(f"last_fetched_{cache_name}_cache_hash"):
+            return True
+        return False
+
+    def process_addon_cache(self, catalog_text_data):
         catalog = AddonCatalog(json.loads(catalog_text_data))
         for addon_id in catalog.get_available_addon_ids():
             if addon_id in self.package_names:
@@ -227,185 +253,12 @@ class CreateAddonListWorker(QtCore.QThread):
                 )
                 fci.Console.PrintError(str(e) + "\n")
 
-    @staticmethod
-    def new_catalog_available() -> bool:
-        """Downloads and checks the hash of the remote catalog and compares it to our last-fetched hash"""
-        hash_url = fci.Preferences().get("AddonCatalogURL") + ".sha256"
-        p = NetworkManager.AM_NETWORK_MANAGER.blocking_get(hash_url, 5000)
-        if not p:
-            raise RuntimeError(f"Failed to fetch the addon catalog hash from {hash_url}\n")
-        sha256 = p.data().decode("utf8")
-        if sha256 != fci.Preferences().get("LastFetchedAddonCatalogHash"):
-            return True
-        return False
-
-    def _retrieve_macros_from_git(self):
-        """Retrieve macros from FreeCAD-macros.git
-
-        Emits a signal for each macro in
-        https://github.com/FreeCAD/FreeCAD-macros.git
-        """
-
-        macro_cache_location = utils.get_cache_file_name("Macros")
-
-        if not self.git_manager:
-            message = translate(
-                "AddonsInstaller",
-                "Git is disabled, skipping Git macros",
-            )
-            fci.Console.PrintWarning(message + "\n")
-            return
-
-        update_succeeded = self._update_local_git_repo()
-        if not update_succeeded:
-            return
-
-        n_files = 0
-        for _, _, filenames in os.walk(macro_cache_location):
-            n_files += len(filenames)
-        counter = 0
-        for dirpath, _, filenames in os.walk(macro_cache_location):
-            counter += 1
-            if self.current_thread.isInterruptionRequested():
-                return
-            if ".git" in dirpath:
-                continue
-            for filename in filenames:
-                if self.current_thread.isInterruptionRequested():
-                    return
-                if filename.lower().endswith(".fcmacro"):
-                    macro = Macro(filename[:-8])  # Remove ".FCMacro".
-                    if macro.name in self.package_names:
-                        fci.Console.PrintLog(
-                            f"Ignoring second macro named {macro.name} (found on git)\n"
-                        )
-                        continue  # We already have a macro with this name
-                    self.package_names.append(macro.name)
-                    macro.on_git = True
-                    macro.src_filename = os.path.join(dirpath, filename)
-                    macro.fill_details_from_file(macro.src_filename)
-                    repo = Addon.from_macro(macro)
-                    fci.Console.PrintLog(f"Found macro {repo.name}\n")
-                    repo.url = "https://github.com/FreeCAD/FreeCAD-macros.git"
-                    utils.update_macro_installation_details(repo)
-                    self.addon_repo.emit(repo)
-
-    def _update_local_git_repo(self) -> bool:
-        macro_cache_location = utils.get_cache_file_name("Macros")
-        try:
-            if os.path.exists(macro_cache_location):
-                if not os.path.exists(os.path.join(macro_cache_location, ".git")):
-                    fci.Console.PrintWarning(
-                        translate(
-                            "AddonsInstaller",
-                            "Attempting to change non-Git Macro setup to use Git\n",
-                        )
-                    )
-                    self.git_manager.repair(
-                        "https://github.com/FreeCAD/FreeCAD-macros.git",
-                        macro_cache_location,
-                    )
-                self.git_manager.update(macro_cache_location)
-            else:
-                self.git_manager.clone(
-                    "https://github.com/FreeCAD/FreeCAD-macros.git",
-                    macro_cache_location,
-                )
-        except GitFailed as e:
-            fci.Console.PrintMessage(
-                translate(
-                    "AddonsInstaller",
-                    "An error occurred updating macros from GitHub, trying clean checkout...",
-                )
-                + f":\n{e}\n"
-            )
-            fci.Console.PrintMessage(f"{macro_cache_location}\n")
-            fci.Console.PrintMessage(
-                translate("AddonsInstaller", "Attempting to do a clean checkout...") + "\n"
-            )
-            try:
-                os.chdir(
-                    os.path.join(macro_cache_location, "..")
-                )  # Make sure we are not IN this directory
-                shutil.rmtree(macro_cache_location, onerror=self._remove_readonly)
-                self.git_manager.clone(
-                    "https://github.com/FreeCAD/FreeCAD-macros.git",
-                    macro_cache_location,
-                )
-                fci.Console.PrintMessage(
-                    translate("AddonsInstaller", "Clean checkout succeeded") + "\n"
-                )
-            except GitFailed as e2:
-                # The Qt Python translation extractor doesn't support splitting this string (yet)
-                # pylint: disable=line-too-long
-                fci.Console.PrintWarning(
-                    translate(
-                        "AddonsInstaller",
-                        "Failed to update macros from GitHub -- try clearing the Addon Manager's cache.",
-                    )
-                    + f":\n{str(e2)}\n"
-                )
-                return False
-        return True
-
-    def _retrieve_macros_from_wiki(self):
-        """Retrieve macros from the wiki
-
-        Read the wiki and emit a signal for each found macro.
-        Reads only the page https://wiki.freecad.org/Macros_recipes
-        """
-
-        p = NetworkManager.AM_NETWORK_MANAGER.blocking_get(
-            "https://wiki.freecad.org/Macros_recipes", 5000
-        )
-        if not p:
-            # The Qt Python translation extractor doesn't support splitting this string (yet)
-            # pylint: disable=line-too-long
-            fci.Console.PrintWarning(
-                translate(
-                    "AddonsInstaller",
-                    "Error connecting to the Wiki, FreeCAD cannot retrieve the Wiki macro list at this time",
-                )
-                + "\n"
-            )
-            return
-        p = p.data().decode("utf8")
-        macros = re.findall(r'title="(Macro.*?)"', p)
-        macros = [mac for mac in macros if "translated" not in mac]
-        macro_names = []
-        for _, mac in enumerate(macros):
-            if self.current_thread.isInterruptionRequested():
-                return
-            macro_name = mac[6:]  # Remove "Macro ".
-            macro_name = macro_name.replace("&amp;", "&")
-            if not macro_name:
-                continue
-            if (
-                (macro_name not in self.macros_reject_list)
-                and ("recipes" not in macro_name.lower())
-                and (macro_name not in macro_names)
-            ):
-                macro_names.append(macro_name)
-                macro = Macro(macro_name)
-                if macro.name in self.package_names:
-                    fci.Console.PrintLog(
-                        f"Ignoring second macro named {macro.name} (found on wiki)\n"
-                    )
-                    continue  # We already have a macro with this name
-                self.package_names.append(macro.name)
-                macro.on_wiki = True
-                macro.parsed = False
-                repo = Addon.from_macro(macro)
-                repo.url = "https://wiki.freecad.org/Macros_recipes"
-                utils.update_macro_installation_details(repo)
-                self.addon_repo.emit(repo)
-
-    @staticmethod
-    def _remove_readonly(func, path, _) -> None:
-        """Remove a read-only file."""
-
-        os.chmod(path, stat.S_IWRITE)
-        func(path)
+    def process_macro_cache(self, catalog_text_data):
+        cache_object: dict = json.loads(catalog_text_data)
+        for macro_name, cache_data in cache_object.items():
+            macro = Macro.from_cache(cache_data)
+            addon = Addon.from_macro(macro)
+            self.addon_repo.emit(addon)
 
 
 class LoadMacrosFromCacheWorker(QtCore.QThread):

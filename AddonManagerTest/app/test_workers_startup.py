@@ -43,16 +43,18 @@ class TestCreateAddonListWorker(unittest.TestCase):
         )
 
         def get_side_effect(key):
-            if key == "LastFetchedAddonCatalogHash":
+            if key == "last_fetched_addon_catalog_cache_hash":
                 return "1234567890abcdef"
-            elif key == "AddonCatalogURL":
+            elif key == "addon_catalog_cache_url":
                 return "https://some.url"
             return None
 
         mock_preferences_instance.get = MagicMock(side_effect=get_side_effect)
 
         # Act
-        result = addonmanager_workers_startup.CreateAddonListWorker.new_catalog_available()
+        result = addonmanager_workers_startup.CreateAddonListWorker.new_cache_available(
+            "addon_catalog"
+        )
 
         # Assert
         self.assertFalse(result)
@@ -70,16 +72,18 @@ class TestCreateAddonListWorker(unittest.TestCase):
         )
 
         def get_side_effect(key):
-            if key == "LastFetchedAddonCatalogHash":
+            if key == "last_fetched_addon_catalog_cache_hash":
                 return "fedcba0987654321"  # NOT the same hash
-            elif key == "AddonCatalogURL":
+            elif key == "addon_catalog_cache_url":
                 return "https://some.url"
             return None
 
         mock_preferences_instance.get = MagicMock(side_effect=get_side_effect)
 
         # Act
-        result = addonmanager_workers_startup.CreateAddonListWorker.new_catalog_available()
+        result = addonmanager_workers_startup.CreateAddonListWorker.new_cache_available(
+            "addon_catalog"
+        )
 
         # Assert
         self.assertTrue(result)
@@ -103,7 +107,7 @@ class TestCreateAddonListWorker(unittest.TestCase):
         catalog_text = TestCreateAddonListWorker.create_fake_addon_catalog_json(1)
 
         # Act
-        addonmanager_workers_startup.CreateAddonListWorker().process_addon_catalog(catalog_text)
+        addonmanager_workers_startup.CreateAddonListWorker().process_addon_cache(catalog_text)
 
         # Assert
         mock_addon_repo_signal.emit.assert_called_once()
@@ -114,7 +118,7 @@ class TestCreateAddonListWorker(unittest.TestCase):
         catalog_text = TestCreateAddonListWorker.create_fake_addon_catalog_json(10)
 
         # Act
-        addonmanager_workers_startup.CreateAddonListWorker().process_addon_catalog(catalog_text)
+        addonmanager_workers_startup.CreateAddonListWorker().process_addon_cache(catalog_text)
 
         # Assert
         self.assertEqual(mock_addon_repo_signal.emit.call_count, 10)
@@ -128,7 +132,7 @@ class TestCreateAddonListWorker(unittest.TestCase):
         worker.package_names = ["FakeAddon1", "FakeAddon2"]
 
         # Act
-        worker.process_addon_catalog(catalog_text)
+        worker.process_addon_cache(catalog_text)
 
         # Assert
         self.assertEqual(8, mock_addon_repo_signal.emit.call_count)

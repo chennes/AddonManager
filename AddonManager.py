@@ -137,12 +137,13 @@ def get_icon(repo: Addon, update: bool = False) -> QtGui.QIcon:
     if repo.repo_type == Addon.Kind.WORKBENCH:
         default_icon = QtGui.QIcon(os.path.join(icon_path, "document-package.svg"))
     elif repo.repo_type == Addon.Kind.MACRO:
-        if repo.macro and repo.macro.icon:
-            default_icon = QtGui.QIcon(os.path.join(icon_path, "document-python.svg"))
-            if os.path.isabs(repo.macro.icon):
-                path = repo.macro.icon
+        if repo.macro and repo.macro.icon_data:
+            if repo.macro.icon_extension == "svg":
+                default_icon = scalable_icon_from_svg_bytes(repo.macro.icon_data)
             else:
-                path = os.path.join(os.path.dirname(repo.macro.src_filename), repo.macro.icon)
+                pixmap = QtGui.QPixmap()
+                pixmap.loadFromData(repo.macro.icon_data)
+                default_icon = QtGui.QIcon(pixmap)
         elif repo.macro and repo.macro.xpm:
             cache_path = fci.DataPaths().cache_dir
             am_path = os.path.join(cache_path, "AddonManager", "MacroIcons")
