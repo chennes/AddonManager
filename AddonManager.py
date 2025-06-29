@@ -26,17 +26,13 @@ import os
 import functools
 import tempfile
 import threading
-import json
-from datetime import date
 from typing import Dict
 
 from PySideWrapper import QtGui, QtCore, QtWidgets, QtSvg
 
 from addonmanager_workers_startup import (
     CreateAddonListWorker,
-    LoadMacrosFromCacheWorker,
     CheckWorkbenchesForUpdatesWorker,
-    CacheMacroCodeWorker,
     GetBasicAddonStatsWorker,
     GetAddonScoreWorker,
 )
@@ -120,7 +116,7 @@ def scalable_icon_from_svg_bytes(svg_bytes: bytes) -> QtGui.QIcon:
 
 
 def get_icon(repo: Addon, update: bool = False) -> QtGui.QIcon:
-    """Returns an icon for an Addon. Uses a cached icon if possible, unless update is True,
+    """Returns an icon for an Addon. Uses a cached icon if possible, unless `update` is True,
     in which case the icon is regenerated."""
 
     icon_path = os.path.join(os.path.dirname(__file__), "Resources", "icons")
@@ -182,9 +178,6 @@ class CommandAddonManager(QtCore.QObject):
         "create_addon_list_worker",
         "check_worker",
         "show_worker",
-        "showmacro_worker",
-        "macro_worker",
-        "load_macro_metadata_worker",
         "update_all_worker",
         "check_for_python_package_updates_worker",
         "get_basic_addon_stats_worker",
@@ -212,26 +205,20 @@ class CommandAddonManager(QtCore.QObject):
         self.composite_view = None
         self.button_bar = None
 
-        self.update_cache = False
         self.dialog = None
         self.startup_sequence = []
         self.packages_with_updates = set()
 
-        self.macro_repo_dir = None
         self.number_of_progress_regions = 0
         self.current_progress_region = 0
 
         self.check_worker = None
         self.check_for_python_package_updates_worker = None
         self.update_all_worker = None
-        self.macro_worker = None
         self.create_addon_list_worker = None
         self.get_addon_score_worker = None
         self.get_basic_addon_stats_worker = None
-        self.load_macro_metadata_worker = None
 
-        self.macro_cache = []
-        self.package_cache = {}
         self.manage_python_packages_dialog = None
 
         # Set up the connection checker
@@ -275,7 +262,6 @@ class CommandAddonManager(QtCore.QObject):
         self.dialog.setWindowTitle(translate("AddonsInstaller", "Addon Manager v") + am_version)
 
         # clean up the leftovers from previous runs
-        self.macro_repo_dir = fci.DataPaths().macro_dir
         self.packages_with_updates = set()
         self.startup_sequence = []
         self.cleanup_workers()
@@ -433,28 +419,7 @@ class CommandAddonManager(QtCore.QObject):
         self.finished.emit()
 
     def startup(self) -> None:
-        """Downloads the available packages listings and populates the table
-
-        This proceeds in four stages: first, the main GitHub repository is queried for a list of
-        possible addons. Each addon is specified as a git submodule with name and branch
-        information. The actual specific commit ID of the submodule (as listed on GitHub) is
-        ignored. Any extra repositories specified by the user are appended to this list.
-
-        Second, the list of macros is downloaded from the FreeCAD/FreeCAD-macros repository and
-        the wiki.
-
-        Third, each of these items is queried for a package.xml metadata file. If that file exists,
-        it is downloaded, cached, and any icons that it references are also downloaded and cached.
-
-        Finally, for workbenches that are not contained within a package (e.g., they provide no
-        metadata), an additional git query is made to see if an update is available. Macros are
-        checked for file changes.
-
-        Each of these stages is launched in a separate thread to ensure that the UI remains
-        responsive, and the operation can be canceled.
-
-        Each stage is also subject to caching, so may return immediately if no cache update has
-        been requested."""
+        """Downloads the available packages listings and populates the table"""
 
         # Each function in this list is expected to launch a thread and connect its completion
         # signal to self.do_next_startup_phase, or to shortcut to calling
@@ -468,8 +433,6 @@ class CommandAddonManager(QtCore.QObject):
             self.fetch_addon_score,
             self.select_addon,
         ]
-        if fci.Preferences().get("DownloadMacros"):
-            self.startup_sequence.append(self.load_macro_metadata)
         self.number_of_progress_regions = len(self.startup_sequence)
         self.current_progress_region = 0
         self.do_next_startup_phase()
@@ -505,13 +468,6 @@ class CommandAddonManager(QtCore.QObject):
         with self.lock:
             repo.icon = get_icon(repo, update=True)
             self.item_model.reload_item(repo)
-
-    def load_macro_metadata(self) -> None:
-        self.load_macro_metadata_worker = CacheMacroCodeWorker(self.item_model.repos)
-        self.load_macro_metadata_worker.update_macro.connect(self.on_package_updated)
-        self.load_macro_metadata_worker.progress_made.connect(self.update_progress_bar)
-        self.load_macro_metadata_worker.finished.connect(self.do_next_startup_phase)
-        self.load_macro_metadata_worker.start()
 
     def select_addon(self) -> None:
         prefs = fci.Preferences()
@@ -743,7 +699,6 @@ class CommandAddonManager(QtCore.QObject):
     def stop_update(self) -> None:
         self.cleanup_workers()
         self.hide_progress_widgets()
-        self.write_cache_stopfile()
 
     def on_package_status_changed(self, repo: Addon) -> None:
         if repo.status() == Addon.Status.PENDING_RESTART:
@@ -766,7 +721,7 @@ class CommandAddonManager(QtCore.QObject):
             return
 
         if macro.is_installed():
-            macro_path = os.path.join(self.macro_repo_dir, macro.filename)
+            macro_path = os.path.join(fci.DataPaths().macro_dir, macro.filename)
             fci.FreeCADGui.open(str(macro_path))
             self.dialog.hide()
             fci.FreeCADGui.SendMsgToActiveView("Run")
@@ -800,7 +755,8 @@ class CommandAddonManager(QtCore.QObject):
         )
         self.installer_gui.run()  # Does not block
 
-    def open_addons_folder(self):
+    @staticmethod
+    def open_addons_folder():
         addons_folder = fci.DataPaths().mod_dir
         QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(addons_folder))
         return

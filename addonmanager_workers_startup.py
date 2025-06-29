@@ -27,19 +27,12 @@ import hashlib
 import io
 import json
 import os
-import queue
-import re
-import shutil
-import stat
-import threading
-import time
-from typing import List, Optional
+from typing import List
 import xml.etree.ElementTree
 import zipfile
 
 from PySideWrapper import QtCore
 
-import addonmanager_utilities as utils
 from addonmanager_macro import Macro
 from Addon import Addon
 from AddonCatalog import AddonCatalog
@@ -66,21 +59,9 @@ class CreateAddonListWorker(QtCore.QThread):
         QtCore.QThread.__init__(self)
         self.setObjectName("CreateAddonListWorker")
 
-        # reject_listed addons
-        self.macros_reject_list = []
-        self.mod_reject_list = []
-
-        # These addons will print an additional message informing the user
-        self.obsolete = []
-
-        # These addons will print an additional message informing the user it is Python2 only
-        self.py2only = []
-
         self.package_names = []
         self.mod_dir = fci.DataPaths().mod_dir
         self.current_thread = None
-
-        self.git_manager = initialize_git()
 
     def run(self):
         """populates the list of addons"""
@@ -91,11 +72,13 @@ class CreateAddonListWorker(QtCore.QThread):
             self.progress_made.emit("Custom addons loaded", 5, 100)
 
             addon_cache = self.get_cache("addon_catalog")
-            self.process_addon_cache(addon_cache)
+            if addon_cache:
+                self.process_addon_cache(addon_cache)
             self.progress_made.emit("Addon catalog loaded", 20, 100)
 
             macro_cache = self.get_cache("macro")
-            self.process_macro_cache(macro_cache)
+            if macro_cache:
+                self.process_macro_cache(macro_cache)
             self.progress_made.emit("Macros loaded", 100, 100)
 
         except ConnectionError as e:
@@ -196,7 +179,7 @@ class CreateAddonListWorker(QtCore.QThread):
                 with open(cached_file, "wb") as f:
                     f.write(cache_text_data)
             else:
-                raise FileNotFoundError(f"cache.json not found in ZIP")
+                raise FileNotFoundError(f"{cache_name}_cache.json not found in ZIP")
         return cache_text_data.decode("utf-8")
 
     @staticmethod
@@ -259,32 +242,6 @@ class CreateAddonListWorker(QtCore.QThread):
             macro = Macro.from_cache(cache_data)
             addon = Addon.from_macro(macro)
             self.addon_repo.emit(addon)
-
-
-class LoadMacrosFromCacheWorker(QtCore.QThread):
-    """A worker object to load macros from a cache file"""
-
-    add_macro_signal = QtCore.Signal(object)
-
-    def __init__(self, cache_file: str):
-        QtCore.QThread.__init__(self)
-        self.setObjectName("LoadMacrosFromCacheWorker")
-        self.cache_file = cache_file
-
-    def run(self):
-        """Rarely called directly: create an instance and call start() on it instead to
-        launch in a new thread"""
-
-        with open(self.cache_file, encoding="utf-8") as f:
-            data = f.read()
-            dict_data = json.loads(data)
-            for item in dict_data:
-                if QtCore.QThread.currentThread().isInterruptionRequested():
-                    return
-                new_macro = Macro.from_cache(item)
-                repo = Addon.from_macro(new_macro)
-                utils.update_macro_installation_details(repo)
-                self.add_macro_signal.emit(repo)
 
 
 class CheckSingleUpdateWorker(QtCore.QObject):
@@ -528,194 +485,6 @@ class UpdateChecker:
             macro_wrapper.set_status(Addon.Status.NO_UPDATE_AVAILABLE)
         else:
             macro_wrapper.set_status(Addon.Status.UPDATE_AVAILABLE)
-
-
-class CacheMacroCodeWorker(QtCore.QThread):
-    """Download and cache the macro code and parse its internal metadata"""
-
-    update_macro = QtCore.Signal(Addon)
-    progress_made = QtCore.Signal(str, int, int)
-
-    def __init__(self, repos: List[Addon]) -> None:
-        QtCore.QThread.__init__(self)
-        self.setObjectName("CacheMacroCodeWorker")
-        self.repos = repos
-        self.workers = []
-        self.terminators = []
-        self.lock = threading.Lock()
-        self.failed = []
-        self.counter = 0
-        self.repo_queue = None
-
-    def run(self):
-        """Rarely called directly: create an instance and call start() on it instead to
-        launch in a new thread"""
-
-        self.repo_queue = queue.Queue()
-        num_macros = 0
-        for repo in self.repos:
-            if repo.macro is not None:
-                self.repo_queue.put(repo)
-                num_macros += 1
-
-        interrupted = self._process_queue(num_macros)
-        if interrupted:
-            return
-
-        # Make sure all of our child threads have fully exited:
-        for worker in self.workers:
-            worker.wait(50)
-            if not worker.isFinished():
-                # The Qt Python translation extractor doesn't support splitting this string (yet)
-                # pylint: disable=line-too-long
-                fci.Console.PrintError(
-                    translate(
-                        "AddonsInstaller",
-                        "Addon Manager: a worker process failed to complete while fetching {name}",
-                    ).format(name=worker.macro.name)
-                    + "\n"
-                )
-
-        self.repo_queue.join()
-        for terminator in self.terminators:
-            if terminator and terminator.isActive():
-                terminator.stop()
-
-        if len(self.failed) > 0:
-            num_failed = len(self.failed)
-            fci.Console.PrintWarning(
-                translate(
-                    "AddonsInstaller",
-                    "Out of {num_macros} macros, {num_failed} timed out while processing",
-                ).format(num_macros=num_macros, num_failed=num_failed)
-                + "\n"
-            )
-
-    def _process_queue(self, num_macros) -> bool:
-        """Spools up six network connections and downloads the macro code. Returns True if
-        it was interrupted by a user request, or False if it ran to completion."""
-
-        # Emulate QNetworkAccessManager and spool up six connections:
-        for _ in range(6):
-            self.update_and_advance(None)
-
-        current_thread = QtCore.QThread.currentThread()
-        while True:
-            if current_thread.isInterruptionRequested():
-                for worker in self.workers:
-                    worker.blockSignals(True)
-                    worker.requestInterruption()
-                    if not worker.wait(100):
-                        fci.Console.PrintWarning(
-                            translate(
-                                "AddonsInstaller",
-                                "Addon Manager: a worker process failed to halt ({name})",
-                            ).format(name=worker.macro.name)
-                            + "\n"
-                        )
-                return True
-            # Ensure our signals propagate out by running an internal thread-local event loop
-            QtCore.QCoreApplication.processEvents()
-            with self.lock:
-                if self.counter >= num_macros:
-                    break
-            time.sleep(0.1)
-        return False
-
-    def update_and_advance(self, repo: Optional[Addon]) -> None:
-        """Emit the updated signal and launch the next item from the queue."""
-        if repo is not None:
-            if repo.macro.name not in self.failed:
-                self.update_macro.emit(repo)
-            self.repo_queue.task_done()
-            with self.lock:
-                self.counter += 1
-
-        if QtCore.QThread.currentThread().isInterruptionRequested():
-            return
-
-        if repo is not None:
-            message = translate("AddonsInstaller", "Caching {} macro").format(repo.display_name)
-        else:
-            message = translate("AddonsInstaller", "Caching macros")
-        self.progress_made.emit(message, len(self.repos) - self.repo_queue.qsize(), len(self.repos))
-
-        try:
-            next_repo = self.repo_queue.get_nowait()
-            worker = GetMacroDetailsWorker(next_repo)
-            worker.finished.connect(lambda: self.update_and_advance(next_repo))
-            with self.lock:
-                self.workers.append(worker)
-                self.terminators.append(
-                    QtCore.QTimer.singleShot(10000, lambda: self.clean_terminate(worker))
-                )
-            worker.start()
-        except queue.Empty:
-            # If the queue is empty, it's not an error, it's an expected end condition
-            pass
-
-    def clean_terminate(self, worker) -> None:
-        """Shut down all running workers and exit the thread"""
-        if not worker.isFinished():
-            macro_name = worker.macro.name
-            fci.Console.PrintWarning(
-                translate(
-                    "AddonsInstaller",
-                    "Timeout while fetching metadata for macro {}",
-                ).format(macro_name)
-                + "\n"
-            )
-            # worker.blockSignals(True)
-            worker.requestInterruption()
-            worker.wait(100)
-            if worker.isRunning():
-                fci.Console.PrintError(
-                    translate(
-                        "AddonsInstaller",
-                        "Failed to kill process for macro {}!\n",
-                    ).format(macro_name)
-                )
-            with self.lock:
-                self.failed.append(macro_name)
-
-
-class GetMacroDetailsWorker(QtCore.QThread):
-    """Retrieve the macro details for a macro"""
-
-    readme_updated = QtCore.Signal(str)
-
-    def __init__(self, repo):
-
-        QtCore.QThread.__init__(self)
-        self.setObjectName("GetMacroDetailsWorker")
-        self.macro = repo.macro
-
-    def run(self):
-        """Rarely called directly: create an instance and call start() on it instead to
-        launch in a new thread"""
-
-        if not self.macro.parsed and self.macro.on_git:
-            self.macro.fill_details_from_file(self.macro.src_filename)
-        if not self.macro.parsed and self.macro.on_wiki:
-            mac = self.macro.name.replace(" ", "_")
-            mac = mac.replace("&", "%26")
-            mac = mac.replace("+", "%2B")
-            url = "https://wiki.freecad.org/Macro_" + mac
-            self.macro.fill_details_from_wiki(url)
-        message = (
-            "<h1>"
-            + self.macro.name
-            + "</h1>"
-            + self.macro.desc
-            + '<br/><br/>Macro location: <a href="'
-            + self.macro.url
-            + '">'
-            + self.macro.url
-            + "</a>"
-        )
-        if QtCore.QThread.currentThread().isInterruptionRequested():
-            return
-        self.readme_updated.emit(message)
 
 
 class GetBasicAddonStatsWorker(QtCore.QThread):
