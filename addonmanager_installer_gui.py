@@ -83,7 +83,7 @@ class AddonInstallerGUI(QtCore.QObject):
         self.installer.success.connect(self._installation_succeeded)
         self.installer.failure.connect(self._installation_failed)
 
-    def __del__(self):
+    def shutdown(self):
         try:
             self._stop_thread(self.worker_thread)
             self._stop_thread(self.dependency_worker_thread)
@@ -536,9 +536,6 @@ class MacroInstallerGUI(QtCore.QObject):
         self.toolbar_adapter = ToolbarAdapter()
         self.macro_dir = fci.DataPaths().macro_dir
 
-    def __del__(self):
-        quit()
-
     def quit(self):
         if self.worker_thread and hasattr(self.worker_thread, "quit"):
             self.worker_thread.quit()
@@ -547,7 +544,7 @@ class MacroInstallerGUI(QtCore.QObject):
                 fci.Console.PrintError(
                     "INTERNAL ERROR: Thread did not quit() cleanly, using terminate()\n"
                 )
-                self.worker_thread.terminate()
+                self.worker_thread.clean_terminate()
 
     def run(self):
         """Perform the installation, including any necessary user interaction via modal dialog

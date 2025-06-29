@@ -269,8 +269,6 @@ class TestMacroParser(unittest.TestCase):
             'f"Some fancy {thing}"',
             "r'Some fancy {thing}'",
             'r"Some fancy {thing}"',
-            "u'Some fancy {thing}'",
-            'u"Some fancy {thing}"',
             "fr'Some fancy {thing}'",
             'fr"Some fancy {thing}"',
             "rf'Some fancy {thing}'",

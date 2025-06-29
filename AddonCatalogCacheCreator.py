@@ -123,7 +123,7 @@ class CacheWriter:
             os.path.join(self.cwd, "addon_catalog_cache.zip"), "w", zipfile.ZIP_DEFLATED
         ) as zipf:
             zipf.writestr(
-                "cache.json",
+                "addon_catalog_cache.json",
                 json.dumps(recursive_serialize(self.catalog.get_catalog()), indent="  "),
             )
 

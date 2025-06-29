@@ -51,7 +51,7 @@ class DummyThread:
 class MacroParser:
     """Extracts metadata information from a FreeCAD macro"""
 
-    MAX_LINES_TO_SEARCH = 200  # To speed up parsing: some files are VERY large
+    MAX_LINES_TO_SEARCH = 500  # To speed up parsing: some files are VERY large
 
     def __init__(self, name: str, code: str = ""):
         """Create a parser for the macro named "name". Note that the name is only
@@ -127,7 +127,7 @@ class MacroParser:
     def _process_key(self, key: str, line: str, content_lines: io.StringIO):
         """Given a line that starts with a known key, extract the data for that key,
         possibly reading in additional lines (if it contains a line continuation
-        character, or is a triple-quoted string)."""
+         character or is a triple-quoted string)."""
 
         line = self._handle_backslash_continuation(line, content_lines)
         line, was_triple_quoted = self._handle_triple_quoted_string(line, content_lines)
@@ -178,6 +178,10 @@ class MacroParser:
             stripped_of_quotes = line[3:-3]
         elif (line[0] == '"' and line[-1] == '"') or (line[0] == "'" and line[-1] == "'"):
             stripped_of_quotes = line[1:-1]
+        elif (line.startswith('u"') and line[-1] == '"') or (
+            line.startswith("u'") and line[-1] == "'"
+        ):
+            stripped_of_quotes = line[2:-1]
         return stripped_of_quotes
 
     def _standard_extraction(self, value: str, match_group: str):
@@ -230,9 +234,9 @@ class MacroParser:
         """Raise a syntax error if this line contains something we can't handle"""
 
         lower_line = line.strip().lower()
-        if lower_line.startswith("'") and lower_line.endswith("'"):
+        if (lower_line.startswith("u'") or lower_line.startswith("'")) and lower_line.endswith("'"):
             return
-        if lower_line.startswith('"') and lower_line.endswith('"'):
+        if (lower_line.startswith('"') or lower_line.startswith('u"')) and lower_line.endswith('"'):
             return
         if is_float(lower_line):
             return
