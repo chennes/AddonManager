@@ -32,14 +32,7 @@ from typing import List
 import addonmanager_freecad_interface as fci
 from addonmanager_toolbar_adapter import ToolbarAdapter
 
-# Get whatever version of PySide we can
-try:
-    from PySide import QtCore, QtWidgets  # Use the FreeCAD wrapper
-except ImportError:
-    try:
-        from PySide6 import QtCore, QtWidgets  # Outside FreeCAD, try Qt6 first
-    except ImportError:
-        from PySide2 import QtCore, QtWidgets  # Fall back to Qt5
+from PySideWrapper import QtCore, QtWidgets
 
 from addonmanager_installer import AddonInstaller, MacroInstaller
 from addonmanager_dependency_installer import DependencyInstaller
@@ -54,7 +47,7 @@ translate = fci.translate
 class AddonInstallerGUI(QtCore.QObject):
     """GUI functions (sequence of dialog boxes) for installing an addon interactively. The actual
     installation is handled by the AddonInstaller class running in a separate QThread. An instance
-    of this AddonInstallerGUI class should NOT be run in a separate thread, but on the main GUI
+    of this AddonInstallerGUI class should NOT be run in a separate thread but on the main GUI
     thread. All dialogs are modal."""
 
     # External classes are expected to "set and forget" this class, but in the event that some
@@ -152,9 +145,10 @@ class AddonInstallerGUI(QtCore.QObject):
             # No missing deps, just install
             self.install()
 
-    def _handle_disallowed_python(self, python_requires: List[str]) -> bool:
+    @staticmethod
+    def _handle_disallowed_python(python_requires: List[str]) -> bool:
         """Determine if we are missing any required Python packages that are not in the allowed
-        packages list. If so, display a message to the user, and return True. Otherwise return
+        packages list. If so, display a message to the user and return True. Otherwise, return
         False."""
 
         bad_packages = []
@@ -252,7 +246,8 @@ class AddonInstallerGUI(QtCore.QObject):
         self.dependency_dialog.buttonBox.button(QtWidgets.QDialogButtonBox.Cancel).setDefault(True)
         self.dependency_dialog.exec()
 
-    def _check_python_version(self, missing: MissingDependencies) -> bool:
+    @staticmethod
+    def _check_python_version(missing: MissingDependencies) -> bool:
         """Make sure we have a compatible Python version. Returns True to stop the installation
         or False to continue."""
 
@@ -481,7 +476,7 @@ class AddonInstallerGUI(QtCore.QObject):
             while self.worker_thread.isRunning():
                 self.worker_thread.wait(50)
                 QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.AllEvents)
-        path = os.path.join(self.installer.installation_path, self.addon_to_install.name)
+        path = str(os.path.join(self.installer.installation_path, self.addon_to_install.name))
         if os.path.exists(path):
             utils.rmdir(path)
         dlg.hide()
@@ -591,7 +586,7 @@ class MacroInstallerGUI(QtCore.QObject):
         return False
 
     def _ask_for_toolbar(self, custom_toolbars):
-        """Determine what toolbar to add the icon to. The first time it is called it prompts the
+        """Determine what toolbar to add the icon to. The first time it is called, it prompts the
         user to select or create a toolbar. After that, the prompt is optional and can be configured
         via a preference. Returns the pref group for the new toolbar."""
 
