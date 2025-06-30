@@ -23,9 +23,7 @@
 import subprocess
 import unittest
 from unittest.mock import MagicMock, patch
-from mocks import SignalCatcher
-
-from PySideWrapper import QtCore
+from AddonManagerTest.app.mocks import SignalCatcher
 
 from addonmanager_python_deps import (
     PackageInfo,
@@ -238,42 +236,6 @@ class TestPythonPackageListModel(unittest.TestCase):
             python_deps,
         )
 
-    @patch("addonmanager_python_deps.call_pip")
-    @patch("addonmanager_python_deps.fci.Console.PrintLog")
-    @patch("addonmanager_python_deps.fci.Console.PrintError")
-    def test_update_package_success(self, _mock_print_error, _mock_print_log, mock_call_pip):
-        model = PythonPackageListModel([])
-        model.vendor_path = "/some/vendor/path"
-        model.package_list = [PackageInfo("example-pkg", "1", "2", [])]
-
-        index = MagicMock(spec=QtCore.QModelIndex)
-        index.row.return_value = 0
-
-        catcher = SignalCatcher()
-        model.modelReset.connect(catcher.catch_signal)
-
-        model.update_package(index)
-
-        mock_call_pip.assert_called_once_with(
-            ["install", "--upgrade", "example-pkg", "--target", "/some/vendor/path"]
-        )
-        self.assertTrue(catcher.caught)
-
-    @patch("addonmanager_python_deps.call_pip", side_effect=PipFailed("pip error"))
-    @patch("addonmanager_python_deps.fci.Console.PrintLog")
-    @patch("addonmanager_python_deps.fci.Console.PrintError")
-    def test_update_package_failure(self, mock_print_error, _mock_print_log, _mock_call_pip):
-        model = PythonPackageListModel([])
-        model.vendor_path = "/some/vendor/path"
-        model.package_list = [PackageInfo("example-pkg", "1", "2", [])]
-
-        index = MagicMock(spec=QtCore.QModelIndex)
-        index.row.return_value = 0
-
-        model.update_package(index)
-
-        mock_print_error.assert_called_once_with("pip error\n")
-
     class TestUpdateMultiplePackages(unittest.TestCase):
         @patch("addonmanager_python_deps.call_pip")
         @patch("addonmanager_python_deps.fci.Console.PrintLog")
@@ -286,35 +248,10 @@ class TestPythonPackageListModel(unittest.TestCase):
                 PackageInfo("pkg2", "1", "2", []),
             ]
 
-            model.update_multiple_packages(None)
+            model.update_all_packages()
 
             mock_call_pip.assert_called_once_with(
                 ["install", "--upgrade", "--target", "/vendor/path", "pkg1", "pkg2"]
-            )
-            mock_print_log.assert_called_once()
-            mock_print_error.assert_not_called()
-
-        @patch("addonmanager_python_deps.call_pip")
-        @patch("addonmanager_python_deps.fci.Console.PrintLog")
-        @patch("addonmanager_python_deps.fci.Console.PrintError")
-        def test_update_selected_packages(self, mock_print_error, mock_print_log, mock_call_pip):
-            model = PythonPackageListModel([])
-            model.vendor_path = "/vendor/path"
-            model.package_list = [
-                PackageInfo("pkg1", "1", "2", []),
-                PackageInfo("pkg2", "1", "2", []),
-                PackageInfo("pkg3", "1", "2", []),
-            ]
-
-            index0 = MagicMock(spec=QtCore.QModelIndex)
-            index0.row.return_value = 0
-            index2 = MagicMock(spec=QtCore.QModelIndex)
-            index2.row.return_value = 2
-
-            model.update_multiple_packages([index0, index2])
-
-            mock_call_pip.assert_called_once_with(
-                ["install", "--upgrade", "--target", "/vendor/path", "pkg1", "pkg3"]
             )
             mock_print_log.assert_called_once()
             mock_print_error.assert_not_called()
@@ -327,10 +264,7 @@ class TestPythonPackageListModel(unittest.TestCase):
             model.vendor_path = "/vendor/path"
             model.package_list = [PackageInfo("pkg1", "1", "2", [])]
 
-            index = MagicMock(spec=QtCore.QModelIndex)
-            index.row.return_value = 0
-
-            model.update_multiple_packages([index])
+            model.update_all_packages()
 
             mock_call_pip.assert_called_once()
             mock_print_error.assert_called_once_with("upgrade failed\n")
