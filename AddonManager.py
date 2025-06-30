@@ -47,7 +47,7 @@ from Widgets.addonmanager_widget_progress_bar import Progress
 from package_list import PackageListItemModel
 from Addon import Addon
 from addonmanager_python_deps_gui import (
-    PythonPackageManager,
+    PythonPackageManagerGui,
 )
 from addonmanager_devmode import DeveloperMode
 from addonmanager_firstrun import FirstRunDialog
@@ -546,12 +546,12 @@ class CommandAddonManager(QtCore.QObject):
         self.button_bar.check_for_updates.setEnabled(True)
 
     def check_python_updates(self) -> None:
-        PythonPackageManager.migrate_old_am_installations()  # Migrate 0.20 to 0.21
+        # TODO: Run the checker to see if we need to do any Python updates as well
         self.do_next_startup_phase()
 
     def show_python_updates_dialog(self) -> None:
         if not self.manage_python_packages_dialog:
-            self.manage_python_packages_dialog = PythonPackageManager(self.item_model.repos)
+            self.manage_python_packages_dialog = PythonPackageManagerGui(self.item_model.repos)
         self.manage_python_packages_dialog.show()
 
     def fetch_addon_stats(self) -> None:
