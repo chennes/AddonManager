@@ -32,7 +32,7 @@ import shutil
 import subprocess
 import sys
 from functools import partial
-from typing import Dict, Iterable, List, Tuple, TypedDict
+from typing import Dict, Iterable, List, TypedDict
 from addonmanager_utilities import (
     create_pip_call,
     run_interruptable_subprocess,
@@ -74,7 +74,7 @@ class CheckForPythonPackageUpdatesWorker(QtCore.QThread):
 
 def python_package_updates_are_available() -> bool:
     """Returns True if any of the Python packages installed into the AdditionalPythonPackages
-    directory have updates available, or False if they are all up-to-date."""
+    directory have updates available, or False if they are all up to date."""
 
     vendor_path = os.path.join(fci.DataPaths().data_dir, "AdditionalPythonPackages")
     package_counter = 0
@@ -229,8 +229,8 @@ class PythonPackageManager:
         self.dlg.exec()
 
     def _create_list_from_pip(self):
-        """Uses pip and pip -o to generate a list of installed packages, and creates the user
-        interface elements for those packages. Asynchronous, will complete AFTER the window is
+        """Uses pip and pip -o to generate a list of installed packages and creates the user
+        interface elements for those packages. Asynchronous: it will complete AFTER the window is
         showing in most cases."""
 
         self.worker_thread = QtCore.QThread()
@@ -419,7 +419,7 @@ class PythonPackageManager:
         return migrated
 
     @classmethod
-    def get_known_python_versions(cls) -> List[Tuple[int, int]]:
+    def get_known_python_versions(cls) -> List[List[int]]:
         """Get the list of Python versions that the Addon Manager has seen before."""
         known_python_versions_string = fci.Preferences().get("KnownPythonVersions")
         known_python_versions = json.loads(known_python_versions_string)
@@ -430,7 +430,8 @@ class PythonPackageManager:
         known_python_versions = cls.get_known_python_versions()
         major, minor, _ = platform.python_version_tuple()
         if not [major, minor] in known_python_versions:
-            known_python_versions.append((major, minor))
+            # Store this as a list, because we're going to serialize it with JSON
+            known_python_versions.append([int(major), int(minor)])
         fci.Preferences().set("KnownPythonVersions", json.dumps(known_python_versions))
 
     @classmethod
@@ -439,7 +440,7 @@ class PythonPackageManager:
         Python"""
         known_python_versions = cls.get_known_python_versions()
         major, minor, _ = platform.python_version_tuple()
-        if not [major, minor] in known_python_versions:
+        if not [int(major), int(minor)] in known_python_versions:
             return True
         return False
 

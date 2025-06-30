@@ -1,3 +1,4 @@
+import json
 import logging
 import subprocess
 import sys
@@ -32,6 +33,19 @@ class TestPythonPackageManager(unittest.TestCase):
         dialog_watcher = DialogWatcher("Manage Python Dependencies")
         self.manager.show()
         self.assertTrue(dialog_watcher.dialog_found, "Failed to find the expected dialog box")
+
+    @patch("addonmanager_python_deps_gui.fci.Preferences")
+    def test_get_known_python_versions(self, mock_preferences_class: MagicMock):
+        # Arrange
+        mock_preferences_instance = MagicMock()
+        mock_preferences_instance.get.return_value = json.dumps([[3, 8], [3, 9], [3, 10]])
+        mock_preferences_class.return_value = mock_preferences_instance
+
+        # Act
+        result = self.manager.get_known_python_versions()
+
+        # Assert
+        self.assertEqual(result, [[3, 8], [3, 9], [3, 10]])
 
 
 class TestPythonDepsStandaloneFunctions(unittest.TestCase):

@@ -33,19 +33,14 @@ import platform
 import shutil
 import stat
 import subprocess
+import sys
 import time
 import re
 import ctypes
 
 from urllib.parse import urlparse
 
-try:
-    from PySide import QtCore, QtGui, QtWidgets
-except ImportError:
-    try:
-        from PySide6 import QtCore, QtGui, QtWidgets
-    except ImportError:
-        from PySide2 import QtCore, QtGui, QtWidgets
+from PySideWrapper import QtCore, QtGui, QtWidgets
 
 import addonmanager_freecad_interface as fci
 
@@ -568,13 +563,19 @@ def remove_options_and_arg(call_args: List[str], deny_args: List[str]) -> List[s
     return call_args
 
 
+def in_venv():
+    return hasattr(sys, "real_prefix") or (
+        hasattr(sys, "base_prefix") and sys.base_prefix != sys.prefix
+    )
+
+
 def create_pip_call(args: List[str]) -> List[str]:
     """Choose the correct mechanism for calling pip on each platform. It currently supports
     either `python -m pip` (most environments) or `pip` (Snap packages). Returns a list
     of arguments suitable for passing directly to subprocess.Popen and related functions."""
     snap_package = os.getenv("SNAP_REVISION")
     appimage = os.getenv("APPIMAGE")
-    if snap_package:
+    if snap_package or in_venv():
         args = remove_options_and_arg(args, ["--target", "--path"])
         call_args = ["pip", "--disable-pip-version-check"]
         call_args.extend(args)
