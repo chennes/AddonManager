@@ -33,6 +33,7 @@ from PySideWrapper import QtGui, QtCore, QtWidgets, QtSvg
 from addonmanager_workers_startup import (
     CreateAddonListWorker,
     CheckWorkbenchesForUpdatesWorker,
+    PythonUpdateChecker,
     GetBasicAddonStatsWorker,
     GetAddonScoreWorker,
 )
@@ -546,7 +547,22 @@ class CommandAddonManager(QtCore.QObject):
         self.button_bar.check_for_updates.setEnabled(True)
 
     def check_python_updates(self) -> None:
-        # TODO: Run the checker to see if we need to do any Python updates as well
+        """Two different kinds of checks are run here: whether any installed python packages
+        have updates available, and whether any installed Addons are missing required python
+        packages."""
+        self.check_for_python_package_updates_worker = PythonUpdateChecker()
+        self.check_for_python_package_updates_worker.addons = self.item_model.repos
+        self.check_for_python_package_updates_worker.finished.connect(
+            self.check_python_updates_complete
+        )
+        self.check_for_python_package_updates_worker.start()
+
+    def check_python_updates_complete(self):
+        if self.check_for_python_package_updates_worker.python_updates_available:
+            # Do something with this information...
+            pass
+        if self.check_for_python_package_updates_worker.addons_missing_python_requirements:
+            dialog = fci.loadUi(os.path.join(os.path.dirname(__file__), "MissingDependencies.ui"))
         self.do_next_startup_phase()
 
     def show_python_updates_dialog(self) -> None:

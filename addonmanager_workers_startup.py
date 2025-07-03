@@ -40,6 +40,7 @@ from AddonStats import AddonStats
 import NetworkManager
 from addonmanager_git import initialize_git, GitFailed
 from addonmanager_metadata import MetadataReader, get_branch_from_metadata
+from addonmanager_python_deps import PythonPackageListModel
 import addonmanager_freecad_interface as fci
 
 translate = fci.translate
@@ -569,3 +570,36 @@ class GetAddonScoreWorker(QtCore.QThread):
                     fci.Console.PrintLog(
                         f"Failed to convert score value '{score}' to an integer for {addon.name}"
                     )
+
+
+class PythonUpdateChecker(QtCore.QThread):
+    """A worker class for checking to see if any Python package needs to be updated/installed."""
+
+    finished = QtCore.Signal()
+
+    def __init__(self, parent: QtCore.QObject = None):
+        super().__init__(parent)
+        self.addons = []
+        self.python_updates_available = False
+        self.addons_missing_python_requirements = {}
+
+    def run(self):
+        model = PythonPackageListModel(self.addons)
+        model.reset_package_list(force_synchronous=True)
+
+        if model.updates_are_available():
+            self.python_updates_available = True
+
+        for addon in self.addons:
+            if addon.installed_version is not None:
+                deps = model.determine_new_python_dependencies(addon)
+                if deps:
+                    self.addons_missing_python_requirements[addon.display_name] = deps
+
+        if not self.addons_missing_python_requirements:
+            # Fake for testing
+            self.addons_missing_python_requirements["Neato Addons"] = [
+                "numpy",
+                "scipy",
+                "matplotlib",
+            ]

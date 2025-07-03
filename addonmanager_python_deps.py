@@ -226,13 +226,13 @@ class PythonPackageListModel(QtCore.QAbstractTableModel):
         )
         return threaded
 
-    def reset_package_list(self):
+    def reset_package_list(self, force_synchronous: bool = False):
         """Reset the model: asynchronous if the GUI is running (that is, if QThreads can be used),
         otherwise synchronous."""
         self.beginResetModel()
         self.package_list.clear()
         self.reset_worker = AsynchronousResetWorker()
-        if self.can_use_thread():
+        if not force_synchronous and self.can_use_thread():
             self.reset_worker_thread = QtCore.QThread()
             self.reset_worker.moveToThread(self.reset_worker_thread)
             self.reset_worker_thread.started.connect(self.reset_worker.run)
