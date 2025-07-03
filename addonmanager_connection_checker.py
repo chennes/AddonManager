@@ -64,7 +64,7 @@ class ConnectionCheckerGUI(QtCore.QObject):
             self.connection_check_message = QtWidgets.QMessageBox(
                 QtWidgets.QMessageBox.Information,
                 translate("AddonsInstaller", "Checking connection"),
-                translate("AddonsInstaller", "Checking for connection to GitHub..."),
+                translate("AddonsInstaller", "Checking for connection to addons.freecad.org..."),
                 QtWidgets.QMessageBox.Cancel,
             )
             self.connection_check_message.buttonClicked.connect(self.cancel_network_check)

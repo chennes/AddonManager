@@ -59,7 +59,7 @@ class ConnectionChecker(QtCore.QThread):
         on it to spawn a child thread."""
 
         fci.Console.PrintLog("Checking network connection...\n")
-        url = "https://api.github.com/zen"
+        url = "https://addons.freecad.org/status"
         self.done = False
         NetworkManager.AM_NETWORK_MANAGER.completed.connect(self.connection_data_received)
         self.request_id = NetworkManager.AM_NETWORK_MANAGER.submit_unmonitored_get(
@@ -77,13 +77,12 @@ class ConnectionChecker(QtCore.QThread):
             self.failure.emit(
                 translate(
                     "AddonsInstaller",
-                    "Unable to read data from GitHub: check your internet connection and proxy "
-                    "settings and try again.",
+                    "Unable to read data from addons.freecad.org. The server may be down, or you may not be connected to the internet.",
                 )
             )
             self.disconnect_network_manager()
             return
-        fci.Console.PrintLog(f"GitHub's zen message response: {self.data.decode('utf-8')}\n")
+        fci.Console.PrintLog(f"FreeCAD Addon server response: {self.data.decode('utf-8')}\n")
         self.disconnect_network_manager()
         self.success.emit()
 
