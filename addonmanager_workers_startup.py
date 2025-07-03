@@ -230,7 +230,7 @@ class CreateAddonListWorker(QtCore.QThread):
             try:
                 addon = catalog.get_addon_from_id(addon_id, main[0])
                 self.addon_repo.emit(addon)
-            except RuntimeError as e:
+            except Exception as e:
                 fci.Console.PrintError(
                     f"Failed to load the addon {addon_id} from the addon catalog, skipping it.\n"
                 )
