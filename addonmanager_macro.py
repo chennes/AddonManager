@@ -151,6 +151,7 @@ class Macro:
         "rawcodeurl" found on the wiki page, that code is downloaded and used as the
         source."""
         code = ""
+        url = url.replace("freecadweb", "freecad")
         p = Macro.blocking_get(url)
         if not p:
             self._console.PrintWarning(
@@ -340,6 +341,7 @@ class Macro:
             if self.raw_code_url:
                 fetch_url = self.raw_code_url.rsplit("/", 1)[0] + "/" + other_file
                 self._console.PrintLog(f"Attempting to fetch {fetch_url}...\n")
+                fetch_url = fetch_url.replace("freecadweb", "freecad")
                 p = Macro.blocking_get(fetch_url)
                 if p:
                     with open(dst_file, "wb") as f:
@@ -391,6 +393,7 @@ class Macro:
         if wiki_icon.startswith("http"):
             # It's a File: wiki link. We can load THAT page and get the image from it...
             self._console.PrintLog(f"Found a File: link for macro {self.name} -- {wiki_icon}\n")
+            wiki_icon = wiki_icon.replace("freecadweb", "freecad")
             p = Macro.blocking_get(wiki_icon)
             if p:
                 p = p.decode("utf8")
