@@ -9,6 +9,7 @@ SET(AddonManager_SRCS
     Addon.py
     AddonManager.py
     AddonManager.ui
+    AddonCatalog.py
     AddonManagerOptions.py
     AddonManagerOptions.ui
     AddonManagerOptions_AddCustomRepository.ui
@@ -20,7 +21,6 @@ SET(AddonManager_SRCS
     PythonDependencyUpdateDialog.ui
     TestAddonManagerApp.py
     add_toolbar_button_dialog.ui
-    addonmanager_cache.py
     addonmanager_connection_checker.py
     addonmanager_dependency_installer.py
     addonmanager_devmode.py
@@ -43,6 +43,7 @@ SET(AddonManager_SRCS
     addonmanager_metadata.py
     addonmanager_package_details_controller.py
     addonmanager_preferences_defaults.json
+    addonmanager_python_deps.py
     addonmanager_python_deps_gui.py
     addonmanager_readme_controller.py
     addonmanager_toolbar_adapter.py
@@ -93,7 +94,6 @@ SET(AddonManagerTestsApp_SRCS
     AddonManagerTest/app/mocks.py
     AddonManagerTest/app/test_addon.py
     AddonManagerTest/app/test_addoncatalog.py
-    AddonManagerTest/app/test_cache.py
     AddonManagerTest/app/test_dependency_installer.py
     AddonManagerTest/app/test_freecad_interface.py
     AddonManagerTest/app/test_git.py
@@ -103,6 +103,7 @@ SET(AddonManagerTestsApp_SRCS
     AddonManagerTest/app/test_metadata.py
     AddonManagerTest/app/test_uninstaller.py
     AddonManagerTest/app/test_utilities.py
+    AddonManagerTest/app/test_workers_startup.py
 )
 
 SET(AddonManagerTestsGui_SRCS
@@ -122,7 +123,6 @@ SET(AddonManagerTestsGui_SRCS
     AddonManagerTest/gui/test_widget_search.py
     AddonManagerTest/gui/test_widget_view_control_bar.py
     AddonManagerTest/gui/test_widget_view_selector.py
-    AddonManagerTest/gui/test_workers_startup.py
     AddonManagerTest/gui/test_workers_utility.py
 )
 
