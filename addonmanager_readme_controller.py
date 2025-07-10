@@ -90,14 +90,13 @@ class ReadmeController(QtCore.QObject):
             translate("AddonsInstaller", "Loading page for {} from {}...").format(
                 self.addon.display_name, self.url
             )
-        )
-        if self.url[0] == '/':
-            if self.url[:3] == '.md':
+        if self.url[0] == "/":
+            if self.url[:3] == ".md":
                 self.readme_data_type = ReadmeDataType.Markdown
-            elif self.url[:5] == '.html':
+            elif self.url[:5] == ".html":
                 self.readme_data_type = ReadmeDataType.Html
 
-            self._process_package_download(''.join(open(self.url, 'r').readlines()))
+            self._process_package_download("".join(open(self.url, "r").readlines()))
         else:
             self.readme_request_index = NetworkManager.AM_NETWORK_MANAGER.submit_unmonitored_get(
                 self.url
