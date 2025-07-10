@@ -91,7 +91,7 @@ class ReadmeController(QtCore.QObject):
                 self.addon.display_name, self.url
             )
         )
-        if self.url[0]:
+        if self.url[0] == '/':
             if self.url[:3] == '.md':
                 self.readme_data_type = ReadmeDataType.Markdown
             elif self.url[:5] == '.html':
