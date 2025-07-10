@@ -90,6 +90,8 @@ class ReadmeController(QtCore.QObject):
             translate("AddonsInstaller", "Loading page for {} from {}...").format(
                 self.addon.display_name, self.url
             )
+        )
+
         if self.url[0] == "/":
             if self.url[:3] == ".md":
                 self.readme_data_type = ReadmeDataType.Markdown
