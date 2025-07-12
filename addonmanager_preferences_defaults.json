@@ -37,8 +37,6 @@
     "WindowHeight": 600,
     "WindowWidth": 800,
     "alwaysAskForToolbar": true,
-    "devModeLastSelectedLicense": "LGPLv2.1",
-    "developerMode": false,
     "disableGit": false,
     "dontShowAddMacroButtonDialog": false,
     "readWarning2022": false

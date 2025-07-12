@@ -49,10 +49,8 @@ from Addon import Addon
 from addonmanager_python_deps_gui import (
     PythonPackageManagerGui,
 )
-from addonmanager_devmode import DeveloperMode
 from addonmanager_firstrun import FirstRunDialog
 from addonmanager_connection_checker import ConnectionCheckerGUI
-from addonmanager_devmode_metadata_checker import MetadataValidators
 
 from addonmanager_metadata import MetadataReader
 
@@ -200,7 +198,6 @@ class CommandAddonManager(QtCore.QObject):
             )
 
         self.item_model = None
-        self.developer_mode = None
         self.installer_gui = None
         self.composite_view = None
         self.button_bar = None
@@ -289,15 +286,9 @@ class CommandAddonManager(QtCore.QObject):
         icon_path = os.path.join(os.path.dirname(__file__), "Resources", "icons")
         self.dialog.setWindowIcon(QtGui.QIcon(os.path.join(icon_path, "addon_manager.svg")))
 
-        dev_mode_active = fci.Preferences().get("developerMode")
-
         # enable/disable stuff
         self.button_bar.update_all_addons.setEnabled(False)
         self.hide_progress_widgets()
-        if dev_mode_active:
-            self.button_bar.developer_tools.show()
-        else:
-            self.button_bar.developer_tools.hide()
 
         # connect slots
         self.dialog.rejected.connect(self.reject)
@@ -309,7 +300,6 @@ class CommandAddonManager(QtCore.QObject):
         )
         self.button_bar.python_dependencies.triggered.connect(self.show_python_updates_dialog)
         self.button_bar.addons_folder.triggered.connect(self.open_addons_folder)
-        self.button_bar.developer_tools.clicked.connect(self.show_developer_tools)
         self.composite_view.package_list.stop_loading.connect(self.stop_update)
         self.composite_view.package_list.setEnabled(False)
         self.composite_view.execute.connect(self.execute_macro)
@@ -591,15 +581,6 @@ class CommandAddonManager(QtCore.QObject):
 
     def score_fetched_successfully(self):
         self.composite_view.package_list.ui.view_bar.set_rankings_available(True)
-
-    def show_developer_tools(self) -> None:
-        """Display the developer tools dialog"""
-        if not self.developer_mode:
-            self.developer_mode = DeveloperMode()
-        self.developer_mode.show()
-
-        checker = MetadataValidators()
-        checker.validate_all(self.item_model.repos)
 
     def add_addon_repo(self, addon_repo: Addon) -> None:
         """adds a workbench to the list"""
