@@ -93,9 +93,9 @@ class WidgetGlobalButtonBar(QtWidgets.QWidget):
         )
 
     def retranslateUi(self, _):
-        self.update_all_addons.setText(translate("AddonsInstaller", "Update all Addons"))
+        self.update_all_addons.setText(translate("AddonsInstaller", "Update All Addons"))
         self.check_for_updates.setText(translate("AddonsInstaller", "Check for Updates"))
-        self.python_dependencies.setText(translate("AddonsInstaller", "Open Python dependencies"))
+        self.python_dependencies.setText(translate("AddonsInstaller", "Open Python Dependencies"))
         self.addons_folder.setText(translate("AddonsFolder", "Open Addons Folder"))
         self.developer_tools.setText(translate("AddonsInstaller", "Developer Tools…"))
         self.close.setText(translate("AddonsInstaller", "Close"))
