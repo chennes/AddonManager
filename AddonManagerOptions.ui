@@ -415,22 +415,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="Gui::PrefCheckBox" name="guiprefcheckboxDeveloperMode">
-        <property name="toolTip">
-         <string>Activate Addon Manager options intended for developers of new addons</string>
-        </property>
-        <property name="text">
-         <string>Addon developer mode</string>
-        </property>
-        <property name="prefPath" stdset="0">
-         <cstring>Addons</cstring>
-        </property>
-        <property name="prefEntry" stdset="0">
-         <cstring>developerMode</cstring>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
