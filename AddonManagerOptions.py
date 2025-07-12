@@ -21,7 +21,7 @@
 # *                                                                         *
 # ***************************************************************************
 
-"""Contains a the Addon Manager's preferences dialog management class"""
+"""Contains the Addon Manager's preferences dialog management class"""
 
 import os
 
@@ -185,7 +185,7 @@ class CustomRepoDataModel(QtCore.QAbstractTableModel):
         self.load_model()
 
     def load_model(self):
-        """Load the data from the preferences entry"""
+        """Load the data from the preference entry"""
         pref_entry: str = self.pref.GetString("CustomRepositories", "")
 
         # The entry is saved as a space- and newline-delimited text block: break it into its
@@ -292,10 +292,10 @@ class CustomRepositoryDialog:
         )
 
     def exec(self):
-        """Run the dialog modally, and return either None or a tuple or (url,branch)"""
+        """Run the dialog as a modal, and return either None or a tuple of (url,branch)"""
         result = self.dialog.exec()
         if result == QtWidgets.QDialog.Accepted:
             url = self.dialog.urlLineEdit.text()
             branch = self.dialog.branchLineEdit.text()
-            return (url, branch)
-        return (None, None)
+            return url, branch
+        return None, None
