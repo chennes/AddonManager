@@ -193,11 +193,13 @@ class CacheWriter:
             with open(path_to_metadata, "r", encoding="utf-8") as f:
                 cache_entry.metadata_txt = f.read()
 
-        if os.path.exists(os.path.join(self.cwd, addon_id, ".git")):
+        dirname = CacheWriter.get_directory_name(addon_id, index, catalog_entry)
+        if os.path.exists(os.path.join(self.cwd, dirname, ".git")):
             old_dir = os.getcwd()
             os.chdir(os.path.join(self.cwd, addon_id))
             last_updated_time = CacheWriter.determine_last_commit_time()
-            cache_entry.last_update_time = last_updated_time.isoformat()
+            if last_updated_time:
+                catalog_entry.last_update_time = last_updated_time.isoformat()
             os.chdir(old_dir)
 
         return cache_entry
@@ -375,10 +377,15 @@ class CacheWriter:
     @staticmethod
     def determine_last_commit_time() -> datetime.datetime:
         """Executed on the current working directory. Returns the time of the last commit."""
-        command = ["git", "log", "-1", "--format=%cd"]
+        command = ["git", "log", "-1", "--format=%cd", "--date=iso-strict"]
         completed_process = subprocess.run(command, capture_output=True)
-        completed_process_output = completed_process.stdout.decode("utf-8")
-        return datetime.datetime.strptime(completed_process_output, "%Y-%m-%d %H:%M:%S %z")
+        completed_process_output = completed_process.stdout.decode("utf-8").strip()
+        try:
+            dt = datetime.datetime.fromisoformat(completed_process_output)
+        except ValueError:
+            print(f"ERROR: Failed to parse last commit time from {completed_process_output}")
+            dt = None
+        return dt
 
 
 if __name__ == "__main__":
