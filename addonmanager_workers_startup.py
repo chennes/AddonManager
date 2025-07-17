@@ -301,13 +301,11 @@ class CheckWorkbenchesForUpdatesWorker(QtCore.QThread):
             if repo.status() == Addon.Status.UNCHECKED:
                 if repo.repo_type == Addon.Kind.WORKBENCH:
                     checker.check_workbench(repo)
-                    self.update_status.emit(repo)
                 elif repo.repo_type == Addon.Kind.MACRO:
                     checker.check_macro(repo)
-                    self.update_status.emit(repo)
                 elif repo.repo_type == Addon.Kind.PACKAGE:
                     checker.check_package(repo)
-                    self.update_status.emit(repo)
+            self.update_status.emit(repo)
 
 
 class UpdateChecker:

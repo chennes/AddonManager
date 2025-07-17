@@ -493,13 +493,12 @@ class PackageListItemDelegate(QtWidgets.QStyledItemDelegate):
             else:
                 installed_version_string = "<br/>" + translate("AddonsInstaller", "Unknown version")
 
-        installed_date_string = ""
         if repo.updated_timestamp:
-            installed_date_string = "<br/>" + translate("AddonsInstaller", "Installed on") + ": "
-            installed_date_string += QtCore.QLocale().toString(
+            installed_date_string = QtCore.QLocale().toString(
                 QtCore.QDateTime.fromSecsSinceEpoch(int(round(repo.updated_timestamp, 0))),
                 QtCore.QLocale.ShortFormat,
             )
+            installed_version_string += " (" + installed_date_string + ")"
 
         available_version_string = ""
         if repo.metadata:
@@ -508,18 +507,27 @@ class PackageListItemDelegate(QtWidgets.QStyledItemDelegate):
             )
             available_version_string += str(repo.metadata.version)
 
+        remote_updated_date_string = ""
+        if repo.remote_last_updated:
+            py_dt = repo.remote_last_updated
+            q_date = QtCore.QDate(py_dt.year, py_dt.month, py_dt.day)
+            q_time = QtCore.QTime(py_dt.hour, py_dt.minute, py_dt.second, py_dt.microsecond // 1000)
+            q_dt = QtCore.QDateTime(q_date, q_time)
+            remote_updated_date_string = QtCore.QLocale().toString(
+                q_dt,
+                QtCore.QLocale.ShortFormat,
+            )
+            available_version_string += " (" + remote_updated_date_string + ")"
+
         if repo.status() == Addon.Status.UNCHECKED:
             result = translate("AddonsInstaller", "Installed")
             result += installed_version_string
-            result += installed_date_string
         elif repo.status() == Addon.Status.NO_UPDATE_AVAILABLE:
             result = translate("AddonsInstaller", "Up-to-date")
             result += installed_version_string
-            result += installed_date_string
         elif repo.status() == Addon.Status.UPDATE_AVAILABLE:
             result = translate("AddonsInstaller", "Update available")
             result += installed_version_string
-            result += installed_date_string
             result += available_version_string
         elif repo.status() == Addon.Status.PENDING_RESTART:
             result = translate("AddonsInstaller", "Pending restart")
