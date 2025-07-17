@@ -23,6 +23,7 @@
 
 """Defines the Addon class to encapsulate information about FreeCAD Addons"""
 
+import datetime
 import os
 import re
 from urllib.parse import urlparse
@@ -173,6 +174,7 @@ class Addon:
         self.repo_type = Addon.Kind.WORKBENCH
         self.description = None
         self.tags = set()  # Just a cache, loaded from Metadata
+        self.remote_last_updated: Optional[datetime.datetime] = None
         self.last_updated = None
         self.stats = AddonStats()
         self.score = 0

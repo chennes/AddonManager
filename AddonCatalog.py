@@ -25,6 +25,7 @@
 sources and compatible versions. Added in FreeCAD 1.1 to replace .gitmodules."""
 
 import base64
+import datetime
 import os
 import xml.etree.ElementTree
 from dataclasses import dataclass
@@ -127,13 +128,8 @@ class AddonCatalogEntry:
 
     def instantiate_addon(self, addon_id: str) -> Addon:
         """Return an instantiated Addon object"""
-        addon_dir = os.path.join(fci.DataPaths().mod_dir, addon_id)
-        last_modified = None
-        if os.path.exists(addon_dir) and os.listdir(addon_dir):
-            # make sure the folder exists and it contains files!
+        if AddonCatalogEntry.is_installed(addon_id):
             state = Addon.Status.UNCHECKED
-            if os.path.exists(os.path.join(addon_dir, "package.xml")):
-                last_modified = os.path.getmtime(os.path.join(addon_dir, "package.xml"))
         else:
             state = Addon.Status.NOT_INSTALLED
         url = self.repository if self.repository else self.zip_url
@@ -141,8 +137,22 @@ class AddonCatalogEntry:
             addon = Addon(addon_id, url, state, branch=self.git_ref)
         else:
             addon = Addon(addon_id, url, state)
-        if last_modified:
-            addon.updated_timestamp = last_modified
+        try:
+            addon.remote_last_updated = datetime.datetime.fromisoformat(self.last_update_time)
+        except ValueError:
+            addon.remote_last_updated = datetime.datetime.fromtimestamp(0).astimezone()
+        if state == Addon.Status.UNCHECKED:
+            try:
+                package_file = os.path.join(fci.DataPaths().mod_dir, addon_id, "package.xml")
+                addon.installed_metadata = MetadataReader.from_file(package_file)
+            except (FileNotFoundError, xml.etree.ElementTree.ParseError, RuntimeError):
+                pass  # If there was an error, just ignore it, no metadata is not fatal
+            most_recent_mtime = AddonCatalogEntry.most_recent_mtime(addon_id)
+            addon.updated_timestamp = most_recent_mtime.timestamp()
+            if most_recent_mtime < addon.remote_last_updated:
+                addon.set_status(Addon.Status.UPDATE_AVAILABLE)
+            else:
+                addon.set_status(Addon.Status.NO_UPDATE_AVAILABLE)
 
         if self.metadata:
             try:
@@ -152,6 +162,30 @@ class AddonCatalogEntry:
                     "An invalid or corrupted package.xml file was installed for"
                 )
         return addon
+
+    @staticmethod
+    def is_installed(addon_id: str) -> bool:
+        """Check if the addon is installed"""
+        addon_dir = os.path.join(fci.DataPaths().mod_dir, addon_id)
+        return os.path.exists(addon_dir) and os.listdir(addon_dir)
+
+    @staticmethod
+    def most_recent_mtime(addon_id: str) -> datetime.datetime:
+        """Get the last update time of the addon by checking the modification time of all its
+        files and returning the latest one."""
+        if not AddonCatalogEntry.is_installed(addon_id):
+            return datetime.datetime.fromtimestamp(0).astimezone()
+        addon_dir = os.path.join(fci.DataPaths().mod_dir, addon_id)
+        max_time = datetime.datetime.fromtimestamp(0).astimezone()
+        for root, dirs, files in os.walk(addon_dir):
+            dirs[:] = [d for d in dirs if d != ".git"]
+            for file in files:
+                file_path = os.path.join(root, file)
+                file_timestamp = os.path.getmtime(file_path)
+                file_time = datetime.datetime.fromtimestamp(file_timestamp).astimezone()
+                if file_time > max_time:
+                    max_time = file_time
+        return max_time
 
     def _load_addon_metadata(self, addon: Addon, cem: CatalogEntryMetadata):
         if cem.package_xml:
