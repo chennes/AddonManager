@@ -196,7 +196,7 @@ class CacheWriter:
         dirname = CacheWriter.get_directory_name(addon_id, index, catalog_entry)
         if os.path.exists(os.path.join(self.cwd, dirname, ".git")):
             old_dir = os.getcwd()
-            os.chdir(os.path.join(self.cwd, addon_id))
+            os.chdir(os.path.join(self.cwd, dirname))
             last_updated_time = CacheWriter.determine_last_commit_time()
             if last_updated_time:
                 catalog_entry.last_update_time = last_updated_time.isoformat()
