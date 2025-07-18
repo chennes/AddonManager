@@ -24,11 +24,11 @@
 
 """Unified handler for FreeCAD macros that can be obtained from different sources."""
 import base64
+import binascii
 import os
 import re
 import io
 import codecs
-import shutil
 from html import unescape
 from typing import Dict, Tuple, List, Union, Optional
 
@@ -92,7 +92,10 @@ class Macro:
         instance = Macro(cache_dict["name"])
         for key, value in cache_dict.items():
             if key == "icon_data" and value is not None:
-                value = base64.b64decode(value)
+                try:
+                    value = base64.b64decode(value)
+                except binascii.Error as e:
+                    fci.Console.PrintWarning(f"Failed to decode macro icon data: {e}\n")
             instance.__dict__[key] = value
         return instance
 
@@ -316,8 +319,12 @@ class Macro:
                 f.write(self.xpm)
         if self.icon and self.icon_data:
             filename = self.icon.rsplit("/", 1)[-1]
-            with open(os.path.join(macro_dir, filename), "wb") as f:
-                f.write(base64.b64decode(self.icon_data))
+            try:
+                with open(os.path.join(macro_dir, filename), "wb") as f:
+                    f.write(base64.b64decode(self.icon_data))
+            except (OSError, UnicodeDecodeError, binascii.Error) as e:
+                warnings.append(f"Failed to create {filename}")
+                fci.Console.PrintWarning(f"Failed to create {filename}: {e}\n")
 
     def _copy_other_files(self, macro_dir, warnings) -> bool:
         """Copy any specified "other files" into the installation directory"""
@@ -331,7 +338,7 @@ class Macro:
                 os.makedirs(os.path.dirname(full_path), exist_ok=True)
                 with open(full_path, "wb") as f:
                     f.write(base64.b64decode(data))
-            except (OSError, UnicodeDecodeError) as e:
+            except (OSError, UnicodeDecodeError, binascii.Error) as e:
                 warnings.append(f"Failed to create {filename}")
         return True  # No fatal errors, but some files may have failed to copy
 
