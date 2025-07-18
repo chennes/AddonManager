@@ -98,7 +98,8 @@ class ReadmeController(QtCore.QObject):
             elif self.url[:5] == ".html":
                 self.readme_data_type = ReadmeDataType.Html
 
-            self._process_package_download("".join(open(self.url, "r").readlines()))
+            with open(self.url, "r") as fd:
+              self._process_package_download("".join(fd.readlines()))
         else:
             self.readme_request_index = NetworkManager.AM_NETWORK_MANAGER.submit_unmonitored_get(
                 self.url
