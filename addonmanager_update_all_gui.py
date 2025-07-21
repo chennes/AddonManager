@@ -29,18 +29,12 @@ from typing import List
 
 import addonmanager_freecad_interface as fci
 
-# Get whatever version of PySide we can
-try:
-    from PySide import QtCore, QtWidgets  # Use the FreeCAD wrapper
-except ImportError:
-    try:
-        from PySide6 import QtCore, QtWidgets  # Outside FreeCAD, try Qt6 first
-    except ImportError:
-        from PySide2 import QtCore, QtWidgets  # Fall back to Qt5
-
-from Addon import Addon
-
+from Addon import Addon, MissingDependencies
+from addonmanager_installer_gui import AddonDependencyInstallerGUI
 from addonmanager_installer import AddonInstaller, MacroInstaller
+
+from PySideWrapper import QtCore, QtWidgets
+
 
 translate = fci.translate
 
@@ -157,7 +151,9 @@ class UpdateAllGUI(QtCore.QObject):
         self.dialog.tableWidget.setItem(new_row, 0, new_item)
         if addon.installed_metadata and addon.installed_metadata.version:
             self.dialog.tableWidget.setItem(
-                new_row, 1, QtWidgets.QTableWidgetItem(str(addon.installed_metadata.version))
+                new_row,
+                1,
+                QtWidgets.QTableWidgetItem(str(addon.installed_metadata.version)),
             )
         self.dialog.tableWidget.setItem(new_row, 2, QtWidgets.QTableWidgetItem(""))
         self.dialog.tableWidget.setItem(new_row, 3, QtWidgets.QTableWidgetItem(""))
@@ -245,3 +241,185 @@ class UpdateAllGUI(QtCore.QObject):
     def is_running(self):
         """True if the thread is running, and False if not"""
         return self.running
+
+
+class UpdateAllGUIv2(QtCore.QObject):
+    """A GUI to display and manage an "update all" process."""
+
+    finished = QtCore.Signal()
+    addon_updated = QtCore.Signal(object)
+
+    def __init__(self, addons: List[Addon]):
+        super().__init__()
+        self.model = UpdatesAvailableModel(addons)
+        self.dialog = fci.loadUi(os.path.join(os.path.dirname(__file__), "update_all_v2.ui"))
+        self.dialog.table_view.setModel(self.model)
+        self.dialog.update_button.clicked.connect(self.update_button_clicked)
+        self.in_process_row = None
+        self.active_installer = None
+        self.worker_thread = None
+        self.running = False
+        self.cancelled = False
+
+        self.dependency_installer = None
+
+        self.dialog.table_view.horizontalHeader().setStretchLastSection(False)
+        self.dialog.table_view.horizontalHeader().setSectionResizeMode(
+            0, QtWidgets.QHeaderView.Stretch
+        )
+        self.dialog.table_view.horizontalHeader().setSectionResizeMode(
+            1, QtWidgets.QHeaderView.ResizeToContents
+        )
+        self.dialog.table_view.horizontalHeader().setSectionResizeMode(
+            2, QtWidgets.QHeaderView.ResizeToContents
+        )
+        self.dialog.table_view.horizontalHeader().setSectionResizeMode(
+            3, QtWidgets.QHeaderView.ResizeToContents
+        )
+
+    def run(self):
+        """Runs the update selection modal dialog."""
+        self.running = True
+        self.dialog.show()
+
+    def update_button_clicked(self):
+        """Runs the updater on all the selected addons. First checks to see if there are any
+        dependencies that need to be installed. If so, it prompts the user to confirm that they
+        want to install them."""
+        required_wbs = set()
+        required_addons = set()
+        required_python_modules = set()
+        optional_python_modules = set()
+        addons_selected = []
+        for checked, addon in zip(self.model.row_is_checked, self.model.addons_with_update):
+            if checked:
+                fci.Console.PrintMessage(f"Preparing to update {addon.display_name}\n")
+                addons_selected.append(addon)
+                missing_deps = MissingDependencies(addon, self.model.addons)
+                required_wbs.update(missing_deps.wbs)
+                required_addons.update(missing_deps.external_addons)
+                required_python_modules.update(missing_deps.python_requires)
+                optional_python_modules.update(missing_deps.python_optional)
+
+        if required_addons or required_python_modules or optional_python_modules:
+            fci.Console.PrintMessage(
+                f"Found unsatisfied dependencies for the requested addon updates\n"
+            )
+            if required_addons:
+                fci.Console.PrintMessage(f"  Required Addons: {required_addons}\n")
+            if required_python_modules:
+                fci.Console.PrintMessage(f"  Required Python Modules: {required_python_modules}\n")
+            if optional_python_modules:
+                fci.Console.PrintMessage(f"  Optional Python Modules: {optional_python_modules}\n")
+            self.handle_missing_dependencies(
+                addons_selected,
+                required_wbs,
+                required_addons,
+                required_python_modules,
+                optional_python_modules,
+            )
+        else:
+            fci.Console.PrintMessage("No unsatisfied dependencies found, continuing with update\n")
+            self.proceed()
+
+    def handle_missing_dependencies(
+        self,
+        addons,
+        required_wbs,
+        required_addons,
+        required_python_modules,
+        optional_python_modules,
+    ):
+        missing_dependencies = MissingDependencies(Addon("Dummy addon"), [])
+        missing_dependencies.wbs = required_wbs
+        missing_dependencies.external_addons = required_addons
+        missing_dependencies.python_requires = required_python_modules
+        missing_dependencies.python_optional = optional_python_modules
+        self.dependency_installer = AddonDependencyInstallerGUI(addons, missing_dependencies)
+        self.dependency_installer.cancel.connect(self.cancel)
+        self.dependency_installer.proceed.connect(self.proceed)
+        self.dependency_installer.run()
+
+    def proceed(self):
+        """Does the updates"""
+        self.finished.emit()
+
+    def cancel(self):
+        """Cancels the updates"""
+        self.cancelled = True
+        self.finished.emit()
+
+
+class UpdatesAvailableModel(QtCore.QAbstractTableModel):
+    """A model to display the list of updates available"""
+
+    def __init__(self, addons: List[Addon]):
+        super().__init__()
+        self.addons = addons
+        self.addons_with_update: List[Addon] = []
+        self.row_is_checked: List[bool] = []
+        self.headers = [
+            translate("AddonsInstaller", "Name", "Column header"),
+            translate("AddonsInstaller", "Installed Version", "Column header"),
+            translate("AddonsInstaller", "Available Version", "Column header"),
+            translate("AddonsInstaller", "Update?", "Column header"),
+        ]
+        self.check_for_updates()
+
+    def check_for_updates(self):
+        for addon in self.addons:
+            if addon.status() == Addon.Status.UPDATE_AVAILABLE:
+                self.addons_with_update.append(addon)
+                self.row_is_checked.append(True)
+
+    def rowCount(self, parent=QtCore.QModelIndex()):
+        if parent.isValid():
+            return 0
+        return len(self.addons_with_update)
+
+    def columnCount(self, parent=QtCore.QModelIndex()):
+        if parent.isValid():
+            return 0
+        return len(self.headers)
+
+    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.DisplayRole):
+        if not index.isValid():
+            return None
+        if role == QtCore.Qt.DisplayRole:
+            addon = self.addons_with_update[index.row()]
+            if index.column() == 0:
+                return addon.display_name
+            if index.column() == 1:
+                return str(addon.installed_metadata.version) if addon.installed_metadata else ""
+            if index.column() == 2:
+                return str(addon.metadata.version) if addon.metadata else ""
+        elif role == QtCore.Qt.CheckStateRole and index.column() == 3:
+            return QtCore.Qt.Checked if self.row_is_checked[index.row()] else QtCore.Qt.Unchecked
+        return None
+
+    def flags(self, index: QtCore.QModelIndex):
+        if not index.isValid():
+            return QtCore.Qt.NoItemFlags
+
+        if index.column() == 3:
+            return (
+                QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEditable
+            )
+
+        return QtCore.Qt.NoItemFlags
+
+    def setData(self, index: QtCore.QModelIndex, value, role: int = QtCore.Qt.EditRole):
+        if not index.isValid():
+            return False
+
+        if index.column() == 3 and role == QtCore.Qt.CheckStateRole:
+            self.row_is_checked[index.row()] = QtCore.Qt.CheckState(value) == QtCore.Qt.Checked
+            self.dataChanged.emit(index, index, [QtCore.Qt.CheckStateRole])
+            return True
+
+        return False
+
+    def headerData(self, section, orientation, role):
+        if role == QtCore.Qt.DisplayRole and orientation == QtCore.Qt.Horizontal:
+            return self.headers[section]
+        return None

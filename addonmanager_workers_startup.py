@@ -214,7 +214,7 @@ class CreateAddonListWorker(QtCore.QThread):
                 fci.Console.PrintWarning(
                     translate(
                         "AddonsInstaller",
-                        "WARNING: User-provided custom addon {} is overriding the one in the official addon catalog",
+                        "WARNING: User-provided custom addon {} is overriding the one in the official addon catalog\n",
                     ).format(addon_id)
                 )
                 continue
