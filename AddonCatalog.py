@@ -39,6 +39,9 @@ from Addon import Addon
 import addonmanager_freecad_interface as fci
 
 
+INVALID_TIME = datetime.datetime.fromtimestamp(0, tz=datetime.timezone.utc).astimezone()
+
+
 @dataclass
 class CatalogEntryMetadata:
     """All contents of the metadata are the text contents of the file listed. The icon data is
@@ -140,13 +143,14 @@ class AddonCatalogEntry:
         try:
             addon.remote_last_updated = datetime.datetime.fromisoformat(self.last_update_time)
         except ValueError:
-            addon.remote_last_updated = datetime.datetime.fromtimestamp(0).astimezone()
+            addon.remote_last_updated = INVALID_TIME
         if state == Addon.Status.UNCHECKED:
             try:
                 package_file = os.path.join(fci.DataPaths().mod_dir, addon_id, "package.xml")
                 addon.installed_metadata = MetadataReader.from_file(package_file)
             except (FileNotFoundError, xml.etree.ElementTree.ParseError, RuntimeError):
                 pass  # If there was an error, just ignore it, no metadata is not fatal
+
             most_recent_mtime = AddonCatalogEntry.most_recent_mtime(addon_id)
             addon.updated_timestamp = most_recent_mtime.timestamp()
             if most_recent_mtime < addon.remote_last_updated:
@@ -174,14 +178,17 @@ class AddonCatalogEntry:
         """Get the last update time of the addon by checking the modification time of all its
         files and returning the latest one."""
         if not AddonCatalogEntry.is_installed(addon_id):
-            return datetime.datetime.fromtimestamp(0).astimezone()
+            return INVALID_TIME
         addon_dir = os.path.join(fci.DataPaths().mod_dir, addon_id)
-        max_time = datetime.datetime.fromtimestamp(0).astimezone()
+        max_time = INVALID_TIME
         for root, dirs, files in os.walk(addon_dir):
             dirs[:] = [d for d in dirs if d != ".git"]
             for file in files:
                 file_path = os.path.join(root, file)
-                file_timestamp = os.path.getmtime(file_path)
+                try:
+                    file_timestamp = os.path.getmtime(file_path)
+                except OSError:
+                    continue
                 file_time = datetime.datetime.fromtimestamp(file_timestamp).astimezone()
                 if file_time > max_time:
                     max_time = file_time
