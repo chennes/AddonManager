@@ -177,7 +177,7 @@ class AddonInstaller(QtCore.QObject):
 
     @classmethod
     def _load_local_allowed_packages_list(cls) -> None:
-        """Read in the local allow-list, in case the remote one is unavailable."""
+        """Read in the local allowlist, in case the remote one is unavailable."""
         cls.allowed_packages.clear()
         allow_file = os.path.join(os.path.dirname(__file__), "ALLOWED_PYTHON_PACKAGES.txt")
         if os.path.exists(allow_file):
@@ -201,7 +201,7 @@ class AddonInstaller(QtCore.QObject):
             )
             p = p.decode("utf8")
             lines = p.split("\n")
-            cls.allowed_packages.clear()  # Unset the locally-defined list
+            cls.allowed_packages.clear()  # Unset the locally defined list
             for line in lines:
                 if line and len(line) > 0 and line[0] != "#":
                     cls.allowed_packages.add(line.strip().lower())

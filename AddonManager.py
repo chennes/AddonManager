@@ -38,7 +38,7 @@ from addonmanager_workers_startup import (
 )
 from addonmanager_installer_gui import AddonInstallerGUI, MacroInstallerGUI
 from addonmanager_uninstaller_gui import AddonUninstallerGUI
-from addonmanager_update_all_gui import UpdateAllGUI, UpdateAllGUIv2
+from addonmanager_update_all_gui import UpdateAllGUIv2
 import addonmanager_utilities as utils
 import addonmanager_freecad_interface as fci
 from composite_view import CompositeView

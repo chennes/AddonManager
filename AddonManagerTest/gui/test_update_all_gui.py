@@ -34,7 +34,7 @@ except ImportError:
     except ImportError:
         from PySide2 import QtCore, QtWidgets
 
-from addonmanager_update_all_gui import UpdateAllGUI, AddonStatus
+from addonmanager_update_all_gui import AddonStatus
 
 
 class MockUpdater(QtCore.QObject):

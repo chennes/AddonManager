@@ -27,13 +27,12 @@ from enum import IntEnum, auto
 import os
 from typing import List
 
-import addonmanager_freecad_interface as fci
+from PySideWrapper import QtCore, QtWidgets
 
+import addonmanager_freecad_interface as fci
 from Addon import Addon, MissingDependencies
 from addonmanager_installer_gui import AddonDependencyInstallerGUI
 from addonmanager_installer import AddonInstaller, MacroInstaller
-
-from PySideWrapper import QtCore, QtWidgets
 
 
 translate = fci.translate
@@ -43,7 +42,7 @@ translate = fci.translate
 
 class UpdaterFactory:
     """A factory class for generating updaters. Mainly exists to allow easily mocking
-    those updaters during testing. A replacement class need only provide a
+    those updaters during testing. A replacement class only needs to provide a
     "get_updater" function that returns mock updater objects. Those objects must be
     QObjects with a run() function and a finished signal."""
 
@@ -79,105 +78,35 @@ class AddonStatus(IntEnum):
         return "[INTERNAL ERROR]"
 
 
-class UpdateAllGUI(QtCore.QObject):
-    """A GUI to display and manage an "update all" process."""
+class UpdateAllWorker(QtCore.QObject):
+    """A worker to run the "update all" process. Do not run on the main GUI thread."""
 
     finished = QtCore.Signal()
     addon_updated = QtCore.Signal(object)
 
-    index_role = QtCore.Qt.UserRole + 1
-
     def __init__(self, addons: List[Addon]):
         super().__init__()
         self.addons = addons
-        self.dialog = fci.loadUi(os.path.join(os.path.dirname(__file__), "update_all.ui"))
-        self.row_map = {}
-        self.in_process_row = None
         self.active_installer = None
-        self.addons_with_update: List[Addon] = []
         self.updater_factory = UpdaterFactory(addons)
-        self.worker_thread = None
         self.running = False
         self.cancelled = False
+        self.currentIndex = 0
 
     def run(self):
-        """Run the Update All process. Blocks until updates are complete or
-        cancelled."""
+        """Run the Update All process. Blocks until updates are complete or cancelled."""
         self.running = True
-        self._setup_dialog()
-        self.dialog.show()
+        self.currentIndex = 0
         self._process_next_update()
 
-    def _setup_dialog(self):
-        """Prepare the dialog for display"""
-        self.dialog.rejected.connect(self._cancel_installation)
-        self.dialog.tableWidget.clear()
-        self.in_process_row = None
-        self.row_map = {}
-        self._setup_empty_table()
-        counter = 0
-        for addon in self.addons:
-            if addon.status() == Addon.Status.UPDATE_AVAILABLE:
-                self._add_addon_to_table(addon, counter)
-                self.addons_with_update.append(addon)
-            counter += 1
-
-    def _cancel_installation(self):
+    def cancel(self):
         self.cancelled = True
-        if self.worker_thread and self.worker_thread.isRunning():
-            self.worker_thread.requestInterruption()
-
-    def _setup_empty_table(self):
-        self.dialog.tableWidget.setColumnCount(4)
-        self.dialog.tableWidget.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.dialog.tableWidget.horizontalHeader().setSectionResizeMode(
-            1, QtWidgets.QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.dialog.tableWidget.horizontalHeader().setSectionResizeMode(
-            2, QtWidgets.QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.dialog.tableWidget.horizontalHeader().setSectionResizeMode(
-            3, QtWidgets.QHeaderView.ResizeMode.Stretch
-        )
-
-    def _add_addon_to_table(self, addon: Addon, index: int):
-        """Add the given addon to the list, storing its index as user data in the first column"""
-        new_row = self.dialog.tableWidget.rowCount()
-        self.dialog.tableWidget.setRowCount(new_row + 1)
-        new_item = QtWidgets.QTableWidgetItem(addon.display_name)
-        new_item.setData(UpdateAllGUI.index_role, index)  # Only first item in each row needs data()
-        self.dialog.tableWidget.setItem(new_row, 0, new_item)
-        if addon.installed_metadata and addon.installed_metadata.version:
-            self.dialog.tableWidget.setItem(
-                new_row,
-                1,
-                QtWidgets.QTableWidgetItem(str(addon.installed_metadata.version)),
-            )
-        self.dialog.tableWidget.setItem(new_row, 2, QtWidgets.QTableWidgetItem(""))
-        self.dialog.tableWidget.setItem(new_row, 3, QtWidgets.QTableWidgetItem(""))
-        self.row_map[addon.name] = new_row
-
-    def _update_addon_status(self, row: int, status: AddonStatus):
-        """Update the GUI to reflect this addon's new status."""
-        self.dialog.tableWidget.item(row, 2).setText(status.ui_string())
-        if status == AddonStatus.SUCCEEDED and self.addons[row].metadata:
-            self.dialog.tableWidget.item(row, 2).setText(status.ui_string() + " →")
-            index = self.dialog.tableWidget.item(row, 0).data(UpdateAllGUI.index_role)
-            addon = self.addons[index]
-            if addon.metadata and addon.metadata.version:
-                self.dialog.tableWidget.item(row, 3).setText(str(addon.metadata.version))
 
     def _process_next_update(self):
         """Grab the next addon in the list and start its updater."""
-        if self.addons_with_update:
-            addon = self.addons_with_update.pop(0)
-            self.in_process_row = self.row_map[addon.name] if addon.name in self.row_map else None
-            self._update_addon_status(self.in_process_row, AddonStatus.INSTALLING)
-            self.dialog.tableWidget.scrollToItem(
-                self.dialog.tableWidget.item(self.in_process_row, 0)
-            )
+        if not self.cancelled and self.currentIndex < len(self.addons):
+            addon = self.addons[self.currentIndex]
+            self.currentIndex += 1
             self.active_installer = self.updater_factory.get_updater(addon)
             self._launch_active_installer()
         else:
@@ -189,28 +118,17 @@ class UpdateAllGUI(QtCore.QObject):
         self.active_installer.success.connect(self._update_succeeded)
         self.active_installer.failure.connect(self._update_failed)
         self.active_installer.finished.connect(self._update_finished)
-
-        self.worker_thread = QtCore.QThread()
-        self.worker_thread.setObjectName("UpdateAllGUI worker thread")
-        self.active_installer.moveToThread(self.worker_thread)
-        self.worker_thread.started.connect(self.active_installer.run)
-        self.worker_thread.start()
+        self.active_installer.run()
 
     def _update_succeeded(self, addon):
         """Callback for a successful update"""
-        self._update_addon_status(self.row_map[addon.name], AddonStatus.SUCCEEDED)
         self.addon_updated.emit(addon)
 
     def _update_failed(self, addon):
-        """Callback for a failed update"""
-        self._update_addon_status(self.row_map[addon.name], AddonStatus.FAILED)
+        """Callback for a failed update - does nothing at present"""
 
     def _update_finished(self):
         """Callback for updater that has finished all its work"""
-        if self.worker_thread is not None and self.worker_thread.isRunning():
-            self.worker_thread.quit()
-            self.worker_thread.wait()
-        self.addon_updated.emit(self.active_installer.addon_to_install)
         if not self.cancelled:
             self._process_next_update()
         else:
@@ -218,25 +136,12 @@ class UpdateAllGUI(QtCore.QObject):
 
     def _finalize(self):
         """No more updates, clean up and shut down"""
-        if self.worker_thread is not None and self.worker_thread.isRunning():
-            self.worker_thread.quit()
-            self.worker_thread.wait()
-        text = translate("Addons installer", "Finished updating the following addons")
-        self._set_dialog_to_final_state(text)
         self.running = False
         self.finished.emit()
 
     def _setup_cancelled_state(self):
-        text1 = translate("AddonsInstaller", "Update was cancelled")
-        text2 = translate("AddonsInstaller", "some addons may have been updated")
-        self._set_dialog_to_final_state(text1 + ": " + text2)
         self.running = False
         self.finished.emit()
-
-    def _set_dialog_to_final_state(self, new_content):
-        self.dialog.buttonBox.clear()
-        self.dialog.buttonBox.addButton(QtWidgets.QDialogButtonBox.Close)
-        self.dialog.label.setText(new_content)
 
     def is_running(self):
         """True if the thread is running, and False if not"""
@@ -252,11 +157,17 @@ class UpdateAllGUIv2(QtCore.QObject):
     def __init__(self, addons: List[Addon]):
         super().__init__()
         self.model = UpdatesAvailableModel(addons)
+        self.model.dataChanged.connect(self.model_changed)
         self.dialog = fci.loadUi(os.path.join(os.path.dirname(__file__), "update_all_v2.ui"))
         self.dialog.table_view.setModel(self.model)
         self.dialog.update_button.clicked.connect(self.update_button_clicked)
+        self.progress_dialog = fci.loadUi(
+            os.path.join(os.path.dirname(__file__), "update_all_progress.ui")
+        )
+        self.progress_dialog.buttonBox.rejected.connect(self.cancel)
+
         self.in_process_row = None
-        self.active_installer = None
+        self.addon_installer = None
         self.worker_thread = None
         self.running = False
         self.cancelled = False
@@ -276,6 +187,10 @@ class UpdateAllGUIv2(QtCore.QObject):
         self.dialog.table_view.horizontalHeader().setSectionResizeMode(
             3, QtWidgets.QHeaderView.ResizeToContents
         )
+        self.dialog.table_view.horizontalHeader().setSectionResizeMode(
+            4, QtWidgets.QHeaderView.ResizeToContents
+        )
+        self.dialog.table_view.hideColumn(4)
 
     def run(self):
         """Runs the update selection modal dialog."""
@@ -291,11 +206,12 @@ class UpdateAllGUIv2(QtCore.QObject):
         required_python_modules = set()
         optional_python_modules = set()
         addons_selected = []
-        for checked, addon in zip(self.model.row_is_checked, self.model.addons_with_update):
+        for checked, addon in zip(self.model.update_is_checked, self.model.addons_with_update):
             if checked:
                 fci.Console.PrintMessage(f"Preparing to update {addon.display_name}\n")
                 addons_selected.append(addon)
-                missing_deps = MissingDependencies(addon, self.model.addons)
+                missing_deps = MissingDependencies()
+                missing_deps.import_from_addon(addon, self.model.addons)
                 required_wbs.update(missing_deps.wbs)
                 required_addons.update(missing_deps.external_addons)
                 required_python_modules.update(missing_deps.python_requires)
@@ -330,7 +246,7 @@ class UpdateAllGUIv2(QtCore.QObject):
         required_python_modules,
         optional_python_modules,
     ):
-        missing_dependencies = MissingDependencies(Addon("Dummy addon"), [])
+        missing_dependencies = MissingDependencies()
         missing_dependencies.wbs = required_wbs
         missing_dependencies.external_addons = required_addons
         missing_dependencies.python_requires = required_python_modules
@@ -342,35 +258,100 @@ class UpdateAllGUIv2(QtCore.QObject):
 
     def proceed(self):
         """Does the updates"""
-        self.finished.emit()
+
+        if self.worker_thread is not None and self.worker_thread.isRunning():
+            self.worker_thread.quit()
+            self.worker_thread.wait()
+
+        self.progress_dialog.show()
+        self.dialog.table_view.showColumn(4)  # The "Done" checkbox column
+        addons_to_update = [
+            addon
+            for addon, checked in zip(self.model.addons_with_update, self.model.update_is_checked)
+            if checked
+        ]
+        self.progress_dialog.progressBar.setMaximum(len(addons_to_update))
+        self.progress_dialog.progressBar.setValue(0)
+        self.addon_installer = UpdateAllWorker(addons_to_update)
+        self.worker_thread = QtCore.QThread()
+        self.addon_installer.moveToThread(self.worker_thread)
+        self.worker_thread.started.connect(self.addon_installer.run)
+        self.addon_installer.finished.connect(self.worker_thread.quit)
+        self.addon_installer.finished.connect(self.update_complete)
+        self.addon_installer.addon_updated.connect(self.update_progress)
+        self.worker_thread.start()
 
     def cancel(self):
-        """Cancels the updates"""
+        """Cancels the running updates but leaves the window open and allows the user to try again
+        if they want to."""
         self.cancelled = True
-        self.finished.emit()
+        if self.addon_installer is not None:
+            self.addon_installer.cancel()
+        if self.progress_dialog is not None:
+            self.progress_dialog.hide()
+        if not any(self.model.update_is_checked):
+            self.dialog.update_button.setEnabled(False)
+        else:
+            self.dialog.update_button.setEnabled(True)
+
+    def update_progress(self, addon_installed: Addon):
+        """Updates the progress bar and check the state of the rows"""
+        self.model.rescan_addon(addon_installed)
+        self.addon_updated.emit(addon_installed)
+        if self.progress_dialog.progressBar.value() < self.progress_dialog.progressBar.maximum():
+            self.progress_dialog.progressBar.setValue(self.progress_dialog.progressBar.value() + 1)
+
+    def update_complete(self):
+        self.progress_dialog.hide()
+
+    def model_changed(
+        self,
+        _top_left: QtCore.QModelIndex,
+        _bottom_right: QtCore.QModelIndex,
+        _roles: List[QtCore.Qt.ItemDataRole],
+    ):
+        if not any(self.model.update_is_checked):
+            self.dialog.update_button.setEnabled(False)
+        else:
+            self.dialog.update_button.setEnabled(True)
 
 
 class UpdatesAvailableModel(QtCore.QAbstractTableModel):
-    """A model to display the list of updates available"""
+    """A model to manage the list of updates available"""
 
     def __init__(self, addons: List[Addon]):
         super().__init__()
         self.addons = addons
         self.addons_with_update: List[Addon] = []
-        self.row_is_checked: List[bool] = []
+        self.update_is_checked: List[bool] = []
+        self.update_is_done: List[bool] = []
         self.headers = [
             translate("AddonsInstaller", "Name", "Column header"),
             translate("AddonsInstaller", "Installed Version", "Column header"),
             translate("AddonsInstaller", "Available Version", "Column header"),
             translate("AddonsInstaller", "Update?", "Column header"),
+            translate("AddonsInstaller", "Done", "Column header"),
         ]
-        self.check_for_updates()
+        self.setup()
 
-    def check_for_updates(self):
+    def setup(self):
         for addon in self.addons:
             if addon.status() == Addon.Status.UPDATE_AVAILABLE:
                 self.addons_with_update.append(addon)
-                self.row_is_checked.append(True)
+                self.update_is_checked.append(True)
+                self.update_is_done.append(False)
+
+    def rescan_addon(self, addon: Addon):
+        for i, a in enumerate(self.addons_with_update):
+            if a == addon:
+                self.update_is_done[i] = True
+                self.update_is_checked[i] = False
+                self.dataChanged.emit(
+                    self.createIndex(i, 1),
+                    self.createIndex(i, 4),
+                    [QtCore.Qt.DisplayRole, QtCore.Qt.CheckStateRole],
+                )
+                return
 
     def rowCount(self, parent=QtCore.QModelIndex()):
         if parent.isValid():
@@ -390,11 +371,26 @@ class UpdatesAvailableModel(QtCore.QAbstractTableModel):
             if index.column() == 0:
                 return addon.display_name
             if index.column() == 1:
+                if self.update_is_done[index.row()]:
+                    # Make sure that this column matches the next one if we just updated, otherwise
+                    # it's very confusing!
+                    return str(addon.metadata.version) if addon.metadata else ""
                 return str(addon.installed_metadata.version) if addon.installed_metadata else ""
             if index.column() == 2:
                 return str(addon.metadata.version) if addon.metadata else ""
-        elif role == QtCore.Qt.CheckStateRole and index.column() == 3:
-            return QtCore.Qt.Checked if self.row_is_checked[index.row()] else QtCore.Qt.Unchecked
+        elif role == QtCore.Qt.CheckStateRole:
+            if index.column() == 3:
+                if self.update_is_done[index.row()]:
+                    return QtCore.Qt.Unchecked
+                return (
+                    QtCore.Qt.Checked
+                    if self.update_is_checked[index.row()]
+                    else QtCore.Qt.Unchecked
+                )
+            if index.column() == 4:
+                return (
+                    QtCore.Qt.Checked if self.update_is_done[index.row()] else QtCore.Qt.Unchecked
+                )
         return None
 
     def flags(self, index: QtCore.QModelIndex):
@@ -402,6 +398,8 @@ class UpdatesAvailableModel(QtCore.QAbstractTableModel):
             return QtCore.Qt.NoItemFlags
 
         if index.column() == 3:
+            if self.update_is_done[index.row()]:
+                return QtCore.Qt.NoItemFlags
             return (
                 QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEditable
             )
@@ -413,7 +411,7 @@ class UpdatesAvailableModel(QtCore.QAbstractTableModel):
             return False
 
         if index.column() == 3 and role == QtCore.Qt.CheckStateRole:
-            self.row_is_checked[index.row()] = QtCore.Qt.CheckState(value) == QtCore.Qt.Checked
+            self.update_is_checked[index.row()] = QtCore.Qt.CheckState(value) == QtCore.Qt.Checked
             self.dataChanged.emit(index, index, [QtCore.Qt.CheckStateRole])
             return True
 

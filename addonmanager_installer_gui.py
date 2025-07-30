@@ -107,7 +107,8 @@ class AddonInstallerGUI(QtCore.QObject):
         an Addon installation sequence. All dialogs are modal."""
 
         # Dependency check
-        deps = MissingDependencies(self.addon_to_install, self.addons)
+        deps = MissingDependencies()
+        deps.import_from_addon(self.addon_to_install, self.addons)
 
         self.dependency_installer = AddonDependencyInstallerGUI([self.addon_to_install], deps)
         self.dependency_installer.cancel.connect(self.finished.emit)
@@ -123,7 +124,7 @@ class AddonInstallerGUI(QtCore.QObject):
     def install(self) -> None:
         """Installs or updates a workbench, macro, or package"""
         self.worker_thread = QtCore.QThread()
-        self.worker_thread.setObjectName("AddonInstallerGUI worker thread")
+        self.worker_thread.setObjectName("Addon Installer worker thread")
         self.installer.moveToThread(self.worker_thread)
         self.installer.finished.connect(self.worker_thread.quit)
         self.worker_thread.started.connect(self.installer.run)
@@ -648,15 +649,11 @@ class AddonDependencyInstallerGUI(QtCore.QObject):
 
     def _dependency_dialog_yes_clicked(self) -> None:
         # Get the lists out of the dialog:
-        addons = []
-        for row in range(self.dependency_dialog.listWidgetAddons.count()):
-            item = self.dependency_dialog.listWidgetAddons.item(row)
-            name = item.text()
-            for repo in self.deps.wbs:
-                if repo.name == name or (
-                    hasattr(repo, "display_name") and repo.display_name == name
-                ):
-                    addons.append(repo)
+        addons = [
+            item.text()
+            for row in range(self.dependency_dialog.listWidgetAddons.count())
+            if (item := self.dependency_dialog.listWidgetAddons.item(row)).text() in self.deps.wbs
+        ]
 
         python_requires = []
         for row in range(self.dependency_dialog.listWidgetPythonRequired.count()):
@@ -691,8 +688,8 @@ class AddonDependencyInstallerGUI(QtCore.QObject):
 
         self.dependency_installation_dialog = QtWidgets.QMessageBox(
             QtWidgets.QMessageBox.Information,
-            translate("AddonsInstaller", "Installing dependencies"),
-            translate("AddonsInstaller", "Installing dependencies") + "…",
+            translate("AddonsInstaller", "Installing dependencies", "Window title"),
+            translate("AddonsInstaller", "Installing dependencies…", "Window text"),
             QtWidgets.QMessageBox.Cancel,
             parent=utils.get_main_am_window(),
         )
@@ -717,7 +714,7 @@ class AddonDependencyInstallerGUI(QtCore.QObject):
             + "\n\n"
             + translate(
                 "AddonsInstaller",
-                "Dependencies could not be installed. Continue with installation of anyway?",
+                "Dependencies could not be installed. Continue with installation anyway?",
             ),
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
         )

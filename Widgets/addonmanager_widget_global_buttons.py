@@ -101,7 +101,7 @@ class WidgetGlobalButtonBar(QtWidgets.QWidget):
         if updates > 0:
             self.update_all_addons.setEnabled(True)
             self.update_all_addons.setText(
-                translate("AddonsInstaller", "Apply %n Available Update(s)", "", updates)
+                translate("AddonsInstaller", "See %n update(s)…", "", updates)
             )
         else:
             self.update_all_addons.setEnabled(False)

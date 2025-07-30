@@ -659,7 +659,13 @@ class MissingDependencies:
     * Optional Python packages -> python_optional
     """
 
-    def __init__(self, repo: Addon, all_repos: List[Addon]):
+    def __init__(self):
+        self.external_addons = []
+        self.wbs = []
+        self.python_requires = []
+        self.python_optional = []
+
+    def import_from_addon(self, repo: Addon, all_repos: List[Addon]):
         deps = Addon.Dependencies()
         repo_name_dict = {}
         for r in all_repos:
