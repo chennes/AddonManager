@@ -38,7 +38,7 @@ from addonmanager_workers_startup import (
 )
 from addonmanager_installer_gui import AddonInstallerGUI, MacroInstallerGUI
 from addonmanager_uninstaller_gui import AddonUninstallerGUI
-from addonmanager_update_all_gui import UpdateAllGUIv2
+from addonmanager_update_all_gui import UpdateAllGUI
 import addonmanager_utilities as utils
 import addonmanager_freecad_interface as fci
 from composite_view import CompositeView
@@ -645,7 +645,7 @@ class CommandAddonManager(QtCore.QObject):
             )
             return
 
-        self.installer_gui = UpdateAllGUIv2(self.item_model.repos)
+        self.installer_gui = UpdateAllGUI(self.item_model.repos)
         self.installer_gui.addon_updated.connect(self.on_package_status_changed)
         self.installer_gui.finished.connect(self.cleanup_installer)
         self.installer_gui.run()  # Does not block

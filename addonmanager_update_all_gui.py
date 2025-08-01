@@ -148,7 +148,7 @@ class UpdateAllWorker(QtCore.QObject):
         return self.running
 
 
-class UpdateAllGUIv2(QtCore.QObject):
+class UpdateAllGUI(QtCore.QObject):
     """A GUI to display and manage an "update all" process."""
 
     finished = QtCore.Signal()
@@ -158,7 +158,7 @@ class UpdateAllGUIv2(QtCore.QObject):
         super().__init__()
         self.model = UpdatesAvailableModel(addons)
         self.model.dataChanged.connect(self.model_changed)
-        self.dialog = fci.loadUi(os.path.join(os.path.dirname(__file__), "update_all_v2.ui"))
+        self.dialog = fci.loadUi(os.path.join(os.path.dirname(__file__), "update_all.ui"))
         self.dialog.table_view.setModel(self.model)
         self.dialog.update_button.clicked.connect(self.update_button_clicked)
         self.progress_dialog = fci.loadUi(
