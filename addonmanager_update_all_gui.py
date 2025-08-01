@@ -158,21 +158,20 @@ class UpdateAllGUI(QtCore.QObject):
         super().__init__()
         self.model = UpdatesAvailableModel(addons)
         self.model.dataChanged.connect(self.model_changed)
-        self.dialog = fci.loadUi(os.path.join(os.path.dirname(__file__), "update_all.ui"))
-        self.dialog.table_view.setModel(self.model)
-        self.dialog.update_button.clicked.connect(self.update_button_clicked)
-        self.progress_dialog = fci.loadUi(
-            os.path.join(os.path.dirname(__file__), "update_all_progress.ui")
-        )
-        self.progress_dialog.buttonBox.rejected.connect(self.cancel)
+        self._setup_main_dialog()
+        self._setup_progress_dialog()
 
-        self.in_process_row = None
         self.addon_installer = None
         self.worker_thread = None
         self.running = False
         self.cancelled = False
 
         self.dependency_installer = None
+
+    def _setup_main_dialog(self):
+        self.dialog = fci.loadUi(os.path.join(os.path.dirname(__file__), "update_all.ui"))
+        self.dialog.table_view.setModel(self.model)
+        self.dialog.update_button.clicked.connect(self.update_button_clicked)
 
         self.dialog.table_view.horizontalHeader().setStretchLastSection(False)
         self.dialog.table_view.horizontalHeader().setSectionResizeMode(
@@ -191,6 +190,12 @@ class UpdateAllGUI(QtCore.QObject):
             4, QtWidgets.QHeaderView.ResizeToContents
         )
         self.dialog.table_view.hideColumn(4)
+
+    def _setup_progress_dialog(self):
+        self.progress_dialog = fci.loadUi(
+            os.path.join(os.path.dirname(__file__), "update_all_progress.ui")
+        )
+        self.progress_dialog.buttonBox.rejected.connect(self.cancel)
 
     def run(self):
         """Runs the update selection modal dialog."""
