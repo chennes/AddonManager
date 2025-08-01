@@ -201,26 +201,27 @@ class UpdateAllGUI(QtCore.QObject):
         """Runs the updater on all the selected addons. First checks to see if there are any
         dependencies that need to be installed. If so, it prompts the user to confirm that they
         want to install them."""
-        required_wbs = set()
-        required_addons = set()
-        required_python_modules = set()
-        optional_python_modules = set()
+
+        missing_deps = MissingDependencies()
+
         addons_selected = []
         for checked, addon in zip(self.model.update_is_checked, self.model.addons_with_update):
             if checked:
                 fci.Console.PrintMessage(f"Preparing to update {addon.display_name}\n")
                 addons_selected.append(addon)
-                missing_deps = MissingDependencies()
                 missing_deps.import_from_addon(addon, self.model.addons)
-                required_wbs.update(missing_deps.wbs)
-                required_addons.update(missing_deps.external_addons)
-                required_python_modules.update(missing_deps.python_requires)
-                optional_python_modules.update(missing_deps.python_optional)
 
-        if required_addons or required_python_modules or optional_python_modules:
+        required_wbs = set(missing_deps.wbs)
+        required_addons = set(missing_deps.external_addons)
+        required_python_modules = set(missing_deps.python_requires)
+        optional_python_modules = set(missing_deps.python_optional)
+
+        if required_wbs or required_addons or required_python_modules or optional_python_modules:
             fci.Console.PrintMessage(
                 "Found unsatisfied dependencies for the requested addon updates\n"
             )
+            if required_wbs:
+                fci.Console.PrintMessage(f"  Required Workbenches: {required_wbs}\n")
             if required_addons:
                 fci.Console.PrintMessage(f"  Required Addons: {required_addons}\n")
             if required_python_modules:
