@@ -647,12 +647,10 @@ class AddonDependencyInstallerGUI(QtCore.QObject):
 
     def _dependency_dialog_yes_clicked(self) -> None:
         # Get the lists out of the dialog:
-        addons = [
-            item.text()
-            for row in range(self.dependency_dialog.listWidgetAddons.count())
-            if (item := self.dependency_dialog.listWidgetAddons.item(row)).text()
-            in self.deps.external_addons
-        ]
+        addons = []
+        for row in range(self.dependency_dialog.listWidgetAddons.count()):
+            item = self.dependency_dialog.listWidgetAddons.item(row)
+            addons.append(item.text())
 
         python_requires = []
         for row in range(self.dependency_dialog.listWidgetPythonRequired.count()):
