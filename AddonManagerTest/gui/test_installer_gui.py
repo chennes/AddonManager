@@ -226,6 +226,8 @@ class TestAddonDependencyInstallerGUI(unittest.TestCase):
 
         # Act
         gui.run()
+        while dialog_watcher.timer.isActive():
+            QtCore.QCoreApplication.processEvents()
 
         # Assert
         self.assertTrue(
@@ -247,6 +249,8 @@ class TestAddonDependencyInstallerGUI(unittest.TestCase):
 
         # Act
         gui.run()
+        while dialog_watcher.timer.isActive():
+            QtCore.QCoreApplication.processEvents()
 
         # Assert
         self.assertTrue(
@@ -268,6 +272,8 @@ class TestAddonDependencyInstallerGUI(unittest.TestCase):
 
         # Act
         gui.run()
+        while dialog_watcher.timer.isActive():
+            QtCore.QCoreApplication.processEvents()
 
         # Assert
         self.assertTrue(dialog_watcher.dialog_found, "Failed to find the expected dialog box")
@@ -287,6 +293,8 @@ class TestAddonDependencyInstallerGUI(unittest.TestCase):
 
         # Act
         gui.run()
+        while dialog_watcher.timer.isActive():
+            QtCore.QCoreApplication.processEvents()
 
         # Assert
         self.assertTrue(
@@ -324,6 +332,8 @@ class TestAddonDependencyInstallerGUI(unittest.TestCase):
 
         # Act
         gui.run()
+        while dialog_watcher.timer.isActive():
+            QtCore.QCoreApplication.processEvents()
 
         # Assert
         self.assertTrue(
@@ -346,6 +356,8 @@ class TestAddonDependencyInstallerGUI(unittest.TestCase):
 
         # Act
         gui.run()
+        while dialog_watcher.timer.isActive():
+            QtCore.QCoreApplication.processEvents()
 
         # Assert
         self.assertTrue(
@@ -369,6 +381,8 @@ class TestAddonDependencyInstallerGUI(unittest.TestCase):
 
         # Act
         gui.run()
+        while dialog_watcher.timer.isActive():
+            QtCore.QCoreApplication.processEvents()
 
         # Assert
         self.assertTrue(
@@ -452,6 +466,9 @@ class TestAddonDependencyInstallerGUI(unittest.TestCase):
         gui.run()
         gui.dependency_installer.run()  # Called manually to avoid threading during the test
 
+        while dialog_watcher.timer.isActive():
+            QtCore.QCoreApplication.processEvents()
+
         # Assert
         self.assertTrue(
             dialog_watcher.dialog_found, "Failed to find the Resolve Dependencies dialog box"
@@ -482,6 +499,8 @@ class TestAddonDependencyInstallerGUI(unittest.TestCase):
 
         # Act
         gui.run()
+        while dialog_watcher.timer.isActive():
+            QtCore.QCoreApplication.processEvents()
 
         # Assert
         self.assertTrue(
