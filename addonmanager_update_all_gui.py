@@ -219,7 +219,7 @@ class UpdateAllGUIv2(QtCore.QObject):
 
         if required_addons or required_python_modules or optional_python_modules:
             fci.Console.PrintMessage(
-                f"Found unsatisfied dependencies for the requested addon updates\n"
+                "Found unsatisfied dependencies for the requested addon updates\n"
             )
             if required_addons:
                 fci.Console.PrintMessage(f"  Required Addons: {required_addons}\n")

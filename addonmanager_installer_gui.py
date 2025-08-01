@@ -35,6 +35,7 @@ from PySideWrapper import QtCore, QtWidgets
 
 from addonmanager_installer import AddonInstaller, MacroInstaller
 from addonmanager_dependency_installer import DependencyInstaller
+from addonmanager_metadata import Version
 import addonmanager_utilities as utils
 from Addon import Addon, MissingDependencies
 
@@ -611,22 +612,19 @@ class AddonDependencyInstallerGUI(QtCore.QObject):
         or False to continue."""
 
         # For now only look at the minor version, since major is always Python 3
-        minor_required = self.deps.python_min_version["minor"]
-        if sys.version_info.minor < minor_required:
+        python_version = Version(
+            from_list=[sys.version_info.major, sys.version_info.minor, sys.version_info.micro]
+        )
+        if python_version < self.deps.python_min_version:
             # pylint: disable=line-too-long
             QtWidgets.QMessageBox.critical(
                 utils.get_main_am_window(),
                 translate("AddonsInstaller", "Incompatible Python version"),
                 translate(
                     "AddonsInstaller",
-                    "This addon (or one of its dependencies) requires Python {}.{}, and your system"
-                    " is running {}.{}. Installation cancelled.",
-                ).format(
-                    self.deps.python_min_version["major"],
-                    self.deps.python_min_version["minor"],
-                    sys.version_info.major,
-                    sys.version_info.minor,
-                ),
+                    "This addon (or one of its dependencies) requires Python {}, and your system"
+                    " is running {}. Installation cancelled.",
+                ).format(str(self.deps.python_min_version), str(python_version)),
                 QtWidgets.QMessageBox.Cancel,
             )
             return True
@@ -652,7 +650,8 @@ class AddonDependencyInstallerGUI(QtCore.QObject):
         addons = [
             item.text()
             for row in range(self.dependency_dialog.listWidgetAddons.count())
-            if (item := self.dependency_dialog.listWidgetAddons.item(row)).text() in self.deps.wbs
+            if (item := self.dependency_dialog.listWidgetAddons.item(row)).text()
+            in self.deps.external_addons
         ]
 
         python_requires = []
