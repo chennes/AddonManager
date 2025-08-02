@@ -24,6 +24,7 @@
 """GUI functions for uninstalling an Addon or Macro."""
 
 import addonmanager_freecad_interface as fci
+from Widgets.addonmanager_utility_dialogs import MessageDialog
 
 # Get whatever version of PySide we can
 try:
@@ -81,8 +82,9 @@ class AddonUninstallerGUI(QtCore.QObject):
     def _confirm_uninstallation(self) -> bool:
         """Present a modal dialog asking the user if they really want to uninstall. Returns True to
         continue with the uninstallation, or False to stop the process."""
-        confirm = QtWidgets.QMessageBox.question(
-            utils.get_main_am_window(),
+        confirm = MessageDialog.show_modal(
+            MessageDialog.DialogType.QUESTION,
+            "AddonManager_ConfirmUninstallDialog",
             translate("AddonsInstaller", "Confirm remove"),
             translate("AddonsInstaller", "Are you sure you want to uninstall {}?").format(
                 self.addon_to_remove.display_name
@@ -100,6 +102,7 @@ class AddonUninstallerGUI(QtCore.QObject):
             QtWidgets.QMessageBox.Cancel,
             parent=utils.get_main_am_window(),
         )
+        self.progress_dialog.setObjectName("AddonManager_RemovingAddonDialog")
         self.progress_dialog.rejected.connect(self._cancel_removal)
         self.progress_dialog.show()
 
@@ -116,10 +119,12 @@ class AddonUninstallerGUI(QtCore.QObject):
         self.dialog_timer.stop()
         if self.progress_dialog:
             self.progress_dialog.hide()
-        QtWidgets.QMessageBox.information(
-            utils.get_main_am_window(),
+        MessageDialog.show_modal(
+            MessageDialog.DialogType.INFO,
+            "AddonManager_UninstallCompleteDialog",
             translate("AddonsInstaller", "Uninstall complete"),
             translate("AddonInstaller", "Finished removing {}").format(addon.display_name),
+            QtWidgets.QMessageBox.Ok,
         )
         self._finalize()
 
@@ -128,15 +133,17 @@ class AddonUninstallerGUI(QtCore.QObject):
         self.dialog_timer.stop()
         if self.progress_dialog:
             self.progress_dialog.hide()
-        QtWidgets.QMessageBox.critical(
-            utils.get_main_am_window(),
+        MessageDialog.show_modal(
+            MessageDialog.DialogType.ERROR,
+            "AddonManager_UninstallFailedDialog",
             translate("AddonsInstaller", "Uninstall failed"),
             translate("AddonInstaller", "Failed to remove some files") + ":\n" + message,
+            QtWidgets.QMessageBox.Ok,
         )
         self._finalize()
 
     def _finalize(self):
-        """Clean up and emit finished signal"""
+        """Clean up and emit the finished signal"""
         if self.worker_thread.isRunning():
             self.worker_thread.requestInterruption()
             self.worker_thread.quit()

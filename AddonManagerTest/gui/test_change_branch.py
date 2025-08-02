@@ -144,7 +144,7 @@ class TestChangeBranchGui(unittest.TestCase):
         gui = ChangeBranchDialog("/some/path")
         ref = {"ref_name": "foo/bar", "upstream": "us1"}
         dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "Cannot find git"),
+            "AddonManager_CannotFindGitDialog",
             QtWidgets.QDialogButtonBox.Ok,
         )
 
@@ -166,7 +166,7 @@ class TestChangeBranchGui(unittest.TestCase):
         gui = ChangeBranchDialog("/some/path")
         ref = {"ref_name": "foo/bar", "upstream": "us1"}
         dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "git operation failed"),
+            "AddonManager_GitOperationFailedDialog",
             QtWidgets.QDialogButtonBox.Ok,
         )
 
@@ -209,7 +209,7 @@ class TestChangeBranchGui(unittest.TestCase):
         gui.ui.tableView.selectedIndexes.return_value[0].isValid = MagicMock()
         gui.ui.tableView.selectedIndexes.return_value[0].isValid.return_value = True
         dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "DANGER: Developer feature"),
+            "AddonManager_DeveloperFeatureDialog",
             QtWidgets.QDialogButtonBox.Cancel,
         )
         monitor = AsynchronousMonitor(gui.branch_changed)

@@ -170,6 +170,7 @@ class UpdateAllGUI(QtCore.QObject):
 
     def _setup_main_dialog(self):
         self.dialog = fci.loadUi(os.path.join(os.path.dirname(__file__), "update_all.ui"))
+        self.dialog.setObjectName("AddonManager_UpdateAllDialog")
         self.dialog.table_view.setModel(self.model)
         self.dialog.update_button.clicked.connect(self.update_button_clicked)
 
@@ -195,6 +196,7 @@ class UpdateAllGUI(QtCore.QObject):
         self.progress_dialog = fci.loadUi(
             os.path.join(os.path.dirname(__file__), "update_all_progress.ui")
         )
+        self.progress_dialog.setObjectName("AddonManager_UpdateAllProgressDialog")
         self.progress_dialog.buttonBox.rejected.connect(self.cancel)
 
     def run(self):
