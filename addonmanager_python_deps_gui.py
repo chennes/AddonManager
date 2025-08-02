@@ -41,6 +41,7 @@ class PythonPackageManagerGui:
         self.dlg = fci.loadUi(
             os.path.join(os.path.dirname(__file__), "PythonDependencyUpdateDialog.ui")
         )
+        self.dlg.setObjectName("AddonManager_PythonDependencyUpdateDialog")
         self.model = PythonPackageListModel(addons)
         self.dlg.tableView.setModel(self.model)
 

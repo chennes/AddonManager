@@ -40,6 +40,7 @@ class AddonManagerOptions:
 
     def __init__(self, _=None):
         self.form = fci.loadUi(os.path.join(os.path.dirname(__file__), "AddonManagerOptions.ui"))
+        self.form.setObjectName("AddonManager_PreferencesTab")
         self.table_model = CustomRepoDataModel()
         self.form.customRepositoriesTableView.setModel(self.table_model)
         icon_path = os.path.join(os.path.dirname(__file__), "Resources", "icons")
@@ -290,6 +291,7 @@ class CustomRepositoryDialog:
         self.dialog = fci.loadUi(
             os.path.join(os.path.dirname(__file__), "AddonManagerOptions_AddCustomRepository.ui")
         )
+        self.dialog.setObjectName("AddonManager_AddCustomRepositoryDialog")
 
     def exec(self):
         """Run the dialog as a modal, and return either None or a tuple of (url,branch)"""

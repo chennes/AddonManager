@@ -49,5 +49,7 @@ jobs:
           python AddonManagerTest/run_app_tests.py
 
       - name: Run GUI tests
+        env:
+          QT_QPA_PLATFORM: offscreen
         run: |
           xvfb-run -s "-screen 0 1920x1080x24" python3 AddonManagerTest/run_gui_tests.py

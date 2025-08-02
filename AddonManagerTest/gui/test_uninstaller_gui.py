@@ -125,7 +125,7 @@ class TestUninstallerGUI(unittest.TestCase):
 
     def test_failure_dialog(self):
         dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "Uninstall failed"),
+            "AddonManager_UninstallFailedDialog",
             QtWidgets.QDialogButtonBox.Ok,
         )
         self.uninstaller_gui._failed(

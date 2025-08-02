@@ -45,6 +45,7 @@ class FirstRunDialog:
         should continue loading, or False if the user cancelled the dialog and wants to exit."""
         if not self.readWarning:
             warning_dialog = fci.loadUi(os.path.join(os.path.dirname(__file__), "first_run.ui"))
+            warning_dialog.setObjectName("AddonManager_FirstRunDialog")
 
             # Set warning pixmap location:
             svg_path = os.path.join(

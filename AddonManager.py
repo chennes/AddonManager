@@ -382,6 +382,7 @@ class CommandAddonManager(QtCore.QObject):
         if self.restart_required:
             # display restart dialog
             m = QtWidgets.QMessageBox()
+            m.setObjectName("AddonManager_RestartRequired")
             m.setWindowTitle(translate("AddonsInstaller", "Addon Manager"))
             icon_path = os.path.join(os.path.dirname(__file__), "Resources", "icons")
             m.setWindowIcon(QtGui.QIcon(os.path.join(icon_path, "addon_manager.svg")))

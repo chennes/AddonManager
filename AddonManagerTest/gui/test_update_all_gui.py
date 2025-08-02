@@ -45,7 +45,7 @@ class TestUpdateAllGUI(TestCase):
         addons = [Addon("Test 1"), Addon("Test 2"), Addon("Test 3")]
         update_all_gui = UpdateAllGUI(addons)
         dialog_watcher = DialogWatcher(
-            fci.translate("AddonsInstaller", "Update Addons"),
+            "AddonManager_UpdateAllDialog",
             QtWidgets.QDialogButtonBox.Close,
         )
 
@@ -61,7 +61,7 @@ class TestUpdateAllGUI(TestCase):
         # Arrange
         update_all_gui = UpdateAllGUI([])
         dialog_watcher = DialogWatcher(
-            fci.translate("AddonsInstaller", "Update Addons"),
+            "AddonManager_UpdateAllDialog",
             QtWidgets.QDialogButtonBox.Close,
         )
 
@@ -87,9 +87,7 @@ class TestUpdateAllGUI(TestCase):
                     button.click()
                     return
 
-        dialog_interactor = DialogInteractor(
-            fci.translate("AddonsInstaller", "Update Addons"), update_button_clicker
-        )
+        dialog_interactor = DialogInteractor("AddonManager_UpdateAllDialog", update_button_clicker)
 
         # Act
         update_all_gui.run()

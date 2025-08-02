@@ -28,6 +28,7 @@ from typing import Dict
 
 import addonmanager_freecad_interface as fci
 import addonmanager_utilities as utils
+from Widgets.addonmanager_utility_dialogs import MessageDialog
 
 from addonmanager_git import initialize_git, GitFailed
 
@@ -53,6 +54,7 @@ class ChangeBranchDialog(QtWidgets.QWidget):
         super().__init__(parent)
 
         self.ui = utils.loadUi(os.path.join(os.path.dirname(__file__), "change_branch.ui"))
+        self.ui.setObjectName("AddonManager_ChangeBranchDialog")
 
         self.item_filter = ChangeBranchDialogFilter()
         self.ui.tableView.setModel(self.item_filter)
@@ -98,8 +100,9 @@ class ChangeBranchDialog(QtWidgets.QWidget):
                 # This is the one we are already on... just return
                 return
 
-            result = QtWidgets.QMessageBox.critical(
-                self,
+            result = MessageDialog.show_modal(
+                MessageDialog.DialogType.ERROR,
+                "AddonManager_DeveloperFeatureDialog",
                 translate("AddonsInstaller", "DANGER: Developer feature"),
                 translate(
                     "AddonsInstaller",
@@ -109,13 +112,14 @@ class ChangeBranchDialog(QtWidgets.QWidget):
                     "want to continue?",
                 ),
                 QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel,
-                QtWidgets.QMessageBox.Cancel,
+                parent=self,
             )
             if result == QtWidgets.QMessageBox.Cancel:
                 return
             if self.item_model.dirty:
-                result = QtWidgets.QMessageBox.critical(
-                    self,
+                result = MessageDialog.show_modal(
+                    MessageDialog.DialogType.ERROR,
+                    "AddonManager_LocalChangesDialog",
                     translate("AddonsInstaller", "There are local changes"),
                     translate(
                         "AddonsInstaller",
@@ -123,7 +127,7 @@ class ChangeBranchDialog(QtWidgets.QWidget):
                         "to change branches (bringing the changes with you)?",
                     ),
                     QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel,
-                    QtWidgets.QMessageBox.Cancel,
+                    parent=self,
                 )
                 if result == QtWidgets.QMessageBox.Cancel:
                     return
@@ -150,20 +154,22 @@ class ChangeBranchDialog(QtWidgets.QWidget):
             self._show_git_failed_dialog()
 
     def _show_no_git_dialog(self):
-        QtWidgets.QMessageBox.critical(
-            self,
+        MessageDialog.show_modal(
+            MessageDialog.DialogType.ERROR,
+            "AddonManager_CannotFindGitDialog",
             translate("AddonsInstaller", "Cannot find git"),
             translate(
                 "AddonsInstaller",
                 "Could not find git executable: cannot change branch",
             ),
             QtWidgets.QMessageBox.Ok,
-            QtWidgets.QMessageBox.Ok,
+            parent=self,
         )
 
     def _show_git_failed_dialog(self):
-        QtWidgets.QMessageBox.critical(
-            self,
+        MessageDialog.show_modal(
+            MessageDialog.DialogType.ERROR,
+            "AddonManager_GitOperationFailedDialog",
             translate("AddonsInstaller", "git operation failed"),
             translate(
                 "AddonsInstaller",
@@ -171,7 +177,7 @@ class ChangeBranchDialog(QtWidgets.QWidget):
                 "more details in the Report View.",
             ),
             QtWidgets.QMessageBox.Ok,
-            QtWidgets.QMessageBox.Ok,
+            parent=self,
         )
 
 
