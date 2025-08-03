@@ -140,6 +140,16 @@ class AddonCatalogEntry:
             addon = Addon(addon_id, url, state, branch=self.git_ref)
         else:
             addon = Addon(addon_id, url, state)
+
+        if self.metadata:
+            try:
+                self._load_addon_metadata(addon, self.metadata)
+            except xml.etree.ElementTree.ParseError:
+                fci.Console.PrintWarning(
+                    "An invalid or corrupted package.xml file was installed "
+                    f"for {addon.display_name}\n"
+                )
+
         try:
             addon.remote_last_updated = datetime.datetime.fromisoformat(self.last_update_time)
         except ValueError:
@@ -155,16 +165,17 @@ class AddonCatalogEntry:
             addon.updated_timestamp = most_recent_mtime.timestamp()
             if most_recent_mtime < addon.remote_last_updated:
                 addon.set_status(Addon.Status.UPDATE_AVAILABLE)
+            elif (
+                addon.installed_metadata
+                and addon.metadata
+                and addon.installed_metadata.version < addon.metadata.version
+            ):
+                # Fallback: even if the modification time is newer, if the stated version is older
+                # something strange has happened, but flag an available update
+                addon.set_status(Addon.Status.UPDATE_AVAILABLE)
             else:
                 addon.set_status(Addon.Status.NO_UPDATE_AVAILABLE)
 
-        if self.metadata:
-            try:
-                self._load_addon_metadata(addon, self.metadata)
-            except xml.etree.ElementTree.ParseError:
-                fci.Console.PrintWarning(
-                    "An invalid or corrupted package.xml file was installed for"
-                )
         return addon
 
     @staticmethod

@@ -59,14 +59,21 @@ class DialogInteractor(QtCore.QObject):
             1
         )  # At 10 this occasionally left open dialogs; less than 1 produced failed tests
 
+    @staticmethod
+    def iterate_widgets(widget: QtWidgets.QWidget):
+        yield widget
+        for child in widget.findChildren(QtWidgets.QWidget):
+            yield from DialogInteractor.iterate_widgets(child)
+
     def run(self):
-        widget = QtWidgets.QApplication.activeModalWidget()
-        if widget and self._dialog_matches(widget):
-            # Found the dialog we are looking for: now try to run the interaction
-            if self.interaction is not None and callable(self.interaction):
-                self.interaction(widget)
-            self.dialog_found = True
-            self.timer.stop()
+        for top_widget in QtWidgets.QApplication.topLevelWidgets():
+            for widget in DialogInteractor.iterate_widgets(top_widget):
+                if widget and self._dialog_matches(widget):
+                    # Found the widget we are looking for: now try to run the interaction
+                    if self.interaction is not None and callable(self.interaction):
+                        self.interaction(widget)
+                    self.dialog_found = True
+                    self.timer.stop()
 
         self.has_run = True
         self.execution_counter += 1
@@ -75,14 +82,8 @@ class DialogInteractor(QtCore.QObject):
             self.timer.stop()
 
     def _dialog_matches(self, widget) -> bool:
-        # Is this the widget we are looking for? Only applies on Linux and Windows: macOS
-        # doesn't set the title of a modal dialog:
-        os = QtCore.QSysInfo.productType()  # Qt5 gives "osx", Qt6 gives "macos"
-        if os in ["osx", "macos"] or (
-            hasattr(widget, "windowTitle")
-            and callable(widget.windowTitle)
-            and widget.windowTitle() == self.dialog_to_watch_for
-        ):
+        # Is this the widget we are looking for?
+        if widget.objectName() == self.dialog_to_watch_for:
             return True
         return False
 

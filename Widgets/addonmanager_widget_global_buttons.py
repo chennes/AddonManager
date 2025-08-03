@@ -95,13 +95,13 @@ class WidgetGlobalButtonBar(QtWidgets.QWidget):
         self.python_dependencies.setText(translate("AddonsInstaller", "Open Python Dependencies"))
         self.addons_folder.setText(translate("AddonsFolder", "Open Addons Folder"))
         self.close.setText(translate("AddonsInstaller", "Close"))
-        self.gear_tools.setText(translate("AddonsInstaller", "Gear Tools…"))
+        self.gear_tools.setText("Gear Tools…")  # This text should never be user-visible
 
     def set_number_of_available_updates(self, updates: int):
         if updates > 0:
             self.update_all_addons.setEnabled(True)
             self.update_all_addons.setText(
-                translate("AddonsInstaller", "Apply %n Available Update(s)", "", updates)
+                translate("AddonsInstaller", "See %n update(s)…", "", updates)
             )
         else:
             self.update_all_addons.setEnabled(False)

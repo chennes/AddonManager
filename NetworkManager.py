@@ -455,6 +455,7 @@ class NetworkManager(QtCore.QObject):
             proxy_authentication = fci.loadUi(
                 os.path.join(os.path.dirname(__file__), "proxy_authentication.ui")
             )
+            proxy_authentication.setObjectName("AddonManager_ProxyAuthenticationDialog")
             # Show the right labels, etc.
             proxy_authentication.labelProxyAddress.setText(f"{reply.hostName()}:{reply.port()}")
             if authenticator.realm():

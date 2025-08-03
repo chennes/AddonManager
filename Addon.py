@@ -133,7 +133,7 @@ class Addon:
             self.internal_workbenches: Set[str] = set()  # Required internal workbenches
             self.python_requires: Set[str] = set()
             self.python_optional: Set[str] = set()
-            self.python_min_version = {"major": 3, "minor": 0}
+            self.python_min_version = Version(from_list=[3, 0, 0])
 
     class DependencyType(IntEnum):
         """What kind of dependency a given dependency is"""
@@ -209,7 +209,7 @@ class Addon:
         # And maintains a list of required and optional Python dependencies
         self.python_requires: Set[str] = set()
         self.python_optional: Set[str] = set()
-        self.python_min_version = {"major": 3, "minor": 0}
+        self.python_min_version = Version(from_list=[3, 0, 0])
 
         self._icon_file = None
         self._cached_license: str = ""
@@ -354,8 +354,7 @@ class Addon:
             return
 
         if metadata.pythonmin:
-            self.python_min_version["major"] = metadata.pythonmin.version_as_list[0]
-            self.python_min_version["minor"] = metadata.pythonmin.version_as_list[1]
+            self.python_min_version = Version(from_list=metadata.pythonmin.version_as_list)
 
         for dep in metadata.depend:
             if dep.dependency_type == DependencyType.internal:
@@ -474,16 +473,7 @@ class Addon:
 
         deps.python_requires |= self.python_requires
         deps.python_optional |= self.python_optional
-
-        deps.python_min_version["major"] = max(
-            deps.python_min_version["major"], self.python_min_version["major"]
-        )
-        if deps.python_min_version["major"] == 3:
-            deps.python_min_version["minor"] = max(
-                deps.python_min_version["minor"], self.python_min_version["minor"]
-            )
-        else:
-            fci.Console.PrintWarning("Unrecognized Python version information")
+        deps.python_min_version = max(self.python_min_version, deps.python_min_version)
 
         for dep in self.requires:
             if dep in all_repos:
@@ -659,7 +649,14 @@ class MissingDependencies:
     * Optional Python packages -> python_optional
     """
 
-    def __init__(self, repo: Addon, all_repos: List[Addon]):
+    def __init__(self):
+        self.external_addons = []
+        self.wbs = []
+        self.python_requires = []
+        self.python_optional = []
+        self.python_min_version = Version(from_list=[3, 0, 0])
+
+    def import_from_addon(self, repo: Addon, all_repos: List[Addon]):
         deps = Addon.Dependencies()
         repo_name_dict = {}
         for r in all_repos:
@@ -673,7 +670,6 @@ class MissingDependencies:
             # any dependency checking
             repo.walk_dependency_tree(repo_name_dict, deps)
 
-        self.external_addons = []
         for dep in deps.required_external_addons:
             if dep.status() == Addon.Status.NOT_INSTALLED:
                 self.external_addons.append(dep.name)
@@ -684,7 +680,6 @@ class MissingDependencies:
         else:
             wbs = []
 
-        self.wbs = []
         for dep in deps.internal_workbenches:
             if dep.lower() + "workbench" not in wbs:
                 if dep.lower() == "plot":
@@ -699,8 +694,7 @@ class MissingDependencies:
                     self.wbs.append(dep)
 
         # Check the Python dependencies:
-        self.python_min_version = deps.python_min_version
-        self.python_requires = []
+        self.python_min_version = max(self.python_min_version, deps.python_min_version)
         for py_dep in deps.python_requires:
             if py_dep not in self.python_requires:
                 try:
