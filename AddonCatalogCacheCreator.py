@@ -168,6 +168,7 @@ class CacheWriter:
                 continue
             metadata = self.generate_cache_entry(addon_id, index, catalog_entry)
             self.catalog.add_metadata_to_entry(addon_id, index, metadata)
+            self.create_zip_of_entry(addon_id, index, catalog_entry)
 
     def generate_cache_entry(
         self, addon_id: str, index: int, catalog_entry: AddonCatalog.AddonCatalogEntry
@@ -386,6 +387,53 @@ class CacheWriter:
             print(f"ERROR: Failed to parse last commit time from {completed_process_output}")
             dt = None
         return dt
+
+    def create_zip_of_entry(
+        self, addon_id: str, index: int, catalog_entry: AddonCatalog.AddonCatalogEntry
+    ):
+        """Create a zip file containing the contents of the addon directory for this entry. The
+        zip file is written to a file with the same name as the calculated addon cache directory
+        in the current working directory."""
+
+        dirname = CacheWriter.get_directory_name(addon_id, index, catalog_entry)
+        start_dir = os.path.join(self.cwd, dirname)
+        zip_file_path = os.path.join(self.cwd, f"{dirname}.zip")
+        temp_file_path = zip_file_path + ".new"
+
+        if not os.path.isdir(start_dir):
+            print(
+                f"ERROR: Directory {start_dir} does not exist. Skipping zip creation for addon {addon_id}."
+            )
+            return
+
+        with zipfile.ZipFile(temp_file_path, "w", zipfile.ZIP_DEFLATED) as zf:
+            for root, dirs, files in os.walk(start_dir):
+                if ".git" in dirs:
+                    dirs.remove(".git")  # Don't visit .git directories
+                for file in files:
+                    full_path = os.path.join(root, file)
+                    rel_path = os.path.relpath(full_path, start_dir)
+                    try:
+                        zf.write(full_path, rel_path)
+                    except (OSError, FileNotFoundError, RuntimeError) as e:
+                        print(f"WARNING: Could not add {full_path} to zip archive: {e}")
+        try:
+            with zipfile.ZipFile(temp_file_path, "r") as zf:
+                if zf.testzip() is None:
+                    if os.path.exists(zip_file_path):
+                        os.remove(zip_file_path)
+                    os.rename(temp_file_path, zip_file_path)
+                else:
+                    os.remove(temp_file_path)
+                    print(
+                        f"Failed to create zip file {zip_file_path} for addon {addon_id}: data is corrupt"
+                    )
+        except zipfile.BadZipFile:
+            if os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
+            print(
+                f"Failed to create zip file {zip_file_path} for addon {addon_id}: data is not a valid zip file"
+            )
 
 
 if __name__ == "__main__":
