@@ -90,6 +90,15 @@ class PackageInfo:
     dependencies: List[str]
 
 
+def pep503_normalize(package_name: str) -> str:
+    """Given a Python package name, normalize it per PEP 503, making it all lowercase, and replacing
+    underscores and dots with dashes."""
+
+    result = package_name.replace("_", "-")
+    result = result.replace(".", "-")
+    return result.lower()
+
+
 def parse_pip_list_output(all_packages, outdated_packages) -> List[PackageInfo]:
     """Parses the output from pip into a dictionary with update information in it. The pip
     output should be an array of lines of text."""
@@ -114,7 +123,7 @@ def parse_pip_list_output(all_packages, outdated_packages) -> List[PackageInfo]:
             continue
         entries = line.split()
         if len(entries) > 1:
-            package_name = entries[0]
+            package_name = pep503_normalize(entries[0])
             installed_version = entries[1]
             packages[package_name] = PackageInfo(package_name, installed_version, "", [])
 
@@ -125,7 +134,7 @@ def parse_pip_list_output(all_packages, outdated_packages) -> List[PackageInfo]:
             continue
         entries = line.split()
         if len(entries) > 1:
-            package_name = entries[0]
+            package_name = pep503_normalize(entries[0])
             available_version = entries[2]
             if package_name not in packages:
                 raise RuntimeError(
@@ -311,9 +320,9 @@ class PythonPackageListModel(QtCore.QAbstractTableModel):
         dependent_addons = []
         for addon in self.addons:
             # if addon.installed_version is not None:
-            if package.lower() in addon.python_requires:
+            if package in [pep503_normalize(x) for x in addon.python_requires]:
                 dependent_addons.append({"name": addon.name, "optional": False})
-            elif package.lower() in addon.python_optional:
+            elif package in [pep503_normalize(x) for x in addon.python_optional]:
                 dependent_addons.append({"name": addon.name, "optional": True})
         return dependent_addons
 
