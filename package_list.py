@@ -651,14 +651,6 @@ class PackageListFilter(QtCore.QSortFilterProxyModel):
         license_manager = get_license_manager()
         if data.status() == Addon.Status.NOT_INSTALLED:
 
-            # If it's not installed, check to see if it's Py2 only
-            if self.hide_py2 and data.python2:
-                return False
-
-            # If it's not installed, check to see if it's marked obsolete
-            if self.hide_obsolete and data.obsolete:
-                return False
-
             if self.hide_unlicensed:
                 if not data.license or data.license in ["UNLICENSED", "UNLICENCED"]:
                     fci.Console.PrintLog(f"Hiding {data.name} because it has no license set\n")

@@ -146,8 +146,6 @@ class PackageDetailsController(QtCore.QObject):
 
         flags = WarningFlags()
         flags.required_freecad_version = self.requires_newer_freecad()
-        flags.obsolete = repo.obsolete
-        flags.python2 = repo.python2
         self.ui.set_warning_flags(flags)
         self.set_change_branch_button_state()
 

@@ -321,11 +321,7 @@ class PackageDetailsView(QtWidgets.QWidget):
     def _there_are_warnings_to_show(self) -> bool:
         if self.disabled:
             return True
-        if (
-            self.warning_flags.obsolete
-            or self.warning_flags.python2
-            or self.warning_flags.required_freecad_version
-        ):
+        if self.warning_flags.required_freecad_version:
             return True
         return False  # TODO: Someday support optional warnings on license types
 
@@ -336,10 +332,6 @@ class PackageDetailsView(QtWidgets.QWidget):
                 "WARNING: This addon is currently installed, but disabled. Use the 'enable' "
                 "button to re-enable.",
             )
-        if self.warning_flags.obsolete:
-            return translate("AddonsInstaller", "WARNING: This addon is obsolete")
-        if self.warning_flags.python2:
-            return translate("AddonsInstaller", "WARNING: This addon is Python 2 only")
         if self.warning_flags.required_freecad_version:
             return translate("AddonsInstaller", "WARNING: This addon requires FreeCAD {}").format(
                 self.warning_flags.required_freecad_version
