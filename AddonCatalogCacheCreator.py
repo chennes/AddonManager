@@ -203,6 +203,14 @@ class CacheWriter:
                 catalog_entry.last_update_time = last_updated_time.isoformat()
             os.chdir(old_dir)
 
+        zip_name = os.path.join(self.cwd, dirname + ".zip")
+        if os.path.exists(zip_name):
+            # Don't use os.path.join, by convention this path is always UNIX style, and local
+            # users are required to translate it into their OS's format as needed
+            catalog_entry.relative_cache_path = (
+                BASE_DIRECTORY + "/" + addon_id + "/" + dirname + ".zip"
+            )
+
         return cache_entry
 
     def generate_cache_entry_from_package_xml(
