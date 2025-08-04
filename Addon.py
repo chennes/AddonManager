@@ -167,10 +167,8 @@ class Addon:
         self.name = name.strip()
         self.display_name = self.name
         self.url = url.strip()
+        self.relative_cache_path = ""
         self.branch = branch.strip()
-        self.python2 = False
-        self.obsolete = False
-        self.rejected = False
         self.repo_type = Addon.Kind.WORKBENCH
         self.description = None
         self.tags = set()  # Just a cache, loaded from Metadata
@@ -189,10 +187,6 @@ class Addon:
 
         self._clean_url()
 
-        if utils.recognized_git_location(self):
-            self.metadata_url = utils.construct_git_url(self, "package.xml")
-        else:
-            self.metadata_url = None
         self.metadata: Optional[Metadata] = None
         self.icon = None  # A QIcon version of this Addon's icon
         self.icon_data: bytes = bytes()  # In-memory version of this icon's data
