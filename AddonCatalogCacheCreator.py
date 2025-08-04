@@ -206,9 +206,7 @@ class CacheWriter:
         if os.path.exists(zip_name):
             # Don't use os.path.join, by convention this path is always UNIX style, and local
             # users are required to translate it into their OS's format as needed
-            catalog_entry.relative_cache_path = (
-                BASE_DIRECTORY + "/" + addon_id + "/" + dirname + ".zip"
-            )
+            catalog_entry.relative_cache_path = BASE_DIRECTORY + "/" + dirname + ".zip"
 
         return cache_entry
 
