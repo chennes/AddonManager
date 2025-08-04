@@ -26,7 +26,7 @@
 import datetime
 import os
 import re
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 from typing import Set, List, Optional
 from threading import Lock
 from enum import IntEnum, auto
@@ -314,7 +314,13 @@ class Addon:
         """
 
         self.metadata = metadata
-        self.display_name = metadata.name
+        self.display_name = (
+            str(metadata.name)
+            .replace("\n", " ")
+            .replace("\r", " ")
+            .replace("{", "")
+            .replace("}", "")
+        )
         self.repo_type = Addon.Kind.PACKAGE
         self.description = metadata.description
         for url in metadata.url:
@@ -632,6 +638,30 @@ class Addon:
             # Fall through to the classname-not-found case (if we couldn't read the file, etc.)
             pass
         return ""
+
+    def get_zip_url(self) -> str:
+        if self.url.endswith(".zip"):
+            zip_url = self.url
+        else:
+            # The ZIP url is based on the location of the main cache file:
+            if self.relative_cache_path:
+                cache_file_url = fci.Preferences().get("addon_catalog_cache_url")
+                parsed_url = urlparse(cache_file_url)
+                path_parts = parsed_url.path.rpartition("/")
+                new_path = path_parts[0] + "/" + self.relative_cache_path
+                zip_url = urlunparse(
+                    (
+                        parsed_url.scheme,
+                        parsed_url.netloc,
+                        new_path,
+                        parsed_url.params,
+                        parsed_url.query,
+                        parsed_url.fragment,
+                    )
+                )
+            else:
+                zip_url = utils.get_zip_url(self)
+        return zip_url
 
 
 # @dataclass(frozen)
