@@ -260,12 +260,6 @@ def get_readme_url(repo):
     return construct_git_url(repo, "README.md")
 
 
-def get_metadata_url(url):
-    """Returns the location of a package.xml metadata file"""
-
-    return construct_git_url(url, "package.xml")
-
-
 def get_desc_regex(repo):
     """Returns a regex string that extracts a WB description to be displayed in the description
     panel of the Addon manager, if the README could not be found"""

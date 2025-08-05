@@ -97,13 +97,8 @@ class PackageList(QtWidgets.QWidget):
         self.set_view_style(style)
         self.ui.view_bar.view_selector.set_current_view(style)
 
-        self.item_filter.setHidePy2(fci.Preferences().get("HidePy2"))
-        self.item_filter.setHideObsolete(fci.Preferences().get("HideObsolete"))
         self.item_filter.setHideNonOSIApproved(fci.Preferences().get("HideNonOSIApproved"))
         self.item_filter.setHideNonFSFLibre(fci.Preferences().get("HideNonFSFFreeLibre"))
-        self.item_filter.setHideNewerFreeCADRequired(
-            fci.Preferences().get("HideNewerFreeCADRequired")
-        )
         self.item_filter.setHideUnlicensed(fci.Preferences().get("HideUnlicensed"))
 
     def select_addon(self, addon_name: str):
@@ -586,16 +581,6 @@ class PackageListFilter(QtCore.QSortFilterProxyModel):
         self.status = status
         self.invalidateFilter()
 
-    def setHidePy2(self, hide_py2: bool) -> None:
-        """Sets whether to hide Python 2-only Addons"""
-        self.hide_py2 = hide_py2
-        self.invalidateFilter()
-
-    def setHideObsolete(self, hide_obsolete: bool) -> None:
-        """Sets whether to hide Addons marked obsolete"""
-        self.hide_obsolete = hide_obsolete
-        self.invalidateFilter()
-
     def setHideNonOSIApproved(self, hide: bool) -> None:
         """Sets whether to hide Addons with non-OSI-approved licenses"""
         self.hide_non_OSI_approved = hide
@@ -609,12 +594,6 @@ class PackageListFilter(QtCore.QSortFilterProxyModel):
     def setHideUnlicensed(self, hide: bool) -> None:
         """Sets whether to hide addons without a specified license"""
         self.hide_unlicensed = hide
-        self.invalidateFilter()
-
-    def setHideNewerFreeCADRequired(self, hide_nfr: bool) -> None:
-        """Sets whether to hide packages that have indicated they need a newer version
-        of FreeCAD than the one currently running."""
-        self.hide_newer_freecad_required = hide_nfr
         self.invalidateFilter()
 
     def filterAcceptsRow(self, row, _parent=QtCore.QModelIndex()):
@@ -691,22 +670,6 @@ class PackageListFilter(QtCore.QSortFilterProxyModel):
                     #    f"Hiding addon {data.name} because its license, {licenses_to_check},  is "
                     #    f"not FSF Libre\n"
                     # )
-                    return False
-
-        # If it's not installed, check to see if it's for a newer version of FreeCAD
-        if (
-            data.status() == Addon.Status.NOT_INSTALLED
-            and self.hide_newer_freecad_required
-            and data.metadata
-        ):
-            # Only hide if ALL content items require a newer version, otherwise
-            # it's possible that this package actually provides versions of itself
-            # for newer and older versions
-
-            first_supported_version = get_first_supported_freecad_version(data.metadata)
-            if first_supported_version is not None:
-                current_fc_version = Version(from_list=fci.Version())
-                if first_supported_version > current_fc_version:
                     return False
 
         name = data.display_name

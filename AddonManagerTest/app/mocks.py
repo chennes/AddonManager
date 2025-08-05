@@ -113,6 +113,9 @@ class MockAddon:
     def get_best_icon_relative_path():
         return ""
 
+    def get_zip_url(self):
+        return self.url
+
 
 class MockMacro:
     """Minimal Macro class"""

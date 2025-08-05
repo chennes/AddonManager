@@ -269,12 +269,7 @@ class CommandAddonManager(QtCore.QObject):
         self.composite_view = CompositeView(self.dialog)
         self.button_bar = WidgetGlobalButtonBar(self.dialog)
 
-        # If we are checking for updates automatically, hide the Check for updates button:
-        autocheck = fci.Preferences().get("AutoCheck")
-        if autocheck:
-            self.button_bar.check_for_updates.hide()
-        else:
-            self.button_bar.update_all_addons.hide()
+        self.button_bar.check_for_updates.hide()
 
         # Set up the listing of packages using the model-view-controller architecture
         self.item_model = PackageListItemModel()
@@ -471,13 +466,6 @@ class CommandAddonManager(QtCore.QObject):
     def check_updates(self) -> None:
         """checks every installed addon for available updates"""
 
-        autocheck = fci.Preferences().get("AutoCheck")
-        if not autocheck:
-            fci.Console.PrintLog(
-                "Addon Manager: Skipping update check because AutoCheck user preference is False\n"
-            )
-            self.do_next_startup_phase()
-            return
         if not self.packages_with_updates:
             self.force_check_updates(standalone=False)
         else:
@@ -538,6 +526,18 @@ class CommandAddonManager(QtCore.QObject):
 
     def check_python_updates(self) -> None:
         # TODO: Run the checker to see if we need to do any Python updates as well
+
+        # Really, there are two different things to check here: first, run our normal dependency
+        # checker and display the dependency resolution dialog. This will handle addons that have
+        # disappeared/been uninstalled (but were required by other addons) as well as Python required
+        # and optional dependencies. The only catch is, if we ONLY have optional Python dependencies
+        # missing, we should ignore them.
+
+        # Second, if this is a version of Python we've used before, do any of our Python libraries
+        # installed into the custom directory, or the venv, need to be updated?
+
+        # To the user these are two quite different things, so their interface should reflect that.
+
         self.do_next_startup_phase()
 
     def show_python_updates_dialog(self) -> None:

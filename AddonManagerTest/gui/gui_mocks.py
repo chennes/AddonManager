@@ -22,6 +22,7 @@
 # ***************************************************************************
 
 import sys
+from typing import Optional
 
 try:
     from PySide import QtCore, QtWidgets
@@ -156,3 +157,49 @@ class AsynchronousMonitor:
 
     def good(self) -> bool:
         return self.signal_catcher.caught and not self.signal_catcher.killed
+
+
+class MockNetworkManagerGuiUp:
+    """A mock network manager that behaves roughly like the real thing but never does any network
+    or filesystem access and can simulate various failure scenarios. Uses real Qt signals and can
+    be used across threads. Requires a running event loop. Designed to allow UI evaluation by
+    taking real wall-clock time to complete events, or to speed up testing by using very short
+    timers to simulate network requests."""
+
+    completed = QtCore.Signal(int, int, QtCore.QByteArray)
+    content_length = QtCore.Signal(int, int, int)
+    progress_made = QtCore.Signal(int, int, int)
+    progress_complete = QtCore.Signal(int, int, str)
+
+    def __init__(self, wall_clock_ms: int = 1, simulate_failure: bool = False):
+        pass
+
+    def query_download_size(self, url: str, timeout_ms: int = 30000):
+        pass
+
+    def submit_unmonitored_get(
+        self,
+        url: str,
+        timeout_ms: int = 30000,
+    ) -> int:
+        pass
+
+    def submit_monitored_get(
+        self,
+        url: str,
+        timeout_ms: int = 30000,
+    ) -> int:
+        pass
+
+    def blocking_get(
+        self,
+        url: str,
+        timeout_ms: int = 30000,
+    ) -> Optional[QtCore.QByteArray]:
+        pass
+
+    def abort_all(self):
+        pass
+
+    def abort(self, index: int):
+        pass

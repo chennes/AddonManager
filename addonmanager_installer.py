@@ -61,6 +61,17 @@ class InstallationMethod(IntEnum):
     ZIP = auto()
     ANY = auto()
 
+    def __str__(self):
+        if self.value == self.GIT:
+            return "Git"
+        if self.value == self.COPY:
+            return "Copy"
+        if self.value == self.ZIP:
+            return "Zip"
+        if self.value == self.ANY:
+            return "Any"
+        return "Unknown"
+
 
 class AddonInstaller(QtCore.QObject):
     """The core, non-GUI installer class. Usually instantiated and moved to its own thread,
@@ -112,7 +123,7 @@ class AddonInstaller(QtCore.QObject):
     failure = QtCore.Signal(object, str)
 
     # Finished: regardless of the outcome, this is emitted when all work that is going to be done
-    # is done (i.e. whatever thread this is running in can quit).
+    # is done (i.e., whatever thread this is running in can quit).
     finished = QtCore.Signal()
 
     allowed_packages = set()
@@ -126,7 +137,11 @@ class AddonInstaller(QtCore.QObject):
         super().__init__()
         self.addon_to_install = addon
 
-        self.git_manager = initialize_git()
+        forced_repos = fci.Preferences().get("force_git_in_repos").split(",")
+        if addon and self.addon_to_install.name in forced_repos:
+            self.git_manager = initialize_git()
+        else:
+            self.git_manager = None
 
         if allow_list is not None:
             AddonInstaller.allowed_packages = set(allow_list if allow_list is not None else [])
@@ -145,6 +160,9 @@ class AddonInstaller(QtCore.QObject):
         try:
             addon_url = self.addon_to_install.url.replace(os.path.sep, "/")
             method_to_use = self._determine_install_method(addon_url, install_method)
+            fci.Console.PrintMessage(
+                f"Installing addon {self.addon_to_install.name} using {method_to_use}\n"
+            )
             if method_to_use == InstallationMethod.ZIP:
                 success = self._install_by_zip()
             elif method_to_use == InstallationMethod.GIT:
@@ -255,12 +273,13 @@ class AddonInstaller(QtCore.QObject):
         if not is_remote:
             return InstallationMethod.COPY
 
-        # Prefer git if we have git
-        if self.git_manager:
+        # Use git only if the user specifically requests it, and we have git
+        forced_repos = fci.Preferences().get("force_git_in_repos").split(",")
+        if self.git_manager and self.addon_to_install.name in forced_repos:
             return InstallationMethod.GIT
 
-        # Fall back to ZIP in other cases, though this relies on remote hosts falling
-        # into one of a few particular patterns
+        # Normal case: we aren't locked into any particular method, so use zip downloads from the
+        # addons cache
         return InstallationMethod.ZIP
 
     def _install_by_copy(self) -> bool:
@@ -311,13 +330,9 @@ class AddonInstaller(QtCore.QObject):
 
     def _install_by_zip(self) -> bool:
         """Installs the specified url by downloading the file (if it is remote) and unzipping it
-        into the appropriate installation location. If the GUI is running the download is
-        asynchronous, and issues periodic updates about how much data has been downloaded."""
-        if self.addon_to_install.url.endswith(".zip"):
-            zip_url = self.addon_to_install.url
-        else:
-            zip_url = utils.get_zip_url(self.addon_to_install)
-
+        into the appropriate installation location. If the GUI is running, the download is
+        asynchronous and issues periodic updates about how much data has been downloaded."""
+        zip_url = self.addon_to_install.get_zip_url()
         fci.Console.PrintLog(f"Downloading ZIP file from {zip_url}...\n")
         parse_result = urlparse(zip_url)
         is_remote = parse_result.scheme in ["http", "https"]

@@ -22,11 +22,12 @@
 # ***************************************************************************
 
 """Class to manage the display of an Update All dialog."""
-
+import threading
 from enum import IntEnum, auto
 import os
 from typing import List
 
+import NetworkManager
 from PySideWrapper import QtCore, QtWidgets
 
 import addonmanager_freecad_interface as fci
@@ -83,6 +84,7 @@ class UpdateAllWorker(QtCore.QObject):
 
     finished = QtCore.Signal()
     addon_updated = QtCore.Signal(object)
+    progress_update = QtCore.Signal(int, int)
 
     def __init__(self, addons: List[Addon]):
         super().__init__()
@@ -92,12 +94,35 @@ class UpdateAllWorker(QtCore.QObject):
         self.running = False
         self.cancelled = False
         self.currentIndex = 0
+        self.download_size_lock = threading.Lock()
+        self.total_size = 0
+        self.sizes_received = 0
+        self.downloaded_sizes = []
+        NetworkManager.AM_NETWORK_MANAGER.content_length.connect(self._update_download_size)
 
     def run(self):
         """Run the Update All process. Blocks until updates are complete or cancelled."""
         self.running = True
         self.currentIndex = 0
-        self._process_next_update()
+        self.query_sizes()
+
+    def query_sizes(self):
+        """In the background, builds a list of the download sizes for all the addons being updated"""
+        forced_repos = fci.Preferences().get("force_git_in_repos").split(",")
+        for addon in self.addons:
+            if addon.name in forced_repos:
+                self.sizes_received += 1
+                continue
+            zip_url = addon.get_zip_url()
+            NetworkManager.AM_NETWORK_MANAGER.query_download_size(zip_url)
+
+    def _update_download_size(self, _index: int, _response_code: int, content_length: int) -> None:
+        with self.download_size_lock:
+            self.sizes_received += 1
+            self.total_size += content_length
+            self.downloaded_sizes.append(0)
+            if self.sizes_received == len(self.addons):
+                self._process_next_update()
 
     def cancel(self):
         self.cancelled = True
@@ -118,7 +143,17 @@ class UpdateAllWorker(QtCore.QObject):
         self.active_installer.success.connect(self._update_succeeded)
         self.active_installer.failure.connect(self._update_failed)
         self.active_installer.finished.connect(self._update_finished)
+        if hasattr(self.active_installer, "progress_update"):
+            self.active_installer.progress_update.connect(self._update_progress_update)
         self.active_installer.run()
+
+    def _update_progress_update(self, progress: int, total: int) -> None:
+        """Calculate total progress and emit the signal"""
+        size_array_index = self.currentIndex - 1
+        if 0 <= size_array_index < len(self.downloaded_sizes):
+            self.downloaded_sizes[size_array_index] = progress
+            total_so_far = sum(self.downloaded_sizes)
+            self.progress_update.emit(total_so_far, self.total_size)
 
     def _update_succeeded(self, addon):
         """Callback for a successful update"""
@@ -193,9 +228,7 @@ class UpdateAllGUI(QtCore.QObject):
         self.dialog.table_view.hideColumn(4)
 
     def _setup_progress_dialog(self):
-        self.progress_dialog = fci.loadUi(
-            os.path.join(os.path.dirname(__file__), "update_all_progress.ui")
-        )
+        self.progress_dialog = fci.loadUi(os.path.join(os.path.dirname(__file__), "progress.ui"))
         self.progress_dialog.setObjectName("AddonManager_UpdateAllProgressDialog")
         self.progress_dialog.buttonBox.rejected.connect(self.cancel)
 
@@ -244,7 +277,7 @@ class UpdateAllGUI(QtCore.QObject):
             )
         else:
             fci.Console.PrintMessage("No unsatisfied dependencies found, continuing with update\n")
-            self.proceed()
+            self.check_for_git_migration()
 
     def handle_missing_dependencies(
         self,
@@ -261,8 +294,43 @@ class UpdateAllGUI(QtCore.QObject):
         missing_dependencies.python_optional = optional_python_modules
         self.dependency_installer = AddonDependencyInstallerGUI(addons, missing_dependencies)
         self.dependency_installer.cancel.connect(self.cancel)
-        self.dependency_installer.proceed.connect(self.proceed)
+        self.dependency_installer.proceed.connect(self.check_for_git_migration)
         self.dependency_installer.run()
+
+    def check_for_git_migration(self):
+        """The Addon Manager used to use git as the preferred installation mechanism and only
+        fell back to Zip if git was unavailable (or specifically deactivated). That changed in
+        mid-2025, and Zip was made the preferred download mechanism. This function checks to see if
+        there is a .git directory present that would be deleted by doing this update and offers
+        to let the user turn on git installation (if they are a developer, for example)."""
+
+        addons_to_update = [
+            addon
+            for addon, checked in zip(self.model.addons_with_update, self.model.update_is_checked)
+            if checked
+        ]
+        custom_repos_lines = fci.Preferences().get("CustomRepositories").split("\n")
+        custom_repos = [line.split(" ")[0] for line in custom_repos_lines]
+        forced_repos = fci.Preferences().get("force_git_in_repos").split(",")
+        for addon in addons_to_update:
+            if addon.name in custom_repos or addon.name in forced_repos:
+                continue
+            path_to_addon = str(os.path.join(fci.DataPaths().mod_dir, addon.name))
+            path_to_git_directory = str(os.path.join(path_to_addon, ".git"))
+            if os.path.exists(path_to_git_directory):
+                backup_path = path_to_addon + "-backup-before-zip-migration"
+                os.rename(path_to_addon, backup_path)
+                fci.Console.PrintMessage(
+                    f"Found .git directory for Addon {addon.display_name}"
+                    " - backup created before migration to zip\n"
+                )
+                with open(os.path.join(backup_path, "ADDON_DISABLED"), "w", encoding="utf-8") as f:
+                    f.write(
+                        "This directory is a backup made before migrating from Git to Zip."
+                        " If you don't care about retaining any git information or you are"
+                        " not a developer and/or don't use git, it can be deleted safely."
+                    )
+        self.proceed()
 
     def proceed(self):
         """Does the updates"""
@@ -287,6 +355,7 @@ class UpdateAllGUI(QtCore.QObject):
         self.addon_installer.finished.connect(self.worker_thread.quit)
         self.addon_installer.finished.connect(self.update_complete)
         self.addon_installer.addon_updated.connect(self.update_progress)
+        self.addon_installer.progress_update.connect(self.update_progress_bar)
         self.worker_thread.start()
 
     def cancel(self):
@@ -306,8 +375,10 @@ class UpdateAllGUI(QtCore.QObject):
         """Updates the progress bar and check the state of the rows"""
         self.model.rescan_addon(addon_installed)
         self.addon_updated.emit(addon_installed)
-        if self.progress_dialog.progressBar.value() < self.progress_dialog.progressBar.maximum():
-            self.progress_dialog.progressBar.setValue(self.progress_dialog.progressBar.value() + 1)
+
+    def update_progress_bar(self, so_far: int, total: int):
+        self.progress_dialog.progressBar.setMaximum(total)
+        self.progress_dialog.progressBar.setValue(so_far)
 
     def update_complete(self):
         self.progress_dialog.hide()

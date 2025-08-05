@@ -412,17 +412,11 @@ class GitManager:
         os.chdir(old_dir)
 
     def _find_git(self):
-        # Find git. In preference order
-        #   A) The value of the GitExecutable user preference
-        #   B) The executable located in the same directory as FreeCAD and called "git"
-        #   C) The result of a shutil search for your system's "git" executable
-        prefs = fci.ParamGet("User parameter:BaseApp/Preferences/Addons")
-        git_exe = prefs.GetString("GitExecutable", "Not set")
-        if not git_exe or git_exe == "Not set" or not os.path.exists(git_exe):
-            fc_dir = fci.DataPaths().home_dir
-            git_exe = os.path.join(fc_dir, "bin", "git")
-            if "Windows" in platform.system():
-                git_exe += ".exe"
+
+        fc_dir = fci.DataPaths().home_dir
+        git_exe = os.path.join(fc_dir, "bin", "git")
+        if "Windows" in platform.system():
+            git_exe += ".exe"
 
         if platform.system() == "Darwin" and not self._git_is_real():
             return
@@ -433,7 +427,6 @@ class GitManager:
         if not git_exe or not os.path.exists(git_exe):
             return
 
-        prefs.SetString("GitExecutable", git_exe)
         self.git_exe = git_exe
 
     @staticmethod

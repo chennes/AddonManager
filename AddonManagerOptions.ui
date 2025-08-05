@@ -14,28 +14,18 @@
    <string>Addon Manager Options</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="margin">
+   <property name="leftMargin">
     <number>0</number>
    </property>
-   <item>
-    <widget class="Gui::PrefCheckBox" name="guiprefcheckboxcheckupdates">
-     <property name="toolTip">
-      <string>Checks for updates of installed addons when launching the Addon Manager</string>
-     </property>
-     <property name="text">
-      <string>Automatically check for updates at start (requires Git)</string>
-     </property>
-     <property name="autoExclusive">
-      <bool>false</bool>
-     </property>
-     <property name="prefEntry" stdset="0">
-      <cstring>AutoCheck</cstring>
-     </property>
-     <property name="prefPath" stdset="0">
-      <cstring>Addons</cstring>
-     </property>
-    </widget>
-   </item>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="Gui::PrefCheckBox" name="guiprefcheckboxhideunlicensed">
      <property name="text">
@@ -81,54 +71,6 @@
      </property>
      <property name="prefPath" stdset="0">
       <cstring>Addons</cstring>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="Gui::PrefCheckBox" name="guiprefcheckboxhidepy2">
-     <property name="text">
-      <string>Hide addons marked Python 2 only</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-     <property name="prefEntry" stdset="0">
-      <cstring>HidePy2</cstring>
-     </property>
-     <property name="prefPath" stdset="0">
-      <cstring>Addons</cstring>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="Gui::PrefCheckBox" name="guiprefcheckboxhideobsolete">
-     <property name="text">
-      <string>Hide addons marked obsolete</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-     <property name="prefEntry" stdset="0">
-      <cstring>HideObsolete</cstring>
-     </property>
-     <property name="prefPath" stdset="0">
-      <cstring>Addons</cstring>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="Gui::PrefCheckBox" name="guiprefcheckboxhidenewerfreecadrequired">
-     <property name="text">
-      <string>Hide addons that require a newer version of FreeCAD</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-     <property name="prefPath" stdset="0">
-      <cstring>Addons</cstring>
-     </property>
-     <property name="prefEntry" stdset="0">
-      <cstring>HideNewerFreeCADRequired</cstring>
      </property>
     </widget>
    </item>
@@ -287,83 +229,6 @@
     </layout>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Path to Git executable (optional)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="Gui::PrefFileChooser" name="gui::preffilechooser" native="true">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>300</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>The path to the Git executable. Autodetected if needed and not specified.</string>
-       </property>
-       <property name="prefEntry" stdset="0">
-        <cstring>GitExecutable</cstring>
-       </property>
-       <property name="prefPath" stdset="0">
-        <cstring>Addons</cstring>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="advanced">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="title">
-      <string>Advanced Options</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
-      <item>
-       <widget class="Gui::PrefCheckBox" name="guiprefcheckboxShowBranchSwitcher">
-        <property name="text">
-         <string>Show option to change branches (requires Git)</string>
-        </property>
-        <property name="prefEntry" stdset="0">
-         <cstring>ShowBranchSwitcher</cstring>
-        </property>
-        <property name="prefPath" stdset="0">
-         <cstring>Addons</cstring>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="Gui::PrefCheckBox" name="guiprefcheckboxDisableGit">
-        <property name="text">
-         <string>Disable Git (fall back to ZIP downloads only)</string>
-        </property>
-        <property name="prefEntry" stdset="0">
-         <cstring>disableGit</cstring>
-        </property>
-        <property name="prefPath" stdset="0">
-         <cstring>Addons</cstring>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -385,11 +250,6 @@
    <header>Gui/PrefWidgets.h</header>
   </customwidget>
   <customwidget>
-   <class>Gui::PrefComboBox</class>
-   <extends>QComboBox</extends>
-   <header>Gui/PrefWidgets.h</header>
-  </customwidget>
-  <customwidget>
    <class>Gui::PrefRadioButton</class>
    <extends>QRadioButton</extends>
    <header>Gui/PrefWidgets.h</header>
@@ -397,11 +257,6 @@
   <customwidget>
    <class>Gui::PrefLineEdit</class>
    <extends>QLineEdit</extends>
-   <header>Gui/PrefWidgets.h</header>
-  </customwidget>
-  <customwidget>
-   <class>Gui::PrefFileChooser</class>
-   <extends>QWidget</extends>
    <header>Gui/PrefWidgets.h</header>
   </customwidget>
  </customwidgets>

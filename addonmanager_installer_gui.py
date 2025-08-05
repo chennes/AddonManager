@@ -129,22 +129,25 @@ class AddonInstallerGUI(QtCore.QObject):
         self.worker_thread.setObjectName("Addon Installer worker thread")
         self.installer.moveToThread(self.worker_thread)
         self.installer.finished.connect(self.worker_thread.quit)
+        self.installer.progress_update.connect(self._progress_update)
         self.worker_thread.started.connect(self.installer.run)
 
-        self.installing_dialog = QtWidgets.QMessageBox(
-            QtWidgets.QMessageBox.NoIcon,
-            translate("AddonsInstaller", "Installing Addon"),
-            translate("AddonsInstaller", "Installing FreeCAD addon '{}'").format(
-                self.addon_to_install.display_name
-            ),
-            QtWidgets.QMessageBox.Cancel,
-            parent=utils.get_main_am_window(),
-        )
+        self.installing_dialog = fci.loadUi(os.path.join(os.path.dirname(__file__), "progress.ui"))
         self.installing_dialog.setObjectName("AddonManager_InstallingDialog")
+        self.installing_dialog.label.setText(
+            translate("AddonsInstaller", "Installing '{}'").format(
+                self.addon_to_install.display_name
+            )
+        )
+
         self.installing_dialog.rejected.connect(self._cancel_addon_installation)
         self.installer.finished.connect(self.installing_dialog.hide)
         self.installing_dialog.show()
         self.worker_thread.start()  # Returns immediately
+
+    def _progress_update(self, bytes_read: int, data_size: int) -> None:
+        self.installing_dialog.progressBar.setMaximum(data_size)
+        self.installing_dialog.progressBar.setValue(bytes_read)
 
     def _cancel_addon_installation(self):
         dlg = QtWidgets.QMessageBox(

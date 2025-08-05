@@ -208,6 +208,7 @@ class TestAddonInstaller(unittest.TestCase):
             mock_addon.url = os.path.join(temp_dir, "test_repo")
             mock_addon.branch = "main"
             installer = AddonInstaller(mock_addon, [])
+            installer.git_manager = git_manager  # Make sure it's been created
             installer.installation_path = os.path.join(temp_dir, "installed_addon")
             installer._install_by_git()
 
@@ -247,6 +248,7 @@ class TestAddonInstaller(unittest.TestCase):
             self.assertEqual(method, InstallationMethod.COPY)
             git_manager = initialize_git()
             if git_manager:
+                installer.git_manager = git_manager
                 method = installer._determine_install_method(temp_dir, InstallationMethod.GIT)
                 self.assertEqual(method, InstallationMethod.GIT)
             method = installer._determine_install_method(temp_dir, InstallationMethod.ZIP)
@@ -264,6 +266,7 @@ class TestAddonInstaller(unittest.TestCase):
             self.assertEqual(method, InstallationMethod.COPY)
             git_manager = initialize_git()
             if git_manager:
+                installer.git_manager = git_manager
                 method = installer._determine_install_method(temp_dir, InstallationMethod.GIT)
                 self.assertEqual(method, InstallationMethod.GIT)
             method = installer._determine_install_method(temp_dir, InstallationMethod.ZIP)
@@ -358,7 +361,7 @@ class TestAddonInstaller(unittest.TestCase):
                 method = installer._determine_install_method(temp_file, InstallationMethod.ANY)
                 self.assertEqual(
                     method,
-                    InstallationMethod.GIT,
+                    InstallationMethod.ZIP,
                     f"Failed to allow git access to {site} URL",
                 )
 
