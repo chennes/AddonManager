@@ -351,6 +351,12 @@ class CacheWriter:
         is no icon specified for this Addon (which is not allowed by the standard, but we don't want
         to crash the cache writer)."""
         if metadata.icon:
+            if (
+                metadata.subdirectory
+                and metadata.subdirectory != "."
+                and metadata.subdirectory != "./"
+            ):
+                return metadata.subdirectory + "/" + metadata.icon
             return metadata.icon
         for content_type in metadata.content:
             for content_item in metadata.content[content_type]:
