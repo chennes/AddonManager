@@ -92,6 +92,7 @@ class ConnectionCheckerGUI(QtCore.QObject):
             "AddonManager_ConnectionFailedDialog",
             translate("AddonsInstaller", "Connection failed"),
             message,
+            QtWidgets.QMessageBox.OK,
         )
         self._disconnect_signals()
         self.check_complete.emit()
