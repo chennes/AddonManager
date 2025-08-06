@@ -429,6 +429,7 @@ class CommandAddonManager(QtCore.QObject):
         if len(self.startup_sequence) > 0:
             phase_runner = self.startup_sequence.pop(0)
             self.current_progress_region += 1
+            self.update_progress_bar(translate("AddonsInstaller", "Continuing startup"), 0, 100)
             phase_runner()
         else:
             self.hide_progress_widgets()
@@ -441,6 +442,7 @@ class CommandAddonManager(QtCore.QObject):
         self.create_addon_list_worker.addon_repo.connect(self.add_addon_repo)
         self.update_progress_bar(translate("AddonsInstaller", "Creating addon list"), 10, 100)
         self.create_addon_list_worker.finished.connect(self.do_next_startup_phase)  # Link to step 2
+        self.create_addon_list_worker.progress_made.connect(self.update_progress_bar)
         self.create_addon_list_worker.start()
 
     def activate_table_widgets(self) -> None:
@@ -547,6 +549,7 @@ class CommandAddonManager(QtCore.QObject):
 
     def fetch_addon_stats(self) -> None:
         """Fetch the Addon Stats JSON data from a URL"""
+        self.update_progress_bar(translate("AddonsInstaller", "Fetching addon stats"), 0, 100)
         url = fci.Preferences().get("AddonsStatsURL")
         if url and url != "NONE":
             self.get_basic_addon_stats_worker = GetBasicAddonStatsWorker(
@@ -563,6 +566,7 @@ class CommandAddonManager(QtCore.QObject):
 
     def fetch_addon_score(self) -> None:
         """Fetch the Addon score JSON data from a URL"""
+        self.update_progress_bar(translate("AddonsInstaller", "Fetching addon score"), 0, 100)
         prefs = fci.Preferences()
         url = prefs.get("AddonsScoreURL")
         if url and url != "NONE":
