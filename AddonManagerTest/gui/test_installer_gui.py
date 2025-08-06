@@ -127,11 +127,9 @@ class TestAddonInstallerGUI(unittest.TestCase):
         # Act
         installer = AddonInstallerGUI(test_addon)
         installer.run()
-        mock_dep_gui_instance.run()
 
         # Assert
         self.assertTrue(mock_dep_gui_instance.called)
-        self.assertTrue(mock_dep_gui_instance.moved_to_thread)
 
         installer.shutdown()
 
@@ -158,7 +156,6 @@ class TestAddonInstallerGUI(unittest.TestCase):
 
         # Act
         installer.run()
-        mock_dep_gui_instance.run()
 
         # Assert
         mock_install.assert_called_once()

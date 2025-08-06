@@ -68,7 +68,6 @@ class AddonInstallerGUI(QtCore.QObject):
         self.dependency_installer = None
         self.install_worker = None
         self.dependency_dialog = None
-        self.dependency_worker_thread = None
         self.dependency_installation_dialog = None
         self.installing_dialog = None
         self.worker_thread = None
@@ -80,7 +79,6 @@ class AddonInstallerGUI(QtCore.QObject):
     def shutdown(self):
         try:
             self._stop_thread(self.worker_thread)
-            self._stop_thread(self.dependency_worker_thread)
         except RuntimeError:
             # In some circumstances during shutdown the underlying C++ thread may already be gone:
             # we don't care
@@ -115,13 +113,7 @@ class AddonInstallerGUI(QtCore.QObject):
         self.dependency_installer = AddonDependencyInstallerGUI([self.addon_to_install], deps)
         self.dependency_installer.cancel.connect(self.finished.emit)
         self.dependency_installer.proceed.connect(self.install)
-        self.dependency_worker_thread = QtCore.QThread(self)
-        self.dependency_worker_thread.setObjectName("AddonDependencyInstallerGUI worker thread")
-        self.dependency_installer.moveToThread(self.dependency_worker_thread)
-        self.dependency_worker_thread.started.connect(self.dependency_installer.run)
-        self.dependency_installer.cancel.connect(self.dependency_worker_thread.quit)
-        self.dependency_installer.proceed.connect(self.dependency_worker_thread.quit)
-        self.dependency_worker_thread.start()
+        self.dependency_installer.run()
 
     def install(self) -> None:
         """Installs or updates a workbench, macro, or package"""
