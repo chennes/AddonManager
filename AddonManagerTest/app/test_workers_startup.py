@@ -38,7 +38,7 @@ class TestCreateAddonListWorker(unittest.TestCase):
         mock_preferences_instance = MagicMock()
         mock_preferences_class.return_value = mock_preferences_instance
 
-        mock_network_manager.blocking_get = MagicMock(
+        mock_network_manager.blocking_get_with_retries = MagicMock(
             return_value=QtCore.QByteArray("1234567890abcdef".encode("utf-8"))
         )
 
