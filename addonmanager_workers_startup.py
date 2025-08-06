@@ -27,6 +27,7 @@ import hashlib
 import io
 import json
 import os
+import time
 from typing import List
 import xml.etree.ElementTree
 import zipfile
@@ -55,6 +56,10 @@ class CreateAddonListWorker(QtCore.QThread):
     addon_repo = QtCore.Signal(object)
     progress_made = QtCore.Signal(str, int, int)
 
+    MAX_ATTEMPTS = 3
+    RETRY_DELAY_SECONDS = 3
+    ATTEMPT_TIMEOUT_MS = 30000
+
     def __init__(self):
         QtCore.QThread.__init__(self)
         self.setObjectName("CreateAddonListWorker")
@@ -81,7 +86,7 @@ class CreateAddonListWorker(QtCore.QThread):
                 self.process_macro_cache(macro_cache)
             self.progress_made.emit("Macros loaded", 100, 100)
 
-        except ConnectionError as e:
+        except (ConnectionError, RuntimeError) as e:
             fci.Console.PrintError("Failed to connect to FreeCAD addon remote resource:\n")
             fci.Console.PrintError(str(e) + "\n")
             return
@@ -157,12 +162,25 @@ class CreateAddonListWorker(QtCore.QThread):
         else:
             return self.get_local_cache(full_path)
 
-    @staticmethod
-    def get_remote_cache(cache_name: str) -> str:
+    @classmethod
+    def get_remote_cache(cls, cache_name: str) -> str:
         url = fci.Preferences().get(f"{cache_name}_cache_url")
-        p = NetworkManager.AM_NETWORK_MANAGER.blocking_get(url, 30000)
+
+        attempt = 0
+        p = None
+        while p is None and attempt < cls.MAX_ATTEMPTS:
+            attempt += 1
+            p = NetworkManager.AM_NETWORK_MANAGER.blocking_get(url, cls.ATTEMPT_TIMEOUT_MS)
+            if p is None and attempt < cls.MAX_ATTEMPTS:
+                fci.Console.PrintWarning(
+                    f"Download of {url} failed, retrying in {cls.RETRY_DELAY_SECONDS} seconds... "
+                    f"(attempt {attempt} of {cls.MAX_ATTEMPTS})\n"
+                )
+                time.sleep(cls.RETRY_DELAY_SECONDS)  # This process is running in a dedicated thread
         if not p:
-            raise RuntimeError(f"The Addon Manager failed to fetch {url}.\n")
+            raise RuntimeError(
+                f"The Addon Manager failed to fetch {url} after {cls.MAX_ATTEMPTS} attempts"
+            )
 
         zip_data = p.data()
         sha256 = hashlib.sha256(zip_data).hexdigest()
