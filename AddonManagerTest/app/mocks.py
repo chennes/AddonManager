@@ -99,7 +99,6 @@ class MockAddon:
         self.update_status = None
         self.metadata = None
         self.icon_file = None
-        self.last_updated = None
         self.requires = set()
         self.python_requires = set()
         self.python_optional = set()
