@@ -24,6 +24,7 @@
 
 import os
 import functools
+import shutil
 import tempfile
 import threading
 from typing import Dict
@@ -45,7 +46,7 @@ from composite_view import CompositeView
 from Widgets.addonmanager_widget_global_buttons import WidgetGlobalButtonBar
 from Widgets.addonmanager_widget_progress_bar import Progress
 from package_list import PackageListItemModel
-from Addon import Addon
+from Addon import Addon, cycle_to_sub_addon
 from addonmanager_python_deps_gui import (
     PythonPackageManagerGui,
 )
@@ -298,7 +299,7 @@ class CommandAddonManager(QtCore.QObject):
         self.composite_view.package_list.stop_loading.connect(self.stop_update)
         self.composite_view.package_list.setEnabled(False)
         self.composite_view.execute.connect(self.execute_macro)
-        self.composite_view.install.connect(self.launch_installer_gui)
+        self.composite_view.install.connect(self.update)
         self.composite_view.uninstall.connect(self.remove)
         self.composite_view.update.connect(self.update)
         self.composite_view.update_status.connect(self.status_updated)
@@ -604,6 +605,12 @@ class CommandAddonManager(QtCore.QObject):
         self.item_model.append_item(repo)
 
     def update(self, repo: Addon) -> None:
+        try:
+            self.prep_for_install(repo)
+        except OSError as e:
+            fci.Console.PrintError(e)
+            fci.Console.PrintError("\n\nInstallation cancelled: out of disk space?\n")
+            return
         self.launch_installer_gui(repo)
 
     def mark_repo_update_available(self, repo: Addon, available: bool) -> None:
@@ -613,6 +620,19 @@ class CommandAddonManager(QtCore.QObject):
             repo.set_status(Addon.Status.NO_UPDATE_AVAILABLE)
         self.item_model.reload_item(repo)
         self.composite_view.package_details_controller.show_repo(repo)
+
+    def prep_for_install(self, installing_addon: Addon):
+        """To prepare for installing an addon, we need to see if this is the current active branch:
+        if it is not, then we need to cycle the addon's attached to this addon ID, making this one
+        active. We'll also remove any existing addon installed with this ID, making a backup
+        so that we can recover from a failed update/branch switch."""
+
+        for catalog_addon in self.item_model.repos:
+            if catalog_addon.name == installing_addon.name:
+                if catalog_addon != installing_addon:
+                    cycle_to_sub_addon(catalog_addon, installing_addon, self.item_model)
+                break
+        make_backup(installing_addon)
 
     def launch_installer_gui(self, addon: Addon) -> None:
         if self.installer_gui is not None:
@@ -628,6 +648,7 @@ class CommandAddonManager(QtCore.QObject):
         else:
             self.installer_gui = AddonInstallerGUI(addon, self.item_model.repos)
         self.installer_gui.success.connect(self.on_package_status_changed)
+        self.installer_gui.success.connect(cleanup_pre_installation_backup)
         self.installer_gui.finished.connect(self.cleanup_installer)
         self.installer_gui.run()  # Does not block
 
@@ -746,6 +767,32 @@ class CommandAddonManager(QtCore.QObject):
         addons_folder = fci.DataPaths().mod_dir
         QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(addons_folder))
         return
+
+
+# Some utility functions
+
+
+def make_backup(addon: Addon) -> None:
+    """Make a backup of the addon's current installation directory, so that we can recover
+    from a failed update/branch switch."""
+    original = str(os.path.join(fci.DataPaths().mod_dir, addon.name))
+    if os.path.exists(original):
+        shutil.copytree(original, original + ".pre_update_backup", dirs_exist_ok=True)
+
+
+def cleanup_pre_installation_backup(addon: Addon) -> None:
+    """Remove the backup of the addon's current installation directory"""
+    original = str(os.path.join(fci.DataPaths().mod_dir, addon.name))
+    if os.path.exists(original):
+        shutil.rmtree(original + ".pre_update_backup", ignore_errors=True)
+
+
+def revert_to_backup(addon: Addon) -> None:
+    """Revert to the backup of the addon's current installation directory"""
+    original = str(os.path.join(fci.DataPaths().mod_dir, addon.name))
+    if os.path.exists(original + ".pre_update_backup"):
+        shutil.rmtree(original, ignore_errors=True)
+        shutil.copytree(original + ".pre_update_backup", original, dirs_exist_ok=True)
 
 
 # @}

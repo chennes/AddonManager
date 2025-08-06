@@ -202,29 +202,7 @@ class PackageDetailsView(QtWidgets.QWidget):
         self.message_label.setStyleSheet("color:" + attention_color_string())
 
     def _sync_ui_state(self):
-        self._sync_button_state()
         self._create_status_label_text()
-
-    def _sync_button_state(self):
-        self.button_bar.install.setVisible(not self.installed)
-        self.button_bar.uninstall.setVisible(self.installed)
-        if not self.installed:
-            self.button_bar.disable.hide()
-            self.button_bar.enable.hide()
-            self.button_bar.update.hide()
-            self.button_bar.check_for_update.hide()
-        else:
-            self.button_bar.update.setVisible(self.update_info.update_available)
-            if self.update_info.detached_head:
-                self.button_bar.check_for_update.hide()
-            else:
-                self.button_bar.check_for_update.setVisible(not self.update_info.update_available)
-            if self.can_disable:
-                self.button_bar.enable.setVisible(self.disabled)
-                self.button_bar.disable.setVisible(not self.disabled)
-            else:
-                self.button_bar.enable.hide()
-                self.button_bar.disable.hide()
 
     def _create_status_label_text(self):
         if self.installed:

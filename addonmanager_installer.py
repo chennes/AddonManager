@@ -40,6 +40,7 @@ from PySideWrapper import QtCore
 
 from Addon import Addon
 import addonmanager_utilities as utils
+from addonmanager_installation_manifest import InstallationManifest
 from addonmanager_metadata import get_branch_from_metadata
 from addonmanager_git import initialize_git, GitFailed
 
@@ -449,7 +450,17 @@ class AddonInstaller(QtCore.QObject):
     def _finalize_successful_installation(self):
         """Perform any necessary additional steps after installing the addon."""
         self._update_metadata()
-        self._install_macros()
+        extra_files = self._install_macros()
+        manifest = InstallationManifest()
+        if manifest.contains(self.addon_to_install.name):
+            manifest.record_update(
+                self.addon_to_install.name, self.addon_to_install, extra_files=extra_files
+            )
+        else:
+            manifest.record_new_installation(
+                self.addon_to_install.name, self.addon_to_install, extra_files=extra_files
+            )
+
         self.success.emit(self.addon_to_install)
 
     def _update_metadata(self):
@@ -463,7 +474,7 @@ class AddonInstaller(QtCore.QObject):
             self.addon_to_install.installed_version = self.addon_to_install.metadata.version
             self.addon_to_install.updated_timestamp = os.path.getmtime(package_xml)
 
-    def _install_macros(self):
+    def _install_macros(self) -> List[str]:
         """For any workbenches, copy FCMacro files into the macro directory. Exclude packages that
         have preference packs, otherwise we will litter the macro directory with the pre and post
         scripts."""
@@ -471,7 +482,7 @@ class AddonInstaller(QtCore.QObject):
             isinstance(self.addon_to_install, Addon)
             and self.addon_to_install.contains_preference_pack()
         ):
-            return
+            return []
 
         if not os.path.exists(self.macro_installation_path):
             os.makedirs(self.macro_installation_path)
@@ -503,6 +514,7 @@ class AddonInstaller(QtCore.QObject):
                 )
                 for fcmacro_file in installed_macro_files:
                     f.write(fcmacro_file + "\n")
+        return installed_macro_files
 
     @classmethod
     def _validate_object(cls, addon: object):
@@ -584,6 +596,17 @@ class MacroInstaller(QtCore.QObject):
                 translate("AddonsInstaller", "Failed to create installation manifest " "file:\n")
             )
             fci.Console.PrintWarning(manifest_file)
+
+        # Update the primary manifest as well
+        manifest = InstallationManifest()
+        if manifest.contains(self.addon_to_install.name):
+            manifest.record_update(
+                self.addon_to_install.name, self.addon_to_install, extra_files=[]
+            )
+        else:
+            manifest.record_new_installation(
+                self.addon_to_install.name, self.addon_to_install, extra_files=[]
+            )
 
     @classmethod
     def _validate_object(cls, addon):

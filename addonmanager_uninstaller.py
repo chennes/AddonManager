@@ -31,6 +31,7 @@ from typing import List
 import addonmanager_freecad_interface as fci
 import addonmanager_utilities as utils
 from Addon import Addon
+from addonmanager_installation_manifest import InstallationManifest
 
 try:
     from PySide import QtCore  # Use the FreeCAD wrapper
@@ -132,6 +133,8 @@ class AddonUninstaller(QtCore.QObject):
                     "Could not find addon {} to remove it.",
                 ).format(self.addon_to_remove.name)
         if success:
+            manifest = InstallationManifest()
+            manifest.remove(self.addon_to_remove.name)
             self.success.emit(self.addon_to_remove)
         else:
             self.failure.emit(self.addon_to_remove, error_message)

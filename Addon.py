@@ -169,12 +169,18 @@ class Addon:
         self.url = url.strip()
         self.relative_cache_path = ""
         self.branch = branch.strip()
+        self.branch_display_name = branch.strip()
         self.repo_type = Addon.Kind.WORKBENCH
         self.description = None
         self.tags = set()  # Just a cache, loaded from Metadata
         self.remote_last_updated: Optional[datetime.datetime] = None
         self.stats = AddonStats()
         self.score = 0
+
+        # In cases where there are multiple versions/branches/installations available for an addon,
+        # this dictionary is the mapping from the displayed name in the UI (as given in the
+        # catalog) to the Addon object.
+        self.sub_addons = {}
 
         # To prevent multiple threads from running git actions on this repo at the
         # same time
@@ -207,6 +213,14 @@ class Addon:
         self._icon_file = None
         self._cached_license: str = ""
         self._cached_update_date = None
+
+    def __eq__(self, other):
+        if not isinstance(other, Addon):
+            return NotImplemented
+        return self.name == other.name and self.branch_display_name == other.branch_display_name
+
+    def __hash__(self):
+        return hash((self.name, self.branch_display_name))
 
     def _clean_url(self):
         # The url should never end in ".git", so strip it if it's there
@@ -759,3 +773,24 @@ class MissingDependencies:
         self.python_optional = [
             option for option in self.python_optional if option not in self.python_requires
         ]
+
+
+def cycle_to_sub_addon(original: Addon, sub_addon: Addon, addon_model):
+    """Given an addon with sub-addons, cycle the sub-addon to be the primary. After this call,
+    the addon_list will contain the sub_addon, which will itself have a list of sub-addons that
+    now includes the original addon (and *not* itself).
+    :param original: The addon that is currently the primary
+    :param sub_addon: The sub-addon that should be the primary
+    :param addon_model: The PackageListItemModel containing all addons"""
+
+    addon_model.remove_item(original)
+
+    new_sub_dict = {original.branch_display_name: original}
+    for key, value in original.sub_addons.items():
+        if key != sub_addon.branch_display_name:
+            new_sub_dict[key] = value
+
+    sub_addon.sub_addons = new_sub_dict
+    original.sub_addons = {}
+
+    addon_model.append_item(sub_addon)

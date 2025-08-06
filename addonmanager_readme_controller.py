@@ -32,6 +32,7 @@ from html.parser import HTMLParser
 from typing import Optional
 
 import NetworkManager
+from addonmanager_metadata import UrlType
 
 translate = fci.translate
 
@@ -84,6 +85,28 @@ class ReadmeController(QtCore.QObject):
                 return
         else:
             self.url = utils.get_readme_url(repo)
+            if self.addon.metadata and self.addon.metadata.url:
+                for url in self.addon.metadata.url:
+                    if url.type == UrlType.readme:
+                        if self.url != url.location:
+                            fci.Console.PrintLog("README url does not match expected location\n")
+                            fci.Console.PrintLog(f"Expected: {self.url}\n")
+                            fci.Console.PrintLog(f"package.xml contents: {url.location}\n")
+                            fci.Console.PrintLog(
+                                "Note to addon devs: package.xml now expects a"
+                                " url to the raw MD data, now that Qt can render"
+                                " it without having it transformed to HTML.\n"
+                            )
+                        self.url = url.location
+                        if "/blob/" in self.url:
+                            fci.Console.PrintLog("Attempting to replace 'blob' with 'raw'...\n")
+                            self.url = self.url.replace("/blob/", "/raw/")
+                        elif "/src/" in self.url and "codeberg" in self.url:
+                            fci.Console.PrintLog(
+                                "Attempting to replace 'src' with 'raw' in codeberg URL..."
+                            )
+                            self.url = self.url.replace("/src/", "/raw/")
+
         self.widget.setUrl(self.url)
 
         self.widget.setText(

@@ -33,6 +33,7 @@ import xml.etree.ElementTree
 import zipfile
 
 from PySideWrapper import QtCore
+from addonmanager_installation_manifest import InstallationManifest
 
 from addonmanager_macro import Macro
 from Addon import Addon
@@ -55,6 +56,7 @@ class CreateAddonListWorker(QtCore.QThread):
 
     addon_repo = QtCore.Signal(object)
     progress_made = QtCore.Signal(str, int, int)
+    old_backups_found = QtCore.Signal(object)
 
     MAX_ATTEMPTS = 3
     RETRY_DELAY_MS = 3000
@@ -220,13 +222,14 @@ class CreateAddonListWorker(QtCore.QThread):
 
     def process_addon_cache(self, catalog_text_data):
         catalog = AddonCatalog(json.loads(catalog_text_data))
+        manifest = InstallationManifest(catalog)
         for addon_id in catalog.get_available_addon_ids():
             if addon_id in self.package_names:
                 # We already have something with this name, skip this one
                 fci.Console.PrintWarning(
                     translate(
                         "AddonsInstaller",
-                        "WARNING: User-provided custom addon {} is overriding the one in the official addon catalog\n",
+                        "WARNING: Custom addon '{}' is overriding the one in the official addon catalog\n",
                     ).format(addon_id)
                 )
                 continue
@@ -234,19 +237,70 @@ class CreateAddonListWorker(QtCore.QThread):
             branches = catalog.get_available_branches(addon_id)
             if not branches:
                 fci.Console.PrintWarning(
-                    f"Failed to find any compatible branches for {addon_id}. This is an internal error, please report it to the developers.\n"
+                    f"Failed to find any compatible branches for '{addon_id}'. This is an internal error, please report it to the developers.\n"
                 )
                 continue
-            main = branches[0]
-            # TODO: add multiple branch information to the Addon class
-            try:
-                addon = catalog.get_addon_from_id(addon_id, main[0])
-                self.addon_repo.emit(addon)
-            except Exception as e:
+
+            primary_addon = None
+            installed_branch = None
+            if manifest.contains(addon_id):
+                # Then this addon is currently installed: make sure we use the correct branch
+                installed_branch = manifest.get_addon_info(addon_id)["branch_display_name"]
+                fci.Console.PrintLog(
+                    f"Found installed addon '{addon_id}' with branch '{installed_branch}'\n"
+                )
+                for branch_display_name in branches:
+                    if branch_display_name == installed_branch:
+                        primary_addon = branch_display_name
+                        break
+                if primary_addon is None:
+                    fci.Console.PrintError(
+                        f"Failed to find the installed branch '{installed_branch}' for addon '{addon_id}', skipping it.\n"
+                    )
+                    continue
+            addon_instances = {}
+            name_of_first_entry = None
+            for branch_display_name in branches:
+                try:
+                    addon = catalog.get_addon_from_id(addon_id, branch_display_name)
+                    addon_instances[branch_display_name] = addon
+                    if name_of_first_entry is None:
+                        name_of_first_entry = branch_display_name
+                    else:
+                        fci.Console.PrintMessage(
+                            f"Found additional branch '{branch_display_name}' for addon {addon_id}\n"
+                        )
+                except Exception as e:
+                    # Any exception that occurs gets absorbed here in an attempt to find a working
+                    # branch. Only if all proposed branches fail does this become an error that
+                    # causes us to skip the addon
+                    fci.Console.PrintWarning(
+                        f"Could not load branch '{branch_display_name}' for addon {addon_id}: {str(e)}\n"
+                    )
+                    continue
+            if name_of_first_entry is None:
                 fci.Console.PrintError(
                     f"Failed to load the addon {addon_id} from the addon catalog, skipping it.\n"
                 )
-                fci.Console.PrintError(str(e) + "\n")
+                continue
+            primary_branch_name = installed_branch if installed_branch else name_of_first_entry
+            for branch_display_name in branches:
+                if branch_display_name != primary_branch_name:
+                    # Only add non-primary addons to the sub_addons list so that the primary addon
+                    # doesn't list *itself* as a sub-addon
+                    addon_instances[primary_branch_name].sub_addons[branch_display_name] = (
+                        addon_instances[branch_display_name]
+                    )
+
+            if name_of_first_entry is None:
+                fci.Console.PrintError(
+                    f"Failed to load the addon {addon_id} from the addon catalog, skipping it.\n"
+                )
+                continue
+            self.addon_repo.emit(addon_instances[primary_branch_name])
+
+        if manifest.old_backups:
+            self.old_backups_found.emit(manifest.old_backups)
 
     def process_macro_cache(self, catalog_text_data):
         cache_object: dict = json.loads(catalog_text_data)
