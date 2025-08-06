@@ -178,6 +178,10 @@ class AddonCatalogEntry:
             else:
                 addon.set_status(Addon.Status.NO_UPDATE_AVAILABLE)
 
+        addon.branch_display_name = (
+            self.branch_display_name if self.branch_display_name else self.git_ref
+        )
+
         return addon
 
     @staticmethod
@@ -335,16 +339,19 @@ class AddonCatalog:
             raise RuntimeError(f"Addon {addon_id} index out of range")
         self._dictionary[addon_id][index].metadata = metadata
 
-    def get_available_branches(self, addon_id: str) -> List[Tuple[str, str]]:
+    def get_available_branches(self, addon_id: str) -> List[str]:
         """For a given ID, get the list of available branches compatible with this version of
         FreeCAD along with the branch display name. Either field may be empty, but not both. The
-        first entry in the list is expected to be the "primary"."""
+        first entry in the list is expected to be the "primary".
+        :return: A list of branch display names (or git refs, if no display name is available)"""
         if addon_id not in self._dictionary:
             return []
         result = []
         for entry in self._dictionary[addon_id]:
             if entry.is_compatible():
-                result.append((entry.git_ref, entry.branch_display_name))
+                result.append(
+                    entry.branch_display_name if entry.branch_display_name else entry.git_ref
+                )
         return result
 
     def get_catalog(self) -> Dict[str, List[AddonCatalogEntry]]:

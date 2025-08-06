@@ -242,6 +242,17 @@ class PackageListItemModel(QtCore.QAbstractListModel):
             self.repos.append(repo)
             self.endInsertRows()
 
+    def remove_item(self, repo: Addon) -> None:
+        if repo not in self.repos:
+            # Nothing to remove, don't care
+            return
+        with self.write_lock:
+            self.beginRemoveRows(
+                QtCore.QModelIndex(), self.repos.index(repo), self.repos.index(repo)
+            )
+            self.repos.remove(repo)
+            self.endRemoveRows()
+
     def clear(self) -> None:
         """Clear the model, removing all rows. Thread safe."""
         if self.rowCount() > 0:

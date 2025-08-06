@@ -208,6 +208,7 @@ class UpdateAllGUI(QtCore.QObject):
         self.dialog.setObjectName("AddonManager_UpdateAllDialog")
         self.dialog.table_view.setModel(self.model)
         self.dialog.update_button.clicked.connect(self.update_button_clicked)
+        self.dialog.button_box.rejected.connect(self.finished.emit)
 
         self.dialog.table_view.horizontalHeader().setStretchLastSection(False)
         self.dialog.table_view.horizontalHeader().setSectionResizeMode(

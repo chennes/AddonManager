@@ -44,8 +44,6 @@ SET(AddonManager_SRCS
     addonmanager_utilities.py
     addonmanager_workers_startup.py
     addonmanager_workers_utility.py
-    change_branch.py
-    change_branch.ui
     compact_view.py
     composite_view.py
     dependency_resolution_dialog.ui

@@ -24,7 +24,7 @@
 """Contains the unit test class for addonmanager_installer.py non-GUI functionality."""
 
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 import os
 import shutil
 import tempfile
@@ -114,7 +114,8 @@ class TestAddonInstaller(unittest.TestCase):
             installer._update_metadata()
             self.assertEqual(self.real_addon.installed_version, good_metadata.version)
 
-    def test_finalize_zip_installation_non_github(self):
+    @patch("addonmanager_installer.InstallationManifest")
+    def test_finalize_zip_installation_non_github(self, mock_manifest):
         """Ensure that zip files are correctly extracted."""
         with tempfile.TemporaryDirectory() as temp_dir:
             test_simple_repo = os.path.join(self.test_data_dir, "test_simple_repo.zip")
@@ -127,7 +128,8 @@ class TestAddonInstaller(unittest.TestCase):
             expected_location = os.path.join(temp_dir, non_gh_mock.name, "README")
             self.assertTrue(os.path.isfile(expected_location), "Non-GitHub zip extraction failed")
 
-    def test_finalize_zip_installation_github(self):
+    @patch("addonmanager_installer.InstallationManifest")
+    def test_finalize_zip_installation_github(self, mock_manifest):
         with tempfile.TemporaryDirectory() as temp_dir:
             test_github_style_repo = os.path.join(self.test_data_dir, "test_github_style_repo.zip")
             self.mock_addon.url = "https://github.com/something/test_github_style_repo"
@@ -189,7 +191,8 @@ class TestAddonInstaller(unittest.TestCase):
                     self.assertTrue(os.path.isfile(os.path.join(temp_dir, "AnotherFile.txt")))
                     self.assertFalse(os.path.isdir(subdir))
 
-    def test_install_by_git(self):
+    @patch("addonmanager_installer.InstallationManifest")
+    def test_install_by_git(self, mock_manifest):
         """Test using git to install. Depends on there being a local git
         installation: the test is skipped if there is no local git."""
         git_manager = initialize_git()
@@ -218,7 +221,8 @@ class TestAddonInstaller(unittest.TestCase):
             readme = os.path.join(addon_name_dir, "README.md")
             self.assertTrue(os.path.exists(readme))
 
-    def test_install_by_copy(self):
+    @patch("addonmanager_installer.InstallationManifest")
+    def test_install_by_copy(self, manifest):
         """Test using a simple filesystem copy to install an addon."""
         with tempfile.TemporaryDirectory() as temp_dir:
             git_repo_zip = os.path.join(self.test_data_dir, "test_repo.zip")
@@ -404,7 +408,8 @@ class TestMacroInstaller(unittest.TestCase):
         self.mock = MockAddon()
         self.mock.macro = MockMacro()
 
-    def test_installation(self):
+    @patch("addonmanager_installer.InstallationManifest")
+    def test_installation(self, mock_installation_manifest):
         """Test the wrapper around the macro installer"""
 
         # Note that this doesn't test the underlying Macro object's install function,
