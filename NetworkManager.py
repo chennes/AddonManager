@@ -58,6 +58,7 @@ import os
 import queue
 import itertools
 import tempfile
+import time
 from typing import Dict, List, Optional
 from urllib.parse import urlparse
 
@@ -387,12 +388,47 @@ class NetworkManager(QtCore.QObject):
         self.__request_queued.emit()
         return current_index
 
+    def blocking_get_with_retries(
+        self,
+        url: str,
+        timeout_ms: int = default_timeout,
+        max_attempts: int = 3,
+        delay_ms: int = 1000,
+    ):
+        """Submits a GET request to the QNetworkAccessManager and blocks until it is complete. Do
+        not use on the main GUI thread, it will prevent any event processing while it blocks.
+        :url: The URL to fetch
+        :timeout_ms: The timeout in milliseconds
+        :max_attempts: The number of attempts to make if the request fails
+        :delay_ms: The delay between attempts in milliseconds
+        :returns: The response data, or None if the request failed after max_attempts attempts.
+        """
+        if max_attempts < 1:
+            raise ValueError("max_attempts must be greater than 0")
+        if timeout_ms < 1:
+            raise ValueError("timeout_ms must be greater than 0")
+        attempt = 0
+        while True:
+            attempt += 1
+            p = self.blocking_get(url, timeout_ms)
+            if p is not None or attempt >= max_attempts:
+                return p
+            fci.Console.PrintWarning(
+                f"Failed to get {url}, retrying in {delay_ms}ms... (attempt {attempt} of {max_attempts})"
+            )
+            time.sleep(delay_ms / 1000)
+
     def blocking_get(
         self,
         url: str,
         timeout_ms: int = default_timeout,
     ) -> Optional[QtCore.QByteArray]:
-        """Submits a GET request to the QNetworkAccessManager and block until it is complete"""
+        """Submits a GET request to the QNetworkAccessManager and blocks until it is complete. Do
+        not use on the main GUI thread, it will prevent any event processing while it blocks.
+        :url: The URL to fetch
+        :timeout_ms: The timeout in milliseconds
+        :returns: The response data, or None if the request failed after max_attempts attempts.
+        """
 
         current_index = next(self.counting_iterator)  # A thread-safe counter
         with self.synchronous_lock:

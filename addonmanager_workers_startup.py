@@ -57,7 +57,7 @@ class CreateAddonListWorker(QtCore.QThread):
     progress_made = QtCore.Signal(str, int, int)
 
     MAX_ATTEMPTS = 3
-    RETRY_DELAY_SECONDS = 3
+    RETRY_DELAY_MS = 3000
     ATTEMPT_TIMEOUT_MS = 30000
 
     def __init__(self):
@@ -165,23 +165,13 @@ class CreateAddonListWorker(QtCore.QThread):
     @classmethod
     def get_remote_cache(cls, cache_name: str) -> str:
         url = fci.Preferences().get(f"{cache_name}_cache_url")
-
-        attempt = 0
-        p = None
-        while p is None and attempt < cls.MAX_ATTEMPTS:
-            attempt += 1
-            p = NetworkManager.AM_NETWORK_MANAGER.blocking_get(url, cls.ATTEMPT_TIMEOUT_MS)
-            if p is None and attempt < cls.MAX_ATTEMPTS:
-                fci.Console.PrintWarning(
-                    f"Download of {url} failed, retrying in {cls.RETRY_DELAY_SECONDS} seconds... "
-                    f"(attempt {attempt} of {cls.MAX_ATTEMPTS})\n"
-                )
-                time.sleep(cls.RETRY_DELAY_SECONDS)  # This process is running in a dedicated thread
+        p = NetworkManager.AM_NETWORK_MANAGER.blocking_get_with_retries(
+            url, cls.ATTEMPT_TIMEOUT_MS, cls.MAX_ATTEMPTS, cls.RETRY_DELAY_MS
+        )
         if not p:
             raise RuntimeError(
-                f"The Addon Manager failed to fetch {url} after {cls.MAX_ATTEMPTS} attempts"
+                f"Failed to download cache from {url} after {cls.MAX_ATTEMPTS} attempts"
             )
-
         zip_data = p.data()
         sha256 = hashlib.sha256(zip_data).hexdigest()
         fci.Preferences().set(f"last_fetched_{cache_name}_cache_hash", sha256)
@@ -212,13 +202,17 @@ class CreateAddonListWorker(QtCore.QThread):
             fci.Console.PrintError(str(e) + "\n")
             return ""
 
-    @staticmethod
-    def new_cache_available(cache_name: str) -> bool:
+    @classmethod
+    def new_cache_available(cls, cache_name: str) -> bool:
         """Downloads and checks the hash of the remote catalog and compares it to our last-fetched hash"""
         hash_url = fci.Preferences().get(f"{cache_name}_cache_url") + ".sha256"
-        p = NetworkManager.AM_NETWORK_MANAGER.blocking_get(hash_url, 5000)
+        p = NetworkManager.AM_NETWORK_MANAGER.blocking_get_with_retries(
+            hash_url, cls.ATTEMPT_TIMEOUT_MS, cls.MAX_ATTEMPTS, cls.RETRY_DELAY_MS
+        )
         if not p:
-            raise RuntimeError(f"Failed to fetch the hash from {hash_url}\n")
+            raise RuntimeError(
+                f"Failed to download cache hash from remote server {hash_url} after {cls.MAX_ATTEMPTS} attempts"
+            )
         sha256 = p.data().decode("utf8")
         if sha256 != fci.Preferences().get(f"last_fetched_{cache_name}_cache_hash"):
             return True
@@ -508,6 +502,10 @@ class GetBasicAddonStatsWorker(QtCore.QThread):
 
     update_addon_stats = QtCore.Signal(Addon)
 
+    MAX_ATTEMPTS = 3
+    RETRY_DELAY_MS = 3000
+    ATTEMPT_TIMEOUT_MS = 30000
+
     def __init__(self, url: str, addons: List[Addon], parent: QtCore.QObject = None):
         super().__init__(parent)
         self.setObjectName("GetBasicAddonStatsWorker")
@@ -517,7 +515,9 @@ class GetBasicAddonStatsWorker(QtCore.QThread):
     def run(self):
         """Fetch the remote data and load it into the addons"""
 
-        fetch_result = NetworkManager.AM_NETWORK_MANAGER.blocking_get(self.url, 5000)
+        fetch_result = NetworkManager.AM_NETWORK_MANAGER.blocking_get_with_retries(
+            self.url, self.ATTEMPT_TIMEOUT_MS, self.MAX_ATTEMPTS, self.RETRY_DELAY_MS
+        )
         if fetch_result is None:
             fci.Console.PrintError(
                 translate(
@@ -541,6 +541,10 @@ class GetAddonScoreWorker(QtCore.QThread):
 
     update_addon_score = QtCore.Signal(Addon)
 
+    MAX_ATTEMPTS = 3
+    RETRY_DELAY_MS = 3000
+    ATTEMPT_TIMEOUT_MS = 30000
+
     def __init__(self, url: str, addons: List[Addon], parent: QtCore.QObject = None):
         super().__init__(parent)
         self.setObjectName("GetAddonScoreWorker")
@@ -551,7 +555,9 @@ class GetAddonScoreWorker(QtCore.QThread):
         """Fetch the remote data and load it into the addons"""
 
         if self.url != "TEST":
-            fetch_result = NetworkManager.AM_NETWORK_MANAGER.blocking_get(self.url, 5000)
+            fetch_result = NetworkManager.AM_NETWORK_MANAGER.blocking_get_with_retries(
+                self.url, self.ATTEMPT_TIMEOUT_MS, self.MAX_ATTEMPTS, self.RETRY_DELAY_MS
+            )
             if fetch_result is None:
                 fci.Console.PrintError(
                     translate(
