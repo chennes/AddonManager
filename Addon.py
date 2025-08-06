@@ -173,7 +173,6 @@ class Addon:
         self.description = None
         self.tags = set()  # Just a cache, loaded from Metadata
         self.remote_last_updated: Optional[datetime.datetime] = None
-        self.last_updated = None
         self.stats = AddonStats()
         self.score = 0
 
@@ -245,6 +244,8 @@ class Addon:
 
     @property
     def update_date(self):
+        if self.remote_last_updated is not None:
+            return self.remote_last_updated
         if self._cached_update_date is None:
             self._cached_update_date = 0
             if self.stats and self.stats.last_update_time:

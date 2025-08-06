@@ -560,8 +560,6 @@ class PackageListFilter(QtCore.QSortFilterProxyModel):
         self.package_type = 0  # Default to showing everything
         self.status = 0  # Default to showing any
         self.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
-        self.hide_obsolete = False
-        self.hide_py2 = False
         self.hide_non_OSI_approved = False
         self.hide_non_FSF_libre = False
         self.hide_unlicensed = False
