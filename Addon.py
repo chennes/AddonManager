@@ -23,11 +23,11 @@
 
 """Defines the Addon class to encapsulate information about FreeCAD Addons"""
 
+import datetime
 import os
 import re
-from datetime import datetime
-from urllib.parse import urlparse
-from typing import Dict, Set, List, Optional
+from urllib.parse import urlparse, urlunparse
+from typing import Set, List, Optional
 from threading import Lock
 from enum import IntEnum, auto
 import xml.etree.ElementTree
@@ -35,7 +35,6 @@ import xml.etree.ElementTree
 import addonmanager_freecad_interface as fci
 from addonmanager_macro import Macro
 import addonmanager_utilities as utils
-from addonmanager_utilities import construct_git_url, process_date_string_to_python_datetime
 from addonmanager_metadata import (
     Metadata,
     MetadataReader,
@@ -99,7 +98,7 @@ class Addon:
         NO_UPDATE_AVAILABLE = 2
         UPDATE_AVAILABLE = 3
         PENDING_RESTART = 4
-        CANNOT_CHECK = 5  # If we don't have git, etc.
+        CANNOT_CHECK = 5  # Probably now obsolete  TODO: remove?
         UNKNOWN = 100
 
         def __lt__(self, other):
@@ -134,10 +133,10 @@ class Addon:
             self.internal_workbenches: Set[str] = set()  # Required internal workbenches
             self.python_requires: Set[str] = set()
             self.python_optional: Set[str] = set()
-            self.python_min_version = {"major": 3, "minor": 0}
+            self.python_min_version = Version(from_list=[3, 0, 0])
 
     class DependencyType(IntEnum):
-        """Several types of dependency information is stored"""
+        """What kind of dependency a given dependency is"""
 
         INTERNAL_WORKBENCH = auto()
         REQUIRED_ADDON = auto()
@@ -168,14 +167,12 @@ class Addon:
         self.name = name.strip()
         self.display_name = self.name
         self.url = url.strip()
+        self.relative_cache_path = ""
         self.branch = branch.strip()
-        self.python2 = False
-        self.obsolete = False
-        self.rejected = False
         self.repo_type = Addon.Kind.WORKBENCH
         self.description = None
         self.tags = set()  # Just a cache, loaded from Metadata
-        self.last_updated = None
+        self.remote_last_updated: Optional[datetime.datetime] = None
         self.stats = AddonStats()
         self.score = 0
 
@@ -189,14 +186,9 @@ class Addon:
 
         self._clean_url()
 
-        if utils.recognized_git_location(self):
-            self.metadata_url = construct_git_url(self, "package.xml")
-        else:
-            self.metadata_url = None
         self.metadata: Optional[Metadata] = None
         self.icon = None  # A QIcon version of this Addon's icon
-        self.icon_file: str = ""  # Absolute local path to cached icon file
-        self.best_icon_relative_path = ""
+        self.icon_data: bytes = bytes()  # In-memory version of this icon's data
         self.macro = None  # Bridge to Gaël Écorchard's macro management class
         self.updated_timestamp = None
         self.installed_version = None
@@ -210,7 +202,7 @@ class Addon:
         # And maintains a list of required and optional Python dependencies
         self.python_requires: Set[str] = set()
         self.python_optional: Set[str] = set()
-        self.python_min_version = {"major": 3, "minor": 0}
+        self.python_min_version = Version(from_list=[3, 0, 0])
 
         self._icon_file = None
         self._cached_license: str = ""
@@ -252,6 +244,8 @@ class Addon:
 
     @property
     def update_date(self):
+        if self.remote_last_updated is not None:
+            return self.remote_last_updated
         if self._cached_update_date is None:
             self._cached_update_date = 0
             if self.stats and self.stats.last_update_time:
@@ -259,7 +253,7 @@ class Addon:
             elif self.macro and self.macro.date:
                 # Try to parse the date:
                 try:
-                    self._cached_update_date = process_date_string_to_python_datetime(
+                    self._cached_update_date = utils.process_date_string_to_python_datetime(
                         self.macro.date
                     )
                 except ValueError as e:
@@ -281,67 +275,6 @@ class Addon:
         instance.repo_type = Addon.Kind.MACRO
         instance.description = macro.desc
         return instance
-
-    @classmethod
-    def from_cache(cls, cache_dict: Dict):
-        """Load basic data from cached dict data. Does not include Macro or Metadata
-        information, which must be populated separately."""
-
-        mod_dir = os.path.join(cls.mod_directory, cache_dict["name"])
-        if os.path.isdir(mod_dir):
-            status = Addon.Status.UNCHECKED
-        else:
-            status = Addon.Status.NOT_INSTALLED
-        instance = Addon(cache_dict["name"], cache_dict["url"], status, cache_dict["branch"])
-
-        for key, value in cache_dict.items():
-            if not str(key).startswith("_"):
-                instance.__dict__[key] = value
-
-        instance.repo_type = Addon.Kind(cache_dict["repo_type"])
-        if instance.repo_type == Addon.Kind.PACKAGE:
-            # There must be a cached metadata file, too
-            cached_package_xml_file = os.path.join(
-                instance.cache_directory,
-                "PackageMetadata",
-                instance.name,
-            )
-            if os.path.isfile(cached_package_xml_file):
-                instance.load_metadata_file(cached_package_xml_file)
-
-        instance._load_installed_metadata()
-
-        if "requires" in cache_dict:
-            instance.requires = set(cache_dict["requires"])
-            instance.blocks = set(cache_dict["blocks"])
-            instance.python_requires = set(cache_dict["python_requires"])
-            instance.python_optional = set(cache_dict["python_optional"])
-
-        instance._clean_url()
-
-        return instance
-
-    def to_cache(self) -> Dict:
-        """Returns a dictionary with cache information that can be used later with
-        from_cache to recreate this object."""
-
-        return {
-            "name": self.name,
-            "display_name": self.display_name,
-            "url": self.url,
-            "branch": self.branch,
-            "repo_type": int(self.repo_type),
-            "description": self.description,
-            "cached_icon_filename": self.get_cached_icon_filename(),
-            "best_icon_relative_path": self.get_best_icon_relative_path(),
-            "python2": self.python2,
-            "obsolete": self.obsolete,
-            "rejected": self.rejected,
-            "requires": list(self.requires),
-            "blocks": list(self.blocks),
-            "python_requires": list(self.python_requires),
-            "python_optional": list(self.python_optional),
-        }
 
     def load_metadata_file(self, file: str) -> None:
         """Read a given metadata file and set it as this object's metadata"""
@@ -382,7 +315,13 @@ class Addon:
         """
 
         self.metadata = metadata
-        self.display_name = metadata.name
+        self.display_name = (
+            str(metadata.name)
+            .replace("\n", " ")
+            .replace("\r", " ")
+            .replace("{", "")
+            .replace("}", "")
+        )
         self.repo_type = Addon.Kind.PACKAGE
         self.description = metadata.description
         for url in metadata.url:
@@ -416,8 +355,7 @@ class Addon:
             return
 
         if metadata.pythonmin:
-            self.python_min_version["major"] = metadata.pythonmin.version_as_list[0]
-            self.python_min_version["minor"] = metadata.pythonmin.version_as_list[1]
+            self.python_min_version = Version(from_list=metadata.pythonmin.version_as_list)
 
         for dep in metadata.depend:
             if dep.dependency_type == DependencyType.internal:
@@ -527,69 +465,6 @@ class Addon:
         """Determine if this package contains an "other" content item"""
         return self.contains_packaged_content("other")
 
-    def get_best_icon_relative_path(self) -> str:
-        """Get the path within the repo the addon's icon. Usually specified by
-        top-level metadata, but some authors omit it and specify only icons for the
-        contents. Find the first one of those, in such cases."""
-
-        if self.best_icon_relative_path:
-            return self.best_icon_relative_path
-
-        if not self.metadata:
-            return ""
-
-        real_icon = self.metadata.icon
-        if not real_icon:
-            # If there is no icon set for the entire package, see if there are any
-            # workbenches, which are required to have icons, and grab the first one
-            # we find:
-            content = self.metadata.content
-            if "workbench" in content:
-                wb = content["workbench"][0]
-                if wb.icon:
-                    if wb.subdirectory:
-                        subdir = wb.subdirectory
-                    else:
-                        subdir = wb.name
-                    real_icon = subdir + wb.icon
-
-        self.best_icon_relative_path = real_icon
-        return self.best_icon_relative_path
-
-    def get_cached_icon_filename(self) -> str:
-        """NOTE: This function is deprecated and will be removed in a coming update."""
-
-        if hasattr(self, "cached_icon_filename") and self.cached_icon_filename:
-            return self.cached_icon_filename
-
-        if not self.metadata:
-            return ""
-
-        real_icon = self.metadata.icon
-        if not real_icon:
-            # If there is no icon set for the entire package, see if there are any
-            # workbenches, which are required to have icons, and grab the first one
-            # we find:
-            content = self.metadata.content
-            if "workbench" in content:
-                wb = content["workbench"][0]
-                if wb.icon:
-                    if wb.subdirectory:
-                        subdir = wb.subdirectory
-                    else:
-                        subdir = wb.name
-                    real_icon = subdir + wb.icon
-
-        real_icon = real_icon.replace(
-            "/", os.path.sep
-        )  # Required path separator in the metadata.xml file to local separator
-
-        _, file_extension = os.path.splitext(real_icon)
-        store = os.path.join(self.cache_directory, "PackageMetadata")
-        self.cached_icon_filename = os.path.join(store, self.name, "cached_icon" + file_extension)
-
-        return self.cached_icon_filename
-
     def walk_dependency_tree(self, all_repos, deps):
         """Compute the total dependency tree for this repo (recursive)
         - all_repos is a dictionary of repos, keyed on the name of the repo
@@ -599,16 +474,7 @@ class Addon:
 
         deps.python_requires |= self.python_requires
         deps.python_optional |= self.python_optional
-
-        deps.python_min_version["major"] = max(
-            deps.python_min_version["major"], self.python_min_version["major"]
-        )
-        if deps.python_min_version["major"] == 3:
-            deps.python_min_version["minor"] = max(
-                deps.python_min_version["minor"], self.python_min_version["minor"]
-            )
-        else:
-            fci.Console.PrintWarning("Unrecognized Python version information")
+        deps.python_min_version = max(self.python_min_version, deps.python_min_version)
 
         for dep in self.requires:
             if dep in all_repos:
@@ -670,68 +536,66 @@ class Addon:
         try:
             os.unlink(stopfile)
         except FileNotFoundError:
+            # If the file disappeared on us, there's no need to do anything as it's gone already
             pass
 
         if self.contains_workbench():
             self.enable_workbench()
 
     def enable_workbench(self):
-        wbName = self.get_workbench_name()
+        workbench_name = self.get_workbench_name()
 
         # Remove from the list of disabled.
-        self.remove_from_disabled_wbs(wbName)
+        self.remove_from_disabled_wbs(workbench_name)
 
     def disable_workbench(self):
         pref = fci.ParamGet("User parameter:BaseApp/Preferences/Workbenches")
-        wbName = self.get_workbench_name()
+        workbench_name = self.get_workbench_name()
 
         # Add the wb to the list of disabled if it was not already
         disabled_wbs = pref.GetString("Disabled", "NoneWorkbench,TestWorkbench")
         # print(f"start disabling {disabled_wbs}")
         disabled_wbs_list = disabled_wbs.split(",")
-        if not (wbName in disabled_wbs_list):
-            disabled_wbs += "," + wbName
+        if not (workbench_name in disabled_wbs_list):
+            disabled_wbs += "," + workbench_name
         pref.SetString("Disabled", disabled_wbs)
         # print(f"done disabling :  {disabled_wbs} \n")
 
-    def desinstall_workbench(self):
+    def remove_workbench(self):
         pref = fci.ParamGet("User parameter:BaseApp/Preferences/Workbenches")
-        wbName = self.get_workbench_name()
+        workbench_name = self.get_workbench_name()
 
         # Remove from the list of ordered.
         ordered_wbs = pref.GetString("Ordered", "")
-        # print(f"start remove from ordering {ordered_wbs}")
         ordered_wbs_list = ordered_wbs.split(",")
         ordered_wbs = ""
         for wb in ordered_wbs_list:
-            if wb != wbName:
+            if wb != workbench_name:
                 if ordered_wbs != "":
                     ordered_wbs += ","
                 ordered_wbs += wb
         pref.SetString("Ordered", ordered_wbs)
-        # print(f"end remove from ordering {ordered_wbs}")
 
         # Remove from the list of disabled.
-        self.remove_from_disabled_wbs(wbName)
+        self.remove_from_disabled_wbs(workbench_name)
 
-    def remove_from_disabled_wbs(self, wbName: str):
+    @staticmethod
+    def remove_from_disabled_wbs(workbench_name: str):
         pref = fci.ParamGet("User parameter:BaseApp/Preferences/Workbenches")
 
         disabled_wbs = pref.GetString("Disabled", "NoneWorkbench,TestWorkbench")
-        # print(f"start enabling : {disabled_wbs}")
         disabled_wbs_list = disabled_wbs.split(",")
         disabled_wbs = ""
         for wb in disabled_wbs_list:
-            if wb != wbName:
+            if wb != workbench_name:
                 if disabled_wbs != "":
                     disabled_wbs += ","
                 disabled_wbs += wb
         pref.SetString("Disabled", disabled_wbs)
-        # print(f"Done enabling {disabled_wbs} \n")
 
     def get_workbench_name(self) -> str:
-        """Find the name of the workbench class (ie the name under which it's
-        registered in freecad core)'"""
+        """Find the name of the workbench class (i.e., the name under which it's
+        registered in FreeCAD core)"""
         wb_name = ""
 
         if self.repo_type == Addon.Kind.PACKAGE:
@@ -740,15 +604,15 @@ class Addon:
                     wb_name += ","
                 wb_name += wb.classname
         if self.repo_type == Addon.Kind.WORKBENCH or wb_name == "":
-            wb_name = self.try_find_wbname_in_files()
+            wb_name = self.try_find_workbench_name_in_files()
         if wb_name == "":
             wb_name = self.name
         return wb_name
 
-    def try_find_wbname_in_files(self) -> str:
+    def try_find_workbench_name_in_files(self) -> str:
         """Attempt to locate a line with an addWorkbench command in the workbench's
         Python files. If it is directly instantiating a workbench, then we can use
-        the line to determine classname for this workbench. If it uses a variable,
+        the line to determine the classname for this workbench. If it uses a variable,
         or if the line doesn't exist at all, an empty string is returned."""
         mod_dir = os.path.join(self.mod_directory, self.name)
 
@@ -772,8 +636,33 @@ class Addon:
                 if search_result:
                     return search_result.group(1)
         except OSError:
+            # Fall through to the classname-not-found case (if we couldn't read the file, etc.)
             pass
         return ""
+
+    def get_zip_url(self) -> str:
+        if self.url.endswith(".zip"):
+            zip_url = self.url
+        else:
+            # The ZIP url is based on the location of the main cache file:
+            if self.relative_cache_path:
+                cache_file_url = fci.Preferences().get("addon_catalog_cache_url")
+                parsed_url = urlparse(cache_file_url)
+                path_parts = parsed_url.path.rpartition("/")
+                new_path = path_parts[0] + "/" + self.relative_cache_path
+                zip_url = urlunparse(
+                    (
+                        parsed_url.scheme,
+                        parsed_url.netloc,
+                        new_path,
+                        parsed_url.params,
+                        parsed_url.query,
+                        parsed_url.fragment,
+                    )
+                )
+            else:
+                zip_url = utils.get_zip_url(self)
+        return zip_url
 
 
 # @dataclass(frozen)
@@ -785,7 +674,14 @@ class MissingDependencies:
     * Optional Python packages -> python_optional
     """
 
-    def __init__(self, repo: Addon, all_repos: List[Addon]):
+    def __init__(self):
+        self.external_addons = []
+        self.wbs = []
+        self.python_requires = []
+        self.python_optional = []
+        self.python_min_version = Version(from_list=[3, 0, 0])
+
+    def import_from_addon(self, repo: Addon, all_repos: List[Addon]):
         deps = Addon.Dependencies()
         repo_name_dict = {}
         for r in all_repos:
@@ -795,11 +691,10 @@ class MissingDependencies:
                 repo_name_dict[r.display_name] = r
 
         if hasattr(repo, "walk_dependency_tree"):
-            # Sometimes the test harness doesn't provide this function, to override
+            # Sometimes the test harness doesn't provide this function to override
             # any dependency checking
             repo.walk_dependency_tree(repo_name_dict, deps)
 
-        self.external_addons = []
         for dep in deps.required_external_addons:
             if dep.status() == Addon.Status.NOT_INSTALLED:
                 self.external_addons.append(dep.name)
@@ -810,7 +705,6 @@ class MissingDependencies:
         else:
             wbs = []
 
-        self.wbs = []
         for dep in deps.internal_workbenches:
             if dep.lower() + "workbench" not in wbs:
                 if dep.lower() == "plot":
@@ -825,8 +719,7 @@ class MissingDependencies:
                     self.wbs.append(dep)
 
         # Check the Python dependencies:
-        self.python_min_version = deps.python_min_version
-        self.python_requires = []
+        self.python_min_version = max(self.python_min_version, deps.python_min_version)
         for py_dep in deps.python_requires:
             if py_dep not in self.python_requires:
                 try:

@@ -25,10 +25,7 @@
 
 import io
 import os
-import sys
 import unittest
-
-sys.path.append("../../")  # So the IDE can find the classes to run with
 
 from addonmanager_macro_parser import MacroParser
 from AddonManagerTest.app.mocks import MockConsole, CallCatcher, MockThread
@@ -272,8 +269,6 @@ class TestMacroParser(unittest.TestCase):
             'f"Some fancy {thing}"',
             "r'Some fancy {thing}'",
             'r"Some fancy {thing}"',
-            "u'Some fancy {thing}'",
-            'u"Some fancy {thing}"',
             "fr'Some fancy {thing}'",
             'fr"Some fancy {thing}"',
             "rf'Some fancy {thing}'",

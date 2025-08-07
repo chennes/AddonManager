@@ -58,6 +58,7 @@ import os
 import queue
 import itertools
 import tempfile
+import time
 from typing import Dict, List, Optional
 from urllib.parse import urlparse
 
@@ -92,11 +93,18 @@ else:
 class QueueItem:
     """A container for information about an item in the network queue."""
 
-    def __init__(self, index: int, request: QtNetwork.QNetworkRequest, track_progress: bool):
+    def __init__(
+        self,
+        index: int,
+        request: QtNetwork.QNetworkRequest,
+        track_progress: bool,
+        operation: QtNetwork.QNetworkAccessManager.Operation = QtNetwork.QNetworkAccessManager.GetOperation,
+    ):
         self.index = index
         self.request = request
         self.original_url = request.url()
         self.track_progress = track_progress
+        self.operation = operation
 
 
 class NetworkManager(QtCore.QObject):
@@ -109,6 +117,8 @@ class NetworkManager(QtCore.QObject):
     completed = QtCore.Signal(
         int, int, QtCore.QByteArray
     )  # Index, http response code, received data (if any)
+
+    content_length = QtCore.Signal(int, int, int)
 
     # Connect to progress_made and progress_complete for large amounts of data, which get buffered into a temp file
     # That temp file should be deleted when your code is done with it
@@ -132,6 +142,9 @@ class NetworkManager(QtCore.QObject):
         self.synchronous_lock = threading.Lock()
         self.synchronous_complete: Dict[int, bool] = {}
         self.synchronous_result_data: Dict[int, QtCore.QByteArray] = {}
+
+        # Only one size request at a time:
+        self.download_size_lock = threading.Lock()
 
         # Make sure we exit nicely on quit
         if QtCore.QCoreApplication.instance() is not None:
@@ -290,13 +303,24 @@ class NetworkManager(QtCore.QObject):
                     return  # Do not do anything with this item, it's been aborted...
                 if item.track_progress:
                     self.monitored_connections.append(item.index)
-                self.__launch_request(item.index, item.request)
+                self.__launch_request(item.index, item.request, item.operation)
         except queue.Empty:
+            # Once the queue is empty, there's nothing left to do for now
             pass
 
-    def __launch_request(self, index: int, request: QtNetwork.QNetworkRequest) -> None:
+    def __launch_request(
+        self,
+        index: int,
+        request: QtNetwork.QNetworkRequest,
+        operation: QtNetwork.QNetworkAccessManager.Operation,
+    ) -> None:
         """Given a network request, ask the QNetworkAccessManager to begin processing it."""
-        reply = self.QNAM.get(request)
+        if operation == QtNetwork.QNetworkAccessManager.GetOperation:
+            reply = self.QNAM.get(request)
+        elif operation == QtNetwork.QNetworkAccessManager.HeadOperation:
+            reply = self.QNAM.sendCustomRequest(request, b"HEAD")
+        else:
+            raise NotImplementedError(f"Unknown operation {operation}")
         self.replies[index] = reply
 
         self.__last_started_index = index
@@ -305,6 +329,22 @@ class NetworkManager(QtCore.QObject):
         if index in self.monitored_connections:
             reply.readyRead.connect(self.__ready_to_read)
             reply.downloadProgress.connect(self.__download_progress)
+
+    def query_download_size(self, url: str, timeout_ms: int = default_timeout):
+        """A query to get the download size in the 'Content-Length' header, or zero if the server
+        doesn't support it. Connect to the download_size signal to get the result when it arrives.
+        """
+        with self.download_size_lock:
+            current_index = next(self.counting_iterator)  # A thread-safe counter
+            item = QueueItem(
+                current_index,
+                self.__create_get_request(url, timeout_ms),
+                track_progress=False,
+                operation=QtNetwork.QNetworkAccessManager.HeadOperation,
+            )
+            self.queue.put(item)
+            self.__request_queued.emit()
+            return current_index
 
     def submit_unmonitored_get(
         self,
@@ -348,12 +388,47 @@ class NetworkManager(QtCore.QObject):
         self.__request_queued.emit()
         return current_index
 
+    def blocking_get_with_retries(
+        self,
+        url: str,
+        timeout_ms: int = default_timeout,
+        max_attempts: int = 3,
+        delay_ms: int = 1000,
+    ):
+        """Submits a GET request to the QNetworkAccessManager and blocks until it is complete. Do
+        not use on the main GUI thread, it will prevent any event processing while it blocks.
+        :url: The URL to fetch
+        :timeout_ms: The timeout in milliseconds
+        :max_attempts: The number of attempts to make if the request fails
+        :delay_ms: The delay between attempts in milliseconds
+        :returns: The response data, or None if the request failed after max_attempts attempts.
+        """
+        if max_attempts < 1:
+            raise ValueError("max_attempts must be greater than 0")
+        if timeout_ms < 1:
+            raise ValueError("timeout_ms must be greater than 0")
+        attempt = 0
+        while True:
+            attempt += 1
+            p = self.blocking_get(url, timeout_ms)
+            if p is not None or attempt >= max_attempts:
+                return p
+            fci.Console.PrintWarning(
+                f"Failed to get {url}, retrying in {delay_ms}ms... (attempt {attempt} of {max_attempts})"
+            )
+            time.sleep(delay_ms / 1000)
+
     def blocking_get(
         self,
         url: str,
         timeout_ms: int = default_timeout,
     ) -> Optional[QtCore.QByteArray]:
-        """Submits a GET request to the QNetworkAccessManager and block until it is complete"""
+        """Submits a GET request to the QNetworkAccessManager and blocks until it is complete. Do
+        not use on the main GUI thread, it will prevent any event processing while it blocks.
+        :url: The URL to fetch
+        :timeout_ms: The timeout in milliseconds
+        :returns: The response data, or None if the request failed after max_attempts attempts.
+        """
 
         current_index = next(self.counting_iterator)  # A thread-safe counter
         with self.synchronous_lock:
@@ -419,6 +494,7 @@ class NetworkManager(QtCore.QObject):
             # whereas in Qt 6, the function seems to only accept an
             # integer.
             request.setTransferTimeout(timeout_ms)
+        request.setRawHeader(b"User-Agent", b"FreeCAD AddonManager/1.0")
         return request
 
     def abort_all(self):
@@ -453,6 +529,7 @@ class NetworkManager(QtCore.QObject):
             proxy_authentication = fci.loadUi(
                 os.path.join(os.path.dirname(__file__), "proxy_authentication.ui")
             )
+            proxy_authentication.setObjectName("AddonManager_ProxyAuthenticationDialog")
             # Show the right labels, etc.
             proxy_authentication.labelProxyAddress.setText(f"{reply.hostName()}:{reply.port()}")
             if authenticator.realm():
@@ -551,7 +628,9 @@ class NetworkManager(QtCore.QObject):
                 if hasattr(request, "transferTimeout"):
                     timeout_ms = request.transferTimeout()
             new_url = reply.attribute(QtNetwork.QNetworkRequest.RedirectionTargetAttribute)
-            self.__launch_request(index, self.__create_get_request(new_url, timeout_ms))
+            self.__launch_request(
+                index, self.__create_get_request(new_url, timeout_ms), reply.operation()
+            )
             return  # The task is not done, so get out of this method now
         if reply.error() != QtNetwork.QNetworkReply.NetworkError.OperationCanceledError:
             # It this was not a timeout, make sure we mark the queue task done
@@ -564,6 +643,12 @@ class NetworkManager(QtCore.QObject):
                 f = self.file_buffers[index]
                 f.close()
                 self.progress_complete.emit(index, response_code, f.name)
+            elif reply.operation() == QtNetwork.QNetworkAccessManager.HeadOperation:
+                # The data we were trying to read was the ContentLengthHeader, so make sure that's what we emit
+                data = reply.header(QtNetwork.QNetworkRequest.ContentLengthHeader)
+                if data is None:
+                    data = 0
+                self.content_length.emit(index, response_code, data)
             else:
                 data = reply.readAll()
                 self.completed.emit(index, response_code, data)

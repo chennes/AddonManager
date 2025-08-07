@@ -36,14 +36,7 @@ import zipfile
 
 import addonmanager_freecad_interface as fci
 
-try:
-    # If run from within FreeCAD, a wrapper is provided to handle the below versioning
-    from PySide import QtCore
-except ImportError:
-    try:
-        from PySide6 import QtCore
-    except ImportError:
-        from PySide2 import QtCore
+from PySideWrapper import QtCore
 
 from Addon import Addon
 import addonmanager_utilities as utils
@@ -67,6 +60,17 @@ class InstallationMethod(IntEnum):
     COPY = auto()
     ZIP = auto()
     ANY = auto()
+
+    def __str__(self):
+        if self.value == self.GIT:
+            return "Git"
+        if self.value == self.COPY:
+            return "Copy"
+        if self.value == self.ZIP:
+            return "Zip"
+        if self.value == self.ANY:
+            return "Any"
+        return "Unknown"
 
 
 class AddonInstaller(QtCore.QObject):
@@ -119,7 +123,7 @@ class AddonInstaller(QtCore.QObject):
     failure = QtCore.Signal(object, str)
 
     # Finished: regardless of the outcome, this is emitted when all work that is going to be done
-    # is done (i.e. whatever thread this is running in can quit).
+    # is done (i.e., whatever thread this is running in can quit).
     finished = QtCore.Signal()
 
     allowed_packages = set()
@@ -133,7 +137,11 @@ class AddonInstaller(QtCore.QObject):
         super().__init__()
         self.addon_to_install = addon
 
-        self.git_manager = initialize_git()
+        forced_repos = fci.Preferences().get("force_git_in_repos").split(",")
+        if addon and self.addon_to_install.name in forced_repos:
+            self.git_manager = initialize_git()
+        else:
+            self.git_manager = None
 
         if allow_list is not None:
             AddonInstaller.allowed_packages = set(allow_list if allow_list is not None else [])
@@ -148,10 +156,13 @@ class AddonInstaller(QtCore.QObject):
     def run(self, install_method: InstallationMethod = InstallationMethod.ANY) -> bool:
         """Install an addon. Returns True if the addon was installed, or False if not. Emits
         either success or failure prior to returning."""
+        success = False
         try:
             addon_url = self.addon_to_install.url.replace(os.path.sep, "/")
             method_to_use = self._determine_install_method(addon_url, install_method)
-            success = False
+            fci.Console.PrintMessage(
+                f"Installing addon {self.addon_to_install.name} using {method_to_use}\n"
+            )
             if method_to_use == InstallationMethod.ZIP:
                 success = self._install_by_zip()
             elif method_to_use == InstallationMethod.GIT:
@@ -164,9 +175,12 @@ class AddonInstaller(QtCore.QObject):
             ):
                 self.addon_to_install.enable_workbench()
         except utils.ProcessInterrupted:
+            # This isn't really an "exception" per se, it's that the user cancelled the operation,
+            # so internally we just act like nothing bad happened, but still return false (as in,
+            # the addon was not installed).
             pass
         except Exception as e:
-            fci.Console.PrintLog(e + "\n")
+            fci.Console.PrintLog(str(e) + "\n")
             success = False
         if success:
             if (
@@ -181,7 +195,7 @@ class AddonInstaller(QtCore.QObject):
 
     @classmethod
     def _load_local_allowed_packages_list(cls) -> None:
-        """Read in the local allow-list, in case the remote one is unavailable."""
+        """Read in the local allowlist, in case the remote one is unavailable."""
         cls.allowed_packages.clear()
         allow_file = os.path.join(os.path.dirname(__file__), "ALLOWED_PYTHON_PACKAGES.txt")
         if os.path.exists(allow_file):
@@ -205,7 +219,7 @@ class AddonInstaller(QtCore.QObject):
             )
             p = p.decode("utf8")
             lines = p.split("\n")
-            cls.allowed_packages.clear()  # Unset the locally-defined list
+            cls.allowed_packages.clear()  # Unset the locally defined list
             for line in lines:
                 if line and len(line) > 0 and line[0] != "#":
                     cls.allowed_packages.add(line.strip().lower())
@@ -259,12 +273,13 @@ class AddonInstaller(QtCore.QObject):
         if not is_remote:
             return InstallationMethod.COPY
 
-        # Prefer git if we have git
-        if self.git_manager:
+        # Use git only if the user specifically requests it, and we have git
+        forced_repos = fci.Preferences().get("force_git_in_repos").split(",")
+        if self.git_manager and self.addon_to_install.name in forced_repos:
             return InstallationMethod.GIT
 
-        # Fall back to ZIP in other cases, though this relies on remote hosts falling
-        # into one of a few particular patterns
+        # Normal case: we aren't locked into any particular method, so use zip downloads from the
+        # addons cache
         return InstallationMethod.ZIP
 
     def _install_by_copy(self) -> bool:
@@ -275,7 +290,9 @@ class AddonInstaller(QtCore.QObject):
         if addon_url.startswith("file://"):
             addon_url = addon_url[len("file://") :]  # Strip off the file:// part
         name = self.addon_to_install.name
-        shutil.copytree(addon_url, os.path.join(self.installation_path, name), dirs_exist_ok=True)
+        shutil.copytree(
+            addon_url, str(os.path.join(self.installation_path, name)), dirs_exist_ok=True
+        )
         self._finalize_successful_installation()
         return True
 
@@ -296,7 +313,7 @@ class AddonInstaller(QtCore.QObject):
         """Installs the specified url by using git to clone from it. The URL can be local or remote,
         but must represent a git repository, and the url must be in a format that git can handle
         (git, ssh, rsync, file, or a bare filesystem path)."""
-        install_path = os.path.join(self.installation_path, self.addon_to_install.name)
+        install_path = str(os.path.join(self.installation_path, self.addon_to_install.name))
         try:
             if self._can_use_update():
                 self.git_manager.update(install_path)
@@ -313,13 +330,9 @@ class AddonInstaller(QtCore.QObject):
 
     def _install_by_zip(self) -> bool:
         """Installs the specified url by downloading the file (if it is remote) and unzipping it
-        into the appropriate installation location. If the GUI is running the download is
-        asynchronous, and issues periodic updates about how much data has been downloaded."""
-        if self.addon_to_install.url.endswith(".zip"):
-            zip_url = self.addon_to_install.url
-        else:
-            zip_url = utils.get_zip_url(self.addon_to_install)
-
+        into the appropriate installation location. If the GUI is running, the download is
+        asynchronous and issues periodic updates about how much data has been downloaded."""
+        zip_url = self.addon_to_install.get_zip_url()
         fci.Console.PrintLog(f"Downloading ZIP file from {zip_url}...\n")
         parse_result = urlparse(zip_url)
         is_remote = parse_result.scheme in ["http", "https"]
@@ -355,7 +368,7 @@ class AddonInstaller(QtCore.QObject):
         if index == self.zip_download_index:
             self.progress_update.emit(bytes_read, data_size)
 
-    def _finish_zip(self, index: int, response_code: int, filename: os.PathLike):
+    def _finish_zip(self, index: int, response_code: int, filename: str):
         """Once the zip download is finished, unzip it into the correct location. Only called if
         the GUI is up, and the NetworkManager was responsible for the download. Do not call
         directly."""
@@ -375,17 +388,17 @@ class AddonInstaller(QtCore.QObject):
         fci.Console.PrintLog("ZIP download complete. Installing...\n")
         self._finalize_zip_installation(filename)
 
-    def _finalize_zip_installation(self, filename: os.PathLike):
+    def _finalize_zip_installation(self, filename: str):
         """Given a path to a zipfile, extract that file and put its contents in the correct
         location. Has special handling for GitHub's zip structure, which places the data in a
         subdirectory of the main directory."""
 
-        destination = os.path.join(self.installation_path, self.addon_to_install.name)
+        destination = str(os.path.join(self.installation_path, self.addon_to_install.name))
         if os.path.exists(destination):
             remove_succeeded = utils.rmdir(destination)
             if not remove_succeeded:
                 fci.Console.PrintError(f"Failed to remove {destination}, aborting update")
-                raise RuntimeError(f"Failed to remove outdated Addon from {destination}")
+                raise RuntimeError(f"Failed to remove outdated addon from {destination}")
 
         with zipfile.ZipFile(filename, "r") as zfile:
             zfile.extractall(destination)
@@ -416,6 +429,8 @@ class AddonInstaller(QtCore.QObject):
 
     def _expected_subdirectory_name(self) -> str:
         url = self.addon_to_install.url
+        if url.endswith("/"):
+            url = url[:-1]
         if url.endswith(".git"):
             url = url[:-4]
         _, _, name = url.rpartition("/")
@@ -439,8 +454,8 @@ class AddonInstaller(QtCore.QObject):
 
     def _update_metadata(self):
         """Loads the package metadata from the Addon's downloaded package.xml file."""
-        package_xml = os.path.join(
-            self.installation_path, self.addon_to_install.name, "package.xml"
+        package_xml = str(
+            os.path.join(self.installation_path, self.addon_to_install.name, "package.xml")
         )
 
         if hasattr(self.addon_to_install, "metadata") and os.path.isfile(package_xml):
@@ -463,7 +478,7 @@ class AddonInstaller(QtCore.QObject):
 
         installed_macro_files = []
         for root, _, files in os.walk(
-            os.path.join(self.installation_path, self.addon_to_install.name)
+            str(os.path.join(self.installation_path, self.addon_to_install.name))
         ):
             for f in files:
                 if f.lower().endswith(".fcmacro"):
@@ -484,7 +499,7 @@ class AddonInstaller(QtCore.QObject):
                 now = datetime.now(timezone.utc)
                 f.write(
                     "# The following files were created outside this installation "
-                    f"path during the installation of this Addon on {now}:\n"
+                    f"path during the installation of this addon on {now}:\n"
                 )
                 for fcmacro_file in installed_macro_files:
                     f.write(fcmacro_file + "\n")
@@ -514,7 +529,7 @@ class MacroInstaller(QtCore.QObject):
     # is done (i.e. whatever thread this is running in can quit).
     finished = QtCore.Signal()
 
-    def __init__(self, addon: object):
+    def __init__(self, addon):
         """The provided addon object must have an attribute called "macro", and that attribute must
         itself provide a callable "install" method that takes a single string, the path to the
         installation location."""
@@ -571,7 +586,7 @@ class MacroInstaller(QtCore.QObject):
             fci.Console.PrintWarning(manifest_file)
 
     @classmethod
-    def _validate_object(cls, addon: object):
+    def _validate_object(cls, addon):
         """Make sure this object provides an attribute called "macro" with a method called
         "install" """
         if (

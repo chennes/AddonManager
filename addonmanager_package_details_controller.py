@@ -36,7 +36,7 @@ from addonmanager_metadata import (
     get_branch_from_metadata,
     get_repo_url_from_metadata,
 )
-from addonmanager_workers_startup import GetMacroDetailsWorker, CheckSingleUpdateWorker
+from addonmanager_workers_startup import CheckSingleUpdateWorker
 from addonmanager_git import GitManager, NoGitFound
 from Addon import Addon
 from change_branch import ChangeBranchDialog
@@ -81,7 +81,7 @@ class PackageDetailsController(QtCore.QObject):
         self.ui.button_bar.disable.clicked.connect(self.disable_clicked)
 
     def show_repo(self, repo: Addon) -> None:
-        """The main entry point for this class, shows the package details and related buttons
+        """The main entry point for this class shows the package details and related buttons
         for the provided repo."""
         self.addon = repo
         self.readme_controller.set_addon(repo)
@@ -101,7 +101,7 @@ class PackageDetailsController(QtCore.QObject):
         if repo.metadata is not None:
             self.ui.set_url(get_repo_url_from_metadata(repo.metadata))
         else:
-            self.ui.set_url(None)  # to reset it and  hide it
+            self.ui.set_url(None)  # to reset it and hide it
         update_info = UpdateInformation()
         if installed:
             update_info.unchecked = self.addon.status() == Addon.Status.UNCHECKED
@@ -109,9 +109,9 @@ class PackageDetailsController(QtCore.QObject):
             update_info.check_in_progress = False  # TODO: Implement the "check in progress" status
             if repo.metadata:
                 update_info.branch = get_branch_from_metadata(repo.metadata)
-                update_info.version = repo.metadata.version
+                update_info.version = str(repo.metadata.version)
             elif repo.macro:
-                update_info.version = repo.macro.version
+                update_info.version = str(repo.macro.version)
             self.ui.set_update_available(update_info)
             self.ui.set_location(
                 self.addon.macro_directory
@@ -122,13 +122,10 @@ class PackageDetailsController(QtCore.QObject):
         self.ui.allow_running(repo.repo_type == Addon.Kind.MACRO)
         self.ui.allow_disabling(repo.repo_type != Addon.Kind.MACRO)
 
-        if repo.repo_type == Addon.Kind.MACRO:
-            self.update_macro_info(repo)
-
         if repo.status() == Addon.Status.UNCHECKED:
             self.ui.button_bar.check_for_update.show()
             self.ui.button_bar.check_for_update.setText(
-                translate("AddonsInstaller", "Check for update")
+                translate("AddonsInstaller", "Check for Update")
             )
             self.ui.button_bar.check_for_update.setEnabled(True)
             if not self.update_check_thread:
@@ -149,8 +146,6 @@ class PackageDetailsController(QtCore.QObject):
 
         flags = WarningFlags()
         flags.required_freecad_version = self.requires_newer_freecad()
-        flags.obsolete = repo.obsolete
-        flags.python2 = repo.python2
         self.ui.set_warning_flags(flags)
         self.set_change_branch_button_state()
 
@@ -204,18 +199,11 @@ class PackageDetailsController(QtCore.QObject):
         # If all four above checks passed, then it's possible for us to switch
         # branches, if there are any besides the one we are on: show the button
         self.ui.button_bar.change_branch.show()
-
-    def update_macro_info(self, repo: Addon) -> None:
-        if not repo.macro.url:
-            # We need to populate the macro information... may as well do it while the user reads
-            # the wiki page
-            self.worker = GetMacroDetailsWorker(repo)
-            self.worker.readme_updated.connect(self.macro_readme_updated)
-            self.worker.start()
+        self.ui.button_bar.change_branch.show()
 
     def change_branch_clicked(self) -> None:
         """Loads the branch-switching dialog"""
-        basedir = fci.getUserAppDataDir()
+        basedir: str = fci.getUserAppDataDir()
         path_to_repo = os.path.join(basedir, "Mod", self.addon.name)
         change_branch_dialog = ChangeBranchDialog(path_to_repo, self.ui)
         change_branch_dialog.branch_changed.connect(self.branch_changed)

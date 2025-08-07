@@ -3,21 +3,18 @@
 import addonmanager_freecad_interface as fci
 
 try:
-    from PySide import QtCore, QtWidgets  # Use the FreeCAD wrapper
     from PySide.QtCore import QT_TRANSLATE_NOOP
 except ImportError:
     try:
-        from PySide6 import QtCore, QtWidgets  # Outside FreeCAD, try Qt6 first
         from PySide6.QtCore import QT_TRANSLATE_NOOP
     except ImportError:
-        from PySide2 import QtCore, QtWidgets  # Fall back to Qt5
         from PySide2.QtCore import QT_TRANSLATE_NOOP
 
 
 class ToolbarAdapter:
     """When run within FreeCAD, interface with the toolbar preferences and command-creation
-    code to actually allow the modification of toolbars (e.g. to install a button that runs a
-    Macro when clicked). Outside of FreeCAD, calling any of these methods raises an exception.
+    code to actually allow the modification of toolbars (e.g., to install a button that runs a
+    Macro when clicked). Outside FreeCAD, calling any of these methods raises an exception.
     Test code is expected to Mock this class."""
 
     params = None
@@ -121,16 +118,16 @@ class ToolbarAdapter:
         wb = fci.FreeCADGui.activeWorkbench()
         wb.reloadActive()
 
-    def get_toolbar_name(self, group):
+    @staticmethod
+    def get_toolbar_name(group):
         """Given a toolbar preference group, return the name of the toolbar."""
-        ref = self.params.GetGroup(group)
-        return ref.GetString("Name", "")
+        return group.GetString("Name", "")
 
     def get_custom_toolbars(self):
         """Get a list of toolbar preference groups"""
         return self.params.GetGroups()
 
     @staticmethod
-    def find_custom_command(filename):
-        """Wrap calls to FreeCADGui.Command.findCustomCommand so it can be faked in testing."""
+    def find_custom_command(filename: str):
+        """Wrap calls to `FreeCADGui.Command.findCustomCommand` so it can be faked in testing."""
         return fci.FreeCADGui.Command.findCustomCommand(filename)

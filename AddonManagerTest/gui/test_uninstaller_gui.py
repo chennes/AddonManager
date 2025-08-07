@@ -65,7 +65,7 @@ class TestUninstallerGUI(unittest.TestCase):
 
     def test_confirmation_dialog_yes(self):
         dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "Confirm remove"),
+            "AddonManager_ConfirmUninstallDialog",
             QtWidgets.QDialogButtonBox.Yes,
         )
         answer = self.uninstaller_gui._confirm_uninstallation()
@@ -75,7 +75,7 @@ class TestUninstallerGUI(unittest.TestCase):
 
     def test_confirmation_dialog_cancel(self):
         dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "Confirm remove"),
+            "AddonManager_ConfirmUninstallDialog",
             QtWidgets.QDialogButtonBox.Cancel,
         )
         answer = self.uninstaller_gui._confirm_uninstallation()
@@ -86,7 +86,7 @@ class TestUninstallerGUI(unittest.TestCase):
     def test_progress_dialog(self):
         self.skipTest("Test not updated to handle running outside FreeCAD")
         dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "Removing Addon"),
+            "AddonManager_RemovingAddonDialog",
             QtWidgets.QDialogButtonBox.Cancel,
         )
         self.uninstaller_gui._show_progress_dialog()
@@ -100,7 +100,7 @@ class TestUninstallerGUI(unittest.TestCase):
         self.skipTest("Test not updated to handle running outside FreeCAD")
         worker = FakeWorker()
         dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "Removing Addon"),
+            "AddonManager_RemovingAddonDialog",
             QtWidgets.QDialogButtonBox.Cancel,
         )
         QtCore.QTimer.singleShot(1000, worker.stop)  # If the test fails, this kills the "worker"
@@ -116,7 +116,7 @@ class TestUninstallerGUI(unittest.TestCase):
     def test_success_dialog(self):
         self.skipTest("Test not updated to handle running outside FreeCAD")
         dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "Uninstall complete"),
+            "AddonManager_UninstallCompleteDialog",
             QtWidgets.QDialogButtonBox.Ok,
         )
         self.uninstaller_gui._succeeded(self.addon_to_remove)
@@ -125,7 +125,7 @@ class TestUninstallerGUI(unittest.TestCase):
 
     def test_failure_dialog(self):
         dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "Uninstall failed"),
+            "AddonManager_UninstallFailedDialog",
             QtWidgets.QDialogButtonBox.Ok,
         )
         self.uninstaller_gui._failed(

@@ -412,19 +412,13 @@ class GitManager:
         os.chdir(old_dir)
 
     def _find_git(self):
-        # Find git. In preference order
-        #   A) The value of the GitExecutable user preference
-        #   B) The executable located in the same directory as FreeCAD and called "git"
-        #   C) The result of a shutil search for your system's "git" executable
-        prefs = fci.ParamGet("User parameter:BaseApp/Preferences/Addons")
-        git_exe = prefs.GetString("GitExecutable", "Not set")
-        if not git_exe or git_exe == "Not set" or not os.path.exists(git_exe):
-            fc_dir = fci.DataPaths().home_dir
-            git_exe = os.path.join(fc_dir, "bin", "git")
-            if "Windows" in platform.system():
-                git_exe += ".exe"
 
-        if platform.system() == "Darwin" and not self._xcode_command_line_tools_are_installed():
+        fc_dir = fci.DataPaths().home_dir
+        git_exe = os.path.join(fc_dir, "bin", "git")
+        if "Windows" in platform.system():
+            git_exe += ".exe"
+
+        if platform.system() == "Darwin" and not self._git_is_real():
             return
 
         if not git_exe or not os.path.exists(git_exe):
@@ -433,17 +427,32 @@ class GitManager:
         if not git_exe or not os.path.exists(git_exe):
             return
 
-        prefs.SetString("GitExecutable", git_exe)
         self.git_exe = git_exe
 
-    def _xcode_command_line_tools_are_installed(self) -> bool:
+    @staticmethod
+    def _git_is_real() -> bool:
         """On Macs, there is *always* an executable called "git", but sometimes it's just a
         script that tells the user to install XCode's Command Line tools. So the existence of git
         on the Mac actually requires us to check for that installation."""
         try:
-            subprocess.check_output(["xcode-select", "-p"])
-            return True
+            # Get the path to git from xcrun
+            git_path = (
+                subprocess.check_output(["xcrun", "--find", "git"], stderr=subprocess.DEVNULL)
+                .decode()
+                .strip()
+            )
+            if not os.path.exists(git_path) or not os.access(git_path, os.X_OK):
+                return False
+
+            # Check if running git triggers version output
+            result = subprocess.run(
+                [git_path, "--version"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+            )
+            return result.returncode == 0
+
         except subprocess.CalledProcessError:
+            return False
+        except FileNotFoundError:
             return False
 
     def _synchronous_call_git(self, args: List[str]) -> str:
@@ -458,6 +467,11 @@ class GitManager:
                 f"Git returned a non-zero exit status: {e.returncode}\n"
                 + f"Called with: {' '.join(final_args)}\n\n"
                 + f"Returned stderr:\n{e.stderr}"
+            ) from e
+        except utils.ProcessInterrupted as e:
+            raise GitFailed(
+                "The git process was interrupted due to a network timeout (or explicit user cancellation)\n"
+                + f"Called with: {' '.join(final_args)}\n"
             ) from e
 
         return proc.stdout
@@ -476,5 +490,7 @@ def initialize_git() -> Optional[GitManager]:
         try:
             git_manager = GitManager()
         except NoGitFound:
+            # If git wasn't found, we call just fall through to returning the None that is already
+            # assigned to git_manager
             pass
     return git_manager

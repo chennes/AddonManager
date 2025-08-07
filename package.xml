@@ -2,11 +2,11 @@
 <!-- NOTE: The Addon Manager still uses the original xmlns entry so that older versions of FreeCAD can upgrade
  to the newest Addon Manager. This can be changed when FreeCAD v1.0 is no longer supported. -->
 <package format="1" xmlns="https://wiki.freecad.org/Package_Metadata">
-    <name>AddonManager</name>
+    <name>Addon Manager</name>
     <description>Tool to install workbenches, macros, themes, etc.</description>
-    <icon>resources/icons/addon_manager.svg</icon>
-    <version>2025.05.29a</version>
-    <date>2025-05-29</date>
+    <icon>Resources/icons/addon_manager.svg</icon>
+    <version>2025.08.05</version>
+    <date>2025-08-05</date>
     <maintainer email='chennes@freecad.org'>Chris Hennes</maintainer>
     <author email = 'yorik@uncreated.net'>Yorik van Havre</author>
     <author>Jonathan Wiedemann</author>

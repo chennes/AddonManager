@@ -30,9 +30,6 @@ from AddonManagerTest.app.test_utilities import (
 from AddonManagerTest.app.test_addon import (
     TestAddon as AddonManagerTestAddon,
 )
-from AddonManagerTest.app.test_cache import (
-    TestCache as AddonManagerTestCache,
-)
 from AddonManagerTest.app.test_macro import (
     TestMacro as AddonManagerTestMacro,
 )
@@ -70,14 +67,9 @@ class TestListTerminator:
 
 
 # Basic usage mostly to get static analyzers to stop complaining about unused imports
-try:
-    import FreeCAD
-except ImportError:
-    FreeCAD = None
 loaded_gui_tests = [
     AddonManagerTestUtilities,
     AddonManagerTestAddon,
-    AddonManagerTestCache,
     AddonManagerTestMacro,
     AddonManagerTestGit,
     AddonManagerTestAddonInstaller,

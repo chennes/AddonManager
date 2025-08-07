@@ -28,7 +28,7 @@ Manager main window."""
 import os
 
 from addonmanager_freecad_interface import translate
-from PySideWrapper import QtGui, QtWidgets
+from PySideWrapper import QtCore, QtGui, QtWidgets
 
 
 class WidgetGlobalButtonBar(QtWidgets.QWidget):
@@ -38,12 +38,10 @@ class WidgetGlobalButtonBar(QtWidgets.QWidget):
     def __init__(self, parent: QtWidgets.QWidget = None):
         super().__init__(parent)
         self.horizontal_layout = None
-        self.refresh_local_cache = None
         self.update_all_addons = None
         self.check_for_updates = None
         self.python_dependencies = None
         self.addons_folder = None
-        self.developer_tools = None
         self.close = None
         self._update_ui()
         self.retranslateUi(None)
@@ -51,19 +49,34 @@ class WidgetGlobalButtonBar(QtWidgets.QWidget):
 
     def _update_ui(self):
         self.horizontal_layout = QtWidgets.QHBoxLayout()
-        self.refresh_local_cache = QtWidgets.QPushButton(self)
         self.update_all_addons = QtWidgets.QPushButton(self)
         self.check_for_updates = QtWidgets.QPushButton(self)
-        self.python_dependencies = QtWidgets.QPushButton(self)
-        self.developer_tools = QtWidgets.QPushButton(self)
-        self.addons_folder = QtWidgets.QPushButton(self)
         self.close = QtWidgets.QPushButton(self)
-        self.horizontal_layout.addWidget(self.refresh_local_cache)
+
+        self.gear_tools = QtWidgets.QToolButton()
+        icon_path = os.path.join(os.path.dirname(__file__), "..", "Resources", "icons")
+        self.gear_tools.setIcon(QtGui.QIcon(os.path.join(icon_path, "gear.svg")))
+        self.gear_tools.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
+        self.gear_tools.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+        self.gear_tools.setStyleSheet("QToolButton::menu-indicator { image: none; }")
+
+        if hasattr(QtGui, "QAction"):
+            # Qt6
+            self.addons_folder = QtGui.QAction()
+            self.python_dependencies = QtGui.QAction()
+        else:
+            # Qt5
+            self.addons_folder = QtWidgets.QAction()
+            self.python_dependencies = QtWidgets.QAction()
+        self.gear_menu = QtWidgets.QMenu(self.gear_tools)
+        self.gear_menu.addAction(self.addons_folder)
+        self.gear_menu.addAction(self.python_dependencies)
+
+        self.gear_tools.setMenu(self.gear_menu)
+
         self.horizontal_layout.addWidget(self.update_all_addons)
         self.horizontal_layout.addWidget(self.check_for_updates)
-        self.horizontal_layout.addWidget(self.python_dependencies)
-        self.horizontal_layout.addWidget(self.addons_folder)
-        self.horizontal_layout.addWidget(self.developer_tools)
+        self.horizontal_layout.addWidget(self.gear_tools)
         self.horizontal_layout.addStretch()
         self.horizontal_layout.addWidget(self.close)
         self.setLayout(self.horizontal_layout)
@@ -77,19 +90,18 @@ class WidgetGlobalButtonBar(QtWidgets.QWidget):
         )
 
     def retranslateUi(self, _):
-        self.refresh_local_cache.setText(translate("AddonsInstaller", "Close"))
-        self.update_all_addons.setText(translate("AddonsInstaller", "Update all addons"))
-        self.check_for_updates.setText(translate("AddonsInstaller", "Check for updates"))
-        self.python_dependencies.setText(translate("AddonsInstaller", "Python dependencies..."))
-        self.addons_folder.setText(translate("AddonsFolder", "Open Addons folder"))
-        self.developer_tools.setText(translate("AddonsInstaller", "Developer tools..."))
+        self.update_all_addons.setText(translate("AddonsInstaller", "Update All Addons"))
+        self.check_for_updates.setText(translate("AddonsInstaller", "Check for Updates"))
+        self.python_dependencies.setText(translate("AddonsInstaller", "Open Python Dependencies"))
+        self.addons_folder.setText(translate("AddonsFolder", "Open Addons Folder"))
         self.close.setText(translate("AddonsInstaller", "Close"))
+        self.gear_tools.setText("Gear Tools…")  # This text should never be user-visible
 
     def set_number_of_available_updates(self, updates: int):
         if updates > 0:
             self.update_all_addons.setEnabled(True)
             self.update_all_addons.setText(
-                translate("AddonsInstaller", "Apply %n available update(s)", "", updates)
+                translate("AddonsInstaller", "See %n update(s)…", "", updates)
             )
         else:
             self.update_all_addons.setEnabled(False)

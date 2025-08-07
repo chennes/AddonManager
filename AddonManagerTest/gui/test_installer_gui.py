@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2022 FreeCAD Project Association                        *
+# *   Copyright (c) 2022-2025 The FreeCAD project association AISBL         *
 # *                                                                         *
 # *   This file is part of FreeCAD.                                         *
 # *                                                                         *
@@ -20,258 +20,559 @@
 # *   <https://www.gnu.org/licenses/>.                                      *
 # *                                                                         *
 # ***************************************************************************
-
+import sys
+from enum import IntEnum
 import os
+from typing import List
 import tempfile
 import unittest
 from unittest.mock import MagicMock, Mock, patch
 
-try:
-    from PySide import QtCore, QtWidgets
-except ImportError:
-    try:
-        from PySide6 import QtCore, QtWidgets
-    except ImportError:
-        from PySide2 import QtCore, QtWidgets
+from PySideWrapper import QtWidgets, QtCore
 
-from addonmanager_installer_gui import AddonInstallerGUI, MacroInstallerGUI
+from Addon import Addon, MissingDependencies
+from addonmanager_installer_gui import (
+    AddonInstallerGUI,
+    AddonDependencyInstallerGUI,
+    MacroInstallerGUI,
+)
 import addonmanager_freecad_interface as fci
 
-from AddonManagerTest.gui.gui_mocks import DialogWatcher, DialogInteractor
-from AddonManagerTest.app.mocks import MockAddon
+from AddonManagerTest.gui.gui_mocks import DialogWatcher, DialogInteractor, AsynchronousMonitor
+from addonmanager_metadata import Version
 
 translate = fci.translate
 
 
-class TestInstallerGui(unittest.TestCase):
+class TestAddonInstallerGUI(unittest.TestCase):
 
     def setUp(self):
-        self.addon_to_install = MockAddon()
-        self.installer_gui = AddonInstallerGUI(self.addon_to_install)
-        self.finalized_thread = False
+        pass
 
     def tearDown(self):
         pass
 
-    def test_success_dialog(self):
-        # Pop the modal dialog and verify that it opens, and responds to an OK click
+    class MockDependencyInstallerGUI(QtCore.QObject):
+        cancel = QtCore.Signal()
+        proceed = QtCore.Signal()
+
+        class MockResult(IntEnum):
+            PROCEED = 0
+            CANCEL = 1
+
+        def __init__(self, *_args, **_kwargs):
+            super().__init__()
+            self.setObjectName("Mock Dependency Installer GUI")
+            self.called = False
+            self.moved_to_thread = False
+            self.result = self.MockResult.PROCEED
+
+        def run(self):
+            self.called = True
+            if self.result == self.MockResult.PROCEED:
+                self.proceed.emit()
+            else:
+                self.cancel.emit()
+
+        def moveToThread(self, thread):
+            self.moved_to_thread = True
+
+    class MockInstaller(QtCore.QObject):
+        progress_update = QtCore.Signal(int, int)
+        success = QtCore.Signal(object)
+        failure = QtCore.Signal(object, str)
+        finished = QtCore.Signal()
+
+        class MockResult(IntEnum):
+            SUCCESS = 0
+            FAILURE = 1
+
+        def __init__(self, *_args, **_kwargs):
+            super().__init__()
+            self.setObjectName("Mock Installer")
+            self.called = False
+            self.moved_to_thread = False
+            self.result = self.MockResult.SUCCESS
+
+        def run(self):
+            self.called = True
+            if self.result == self.MockResult.SUCCESS:
+                self.success.emit(Addon("Test Addon"))
+            else:
+                self.failure.emit(Addon("Test Addon"), "Simulated failure")
+            self.finished.emit()
+
+        def run_with_delay(self, delay_ms):
+            QtCore.QTimer.singleShot(delay_ms, self.run)
+
+        def moveToThread(self, thread):
+            self.moved_to_thread = True
+
+    @patch("addonmanager_installer_gui.AddonDependencyInstallerGUI")
+    @patch("addonmanager_installer_gui.MissingDependencies")
+    def test_dependency_installer_launches(
+        self, mock_missing_dependencies_class, mock_addon_dependency_installer_gui_class
+    ):
+        # Arrange
+        test_addon = Addon("Test Addon")
+        mock_md_instance = Mock(spec=MissingDependencies)
+        mock_md_instance.python_requires = ["required_python_dep"]
+        mock_missing_dependencies_class.side_effect = lambda *args, **kwargs: mock_md_instance
+        mock_dep_gui_instance = self.MockDependencyInstallerGUI()
+        mock_dep_gui_instance.result = self.MockDependencyInstallerGUI.MockResult.CANCEL
+        mock_addon_dependency_installer_gui_class.side_effect = (
+            lambda *args, **kwargs: mock_dep_gui_instance
+        )
+
+        # Act
+        installer = AddonInstallerGUI(test_addon)
+        installer.run()
+
+        # Assert
+        self.assertTrue(mock_dep_gui_instance.called)
+
+        installer.shutdown()
+
+    @patch("addonmanager_installer_gui.AddonDependencyInstallerGUI")
+    @patch("addonmanager_installer_gui.MissingDependencies")
+    @patch("addonmanager_installer_gui.AddonInstallerGUI.install")
+    def test_installer_is_called_if_dependencies_are_ok(
+        self,
+        mock_install,
+        mock_missing_dependencies_class,
+        mock_addon_dependency_installer_gui_class,
+    ):
+        # Arrange
+        test_addon = Addon("Test Addon")
+        mock_md_instance = Mock(spec=MissingDependencies)
+        mock_md_instance.python_requires = ["required_python_dep"]
+        mock_missing_dependencies_class.side_effect = lambda *args, **kwargs: mock_md_instance
+        mock_dep_gui_instance = self.MockDependencyInstallerGUI()
+        mock_dep_gui_instance.result = self.MockDependencyInstallerGUI.MockResult.PROCEED
+        mock_addon_dependency_installer_gui_class.side_effect = (
+            lambda *args, **kwargs: mock_dep_gui_instance
+        )
+        installer = AddonInstallerGUI(test_addon)
+
+        # Act
+        installer.run()
+
+        # Assert
+        mock_install.assert_called_once()
+
+        installer.shutdown()
+
+
+class TestAddonDependencyInstallerGUI(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    @staticmethod
+    def create_mock_deps(
+        wbs=None, external_addons=None, python_requires=None, python_optional=None
+    ):
+        mock_dependencies = MagicMock()
+        if wbs is not None:
+            mock_dependencies.wbs = wbs
+        else:
+            mock_dependencies.wbs = []
+
+        if external_addons is not None:
+            mock_dependencies.external_addons = external_addons
+        else:
+            mock_dependencies.external_addons = []
+
+        if python_requires is not None:
+            mock_dependencies.python_requires = python_requires
+        else:
+            mock_dependencies.python_requires = []
+
+        if python_optional is not None:
+            mock_dependencies.python_optional = python_optional
+        else:
+            mock_dependencies.python_optional = []
+
+        mock_dependencies.python_min_version = Version(from_list=[3, 0])
+
+        return mock_dependencies
+
+    @patch("addonmanager_installer_gui.utils.blocking_get", MagicMock(return_value=None))
+    def test_run_with_no_dependencies(self):
+        # Arrange
+        mock_dependencies = self.create_mock_deps()
+        gui = AddonDependencyInstallerGUI([], mock_dependencies)
+        monitor = AsynchronousMonitor(gui.proceed)
+
+        # Act
+        gui.run()
+
+        # Assert
+        monitor.wait_for_at_most(10)
+        self.assertTrue(monitor.good())
+
+    @patch("addonmanager_installer_gui.utils.blocking_get", MagicMock(return_value=None))
+    def test_run_with_internal_wb_missing_ok_emits_proceed(self):
+        # Arrange
+        mock_dependencies = self.create_mock_deps(wbs=["Missing Workbench"])
+        gui = AddonDependencyInstallerGUI([], mock_dependencies)
+        cancel_monitor = AsynchronousMonitor(gui.cancel)
+        proceed_monitor = AsynchronousMonitor(gui.proceed)
         dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "Success"),
+            "AddonManager_MissingRequirementDialog",
             QtWidgets.QDialogButtonBox.Ok,
         )
-        self.installer_gui._installation_succeeded()
-        self.assertTrue(dialog_watcher.dialog_found, "Failed to find the expected dialog box")
-        self.assertTrue(dialog_watcher.button_found, "Failed to find the expected button")
 
-    def test_failure_dialog(self):
-        # Pop the modal dialog and verify that it opens, and responds to a Cancel click
+        # Act
+        gui.run()
+        while dialog_watcher.timer.isActive():
+            QtCore.QCoreApplication.processEvents()
+
+        # Assert
+        self.assertTrue(
+            dialog_watcher.dialog_found, "Failed to find the Missing Requirement dialog box"
+        )
+        self.assertFalse(cancel_monitor.good())
+        self.assertTrue(proceed_monitor.good())
+
+    @patch("addonmanager_installer_gui.utils.blocking_get", MagicMock(return_value=None))
+    def test_run_with_internal_wb_missing_cancel_emits_cancel(self):
+        # Arrange
+        mock_dependencies = self.create_mock_deps(wbs=["Missing Workbench"])
+        gui = AddonDependencyInstallerGUI([], mock_dependencies)
+        cancel_monitor = AsynchronousMonitor(gui.cancel)
+        proceed_monitor = AsynchronousMonitor(gui.proceed)
         dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "Installation Failed"),
+            "AddonManager_MissingRequirementDialog",
             QtWidgets.QDialogButtonBox.Cancel,
         )
-        self.installer_gui._installation_failed(
-            self.addon_to_install, "Test of installation failure"
-        )
-        self.assertTrue(dialog_watcher.dialog_found, "Failed to find the expected dialog box")
-        self.assertTrue(dialog_watcher.button_found, "Failed to find the expected button")
 
-    def test_no_python_dialog(self):
-        # Pop the modal dialog and verify that it opens, and responds to a No click
+        # Act
+        gui.run()
+        while dialog_watcher.timer.isActive():
+            QtCore.QCoreApplication.processEvents()
+
+        # Assert
+        self.assertTrue(
+            dialog_watcher.dialog_found, "Failed to find the Missing Requirement dialog box"
+        )
+        self.assertTrue(cancel_monitor.good())
+        self.assertFalse(proceed_monitor.good())
+
+    @patch("addonmanager_installer_gui.utils.blocking_get", MagicMock(return_value=None))
+    def test_run_with_disallowed_required_python_cancelled_emits_cancel(self):
+        # Arrange
+        mock_dependencies = self.create_mock_deps(python_requires=["not_in_the_allowlist"])
+        gui = AddonDependencyInstallerGUI([], mock_dependencies)
         dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "Cannot execute Python"),
-            QtWidgets.QDialogButtonBox.No,
-        )
-        self.installer_gui._report_no_python_exe()
-        self.assertTrue(dialog_watcher.dialog_found, "Failed to find the expected dialog box")
-        self.assertTrue(dialog_watcher.button_found, "Failed to find the expected button")
-
-    def test_no_pip_dialog(self):
-        # Pop the modal dialog and verify that it opens, and responds to a No click
-        dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "Cannot execute pip"),
-            QtWidgets.QDialogButtonBox.No,
-        )
-        self.installer_gui._report_no_pip("pip not actually run, this was a test")
-        self.assertTrue(dialog_watcher.dialog_found, "Failed to find the expected dialog box")
-        self.assertTrue(dialog_watcher.button_found, "Failed to find the expected button")
-
-    def test_dependency_failure_dialog(self):
-        # Pop the modal dialog and verify that it opens, and responds to a No click
-        dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "Package installation failed"),
-            QtWidgets.QDialogButtonBox.No,
-        )
-        self.installer_gui._report_dependency_failure(
-            "Unit test", "Nothing really failed, this is a test of the dialog box"
-        )
-        self.assertTrue(dialog_watcher.dialog_found, "Failed to find the expected dialog box")
-        self.assertTrue(dialog_watcher.button_found, "Failed to find the expected button")
-
-    def test_install(self):
-        # Run the installation code and make sure it calls the installer
-        self.skipTest("Test not updated to handle running outside FreeCAD")
-        with tempfile.TemporaryDirectory() as temp_dir:
-            self.installer_gui.installer.installation_path = temp_dir
-            self.installer_gui.install()  # This does not block
-            self.installer_gui.installer.success.disconnect(
-                self.installer_gui._installation_succeeded
-            )
-            self.installer_gui.installer.failure.disconnect(self.installer_gui._installation_failed)
-            QtCore.QTimer.singleShot(
-                1000, self.installer_gui.worker_thread.quit
-            )  # Kill after one second
-            while not self.installer_gui.worker_thread.isFinished():
-                QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.AllEvents, 100)
-            self.assertTrue(
-                os.path.exists(os.path.join(temp_dir, "MockAddon")),
-                "Installed directory not found",
-            )
-
-    def test_handle_disallowed_python(self):
-        disallowed_packages = ["disallowed_package_name"]
-        dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "Missing Requirement"),
+            "AddonManager_RequirementFailedDialog",
             QtWidgets.QDialogButtonBox.Cancel,
         )
-        self.installer_gui._handle_disallowed_python(disallowed_packages)
-        self.assertTrue(dialog_watcher.dialog_found, "Failed to find the expected dialog box")
-        self.assertTrue(dialog_watcher.button_found, "Failed to find the expected button")
+        proceed_monitor = AsynchronousMonitor(gui.proceed)
+        cancel_monitor = AsynchronousMonitor(gui.cancel)
 
-    def test_handle_disallowed_python_long_list(self):
-        """A separate test for when there are MANY packages, which takes a separate code path."""
-        disallowed_packages = []
-        for i in range(50):
-            disallowed_packages.append(f"disallowed_package_name_{i}")
+        # Act
+        gui.run()
+        while dialog_watcher.timer.isActive():
+            QtCore.QCoreApplication.processEvents()
+
+        # Assert
+        self.assertTrue(dialog_watcher.dialog_found, "Failed to find the expected dialog box")
+        self.assertFalse(proceed_monitor.good())
+        self.assertTrue(cancel_monitor.good())
+
+    @patch("addonmanager_installer_gui.utils.blocking_get", MagicMock(return_value=None))
+    def test_run_with_disallowed_required_python_ok_emits_proceed(self):
+        # Arrange
+        mock_dependencies = self.create_mock_deps(python_requires=["not_in_the_allowlist"])
+        gui = AddonDependencyInstallerGUI([], mock_dependencies)
         dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "Missing Requirement"),
+            "AddonManager_RequirementFailedDialog",
+            QtWidgets.QDialogButtonBox.Ok,
+        )
+        proceed_monitor = AsynchronousMonitor(gui.proceed)
+        cancel_monitor = AsynchronousMonitor(gui.cancel)
+
+        # Act
+        gui.run()
+        while dialog_watcher.timer.isActive():
+            QtCore.QCoreApplication.processEvents()
+
+        # Assert
+        self.assertTrue(
+            dialog_watcher.dialog_found,
+            "Failed to find the Requirement Cannot be Installed dialog box",
+        )
+        self.assertTrue(proceed_monitor.good())
+        self.assertFalse(cancel_monitor.good())
+
+    @patch("addonmanager_installer_gui.utils.blocking_get", MagicMock(return_value=None))
+    def test_run_with_disallowed_optional_python_continues(self):
+        # Arrange
+        mock_dependencies = self.create_mock_deps(python_optional=["not_in_the_allowlist"])
+        gui = AddonDependencyInstallerGUI([], mock_dependencies)
+        proceed_monitor = AsynchronousMonitor(gui.proceed)
+
+        # Act
+        gui.run()
+
+        # Assert
+        self.assertTrue(proceed_monitor.good())
+
+    @patch("addonmanager_installer_gui.utils.blocking_get", MagicMock(return_value=None))
+    def test_run_incompatible_python_version(self):
+        # Arrange
+        mock_dependencies = self.create_mock_deps()
+        mock_dependencies.python_min_version = Version(
+            from_list=[sys.version_info.major, sys.version_info.minor + 1, 0]
+        )
+        gui = AddonDependencyInstallerGUI([], mock_dependencies)
+        dialog_watcher = DialogWatcher(
+            "AddonManager_IncompatiblePythonVersionDialog",
             QtWidgets.QDialogButtonBox.Cancel,
         )
-        self.installer_gui._handle_disallowed_python(disallowed_packages)
-        self.assertTrue(dialog_watcher.dialog_found, "Failed to find the expected dialog box")
-        self.assertTrue(dialog_watcher.button_found, "Failed to find the expected button")
 
-    def test_report_missing_workbenches_single(self):
-        """Test only missing one workbench"""
-        wbs = ["OneMissingWorkbench"]
+        # Act
+        gui.run()
+
+        # Assert
+        self.assertTrue(
+            dialog_watcher.dialog_found, "Failed to find the Incompatible Python version dialog box"
+        )
+
+    @patch("addonmanager_installer_gui.utils.blocking_get", MagicMock(return_value=None))
+    @patch("addonmanager_installer_gui.AddonInstaller")
+    def test_run_with_required_allowed_package_cancel(self, mock_addon_installer_class):
+        # Arrange
+        mock_addon_installer_class.side_effect = self.MockAddonInstaller
+        mock_dependencies = self.create_mock_deps(python_requires=["in_the_allowlist"])
+        gui = AddonDependencyInstallerGUI([], mock_dependencies)
         dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "Missing Requirement"),
+            "AddonManager_DependencyResolutionDialog",
             QtWidgets.QDialogButtonBox.Cancel,
         )
-        self.installer_gui._report_missing_workbenches(wbs)
-        self.assertTrue(dialog_watcher.dialog_found, "Failed to find the expected dialog box")
-        self.assertTrue(dialog_watcher.button_found, "Failed to find the expected button")
+        proceed_monitor = AsynchronousMonitor(gui.proceed)
+        cancel_monitor = AsynchronousMonitor(gui.cancel)
 
-    def test_report_missing_workbenches_multiple(self):
-        """Test only missing one workbench"""
-        wbs = ["FirstMissingWorkbench", "SecondMissingWorkbench"]
+        # Act
+        gui.run()
+        while dialog_watcher.timer.isActive():
+            QtCore.QCoreApplication.processEvents()
+
+        # Assert
+        self.assertTrue(
+            dialog_watcher.dialog_found, "Failed to find the Resolve Dependencies dialog box"
+        )
+        cancel_monitor.wait_for_at_most(500)
+        self.assertFalse(proceed_monitor.good())
+        self.assertTrue(cancel_monitor.good())
+
+    @patch("addonmanager_installer_gui.utils.blocking_get", MagicMock(return_value=None))
+    @patch("addonmanager_installer_gui.AddonInstaller")
+    def test_run_with_required_allowed_package_ignore(self, mock_addon_installer_class):
+        # Arrange
+        mock_addon_installer_class.side_effect = self.MockAddonInstaller
+        mock_dependencies = self.create_mock_deps(python_requires=["in_the_allowlist"])
+        gui = AddonDependencyInstallerGUI([], mock_dependencies)
         dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "Missing Requirement"),
+            "AddonManager_DependencyResolutionDialog",
+            QtWidgets.QDialogButtonBox.Ignore,
+        )
+        proceed_monitor = AsynchronousMonitor(gui.proceed)
+        cancel_monitor = AsynchronousMonitor(gui.cancel)
+
+        # Act
+        gui.run()
+        while dialog_watcher.timer.isActive():
+            QtCore.QCoreApplication.processEvents()
+
+        # Assert
+        self.assertTrue(
+            dialog_watcher.dialog_found, "Failed to find the Resolve Dependencies dialog box"
+        )
+        proceed_monitor.wait_for_at_most(500)
+        self.assertTrue(proceed_monitor.good())
+        self.assertFalse(cancel_monitor.good())
+
+    class MockDependencyInstaller(QtCore.QObject):
+        no_python_exe = QtCore.Signal()
+        no_pip = QtCore.Signal(str)
+        failure = QtCore.Signal(str, str)
+        finished = QtCore.Signal(bool)
+
+        class MockResult(IntEnum):
+            OK = 0
+            NO_PYTHON_EXE = 1
+            NO_PIP = 2
+            FAILURE = 3
+
+        def __init__(
+            self,
+            addons: List[Addon],
+            python_requires: List[str],
+            python_optional: List[str],
+            location: os.PathLike = None,
+        ):
+            super().__init__()
+            self.setObjectName("Mock Dependency Installer")
+            self.addons = addons
+            self.python_requires = python_requires
+            self.python_optional = python_optional
+            self.location = location
+            self.result = self.MockResult.OK
+            self.called = False
+            self.moved_to_thread = False
+
+        def set_mock_result(self, result: MockResult):
+            self.result = result
+
+        def run(self):
+            self.called = True
+            succeeded = False
+            if self.result == self.MockResult.OK:
+                succeeded = True
+            elif self.result == self.MockResult.NO_PYTHON_EXE:
+                self.no_python_exe.emit()
+            elif self.result == self.MockResult.NO_PIP:
+                self.no_pip.emit("pip didn't run")
+            elif self.result == self.MockResult.FAILURE:
+                self.failure.emit("A bad thing happened", "So very bad")
+            self.finished.emit(succeeded)
+
+        def moveToThread(self, thread):
+            self.moved_to_thread = True
+
+    class MockAddonInstaller(QtCore.QObject):
+        def __init__(self, addons: List[Addon]):
+            super().__init__()
+            self.addons = addons
+            self.allowed_packages = ["in_the_allowlist"]
+
+    @patch("addonmanager_installer_gui.utils.blocking_get", MagicMock(return_value=None))
+    @patch("addonmanager_installer_gui.AddonInstaller")
+    @patch("addonmanager_installer_gui.DependencyInstaller")
+    def test_run_with_required_allowed_package_installs_package(
+        self, mock_dep_installer_class, mock_addon_installer_class
+    ):
+        # Arrange
+        mock_dep_installer_class.side_effect = self.MockDependencyInstaller
+        mock_addon_installer_class.side_effect = self.MockAddonInstaller
+        mock_dependencies = self.create_mock_deps(python_requires=["in_the_allowlist"])
+        gui = AddonDependencyInstallerGUI([], mock_dependencies)
+        dialog_watcher = DialogWatcher(
+            "AddonManager_DependencyResolutionDialog",
+            QtWidgets.QDialogButtonBox.Yes,
+        )
+        proceed_monitor = AsynchronousMonitor(gui.proceed)
+        cancel_monitor = AsynchronousMonitor(gui.cancel)
+
+        # Act
+        gui.run()
+        gui.dependency_installer.run()  # Called manually to avoid threading during the test
+
+        while dialog_watcher.timer.isActive():
+            QtCore.QCoreApplication.processEvents()
+
+        # Assert
+        self.assertTrue(
+            dialog_watcher.dialog_found, "Failed to find the Resolve Dependencies dialog box"
+        )
+        proceed_monitor.wait_for_at_most(500)
+        self.assertTrue(gui.dependency_installer.called)
+        self.assertTrue(proceed_monitor.good())
+        self.assertFalse(cancel_monitor.good())
+        self.assertTrue(gui.dependency_installer.moved_to_thread)
+        self.assertEqual(["in_the_allowlist"], gui.dependency_installer.python_requires)
+
+    @patch("addonmanager_installer_gui.utils.blocking_get", MagicMock(return_value=None))
+    @patch("addonmanager_installer_gui.AddonInstaller")
+    @patch("addonmanager_installer_gui.DependencyInstaller")
+    def test_run_with_optional_unchecked_allowed_package_does_not_install_package(
+        self, mock_dep_installer_class, mock_addon_installer_class
+    ):
+        # Arrange
+        mock_dep_installer_class.side_effect = self.MockDependencyInstaller
+        mock_addon_installer_class.side_effect = self.MockAddonInstaller
+        mock_dependencies = self.create_mock_deps(python_optional=["in_the_allowlist"])
+        gui = AddonDependencyInstallerGUI([], mock_dependencies)
+        dialog_watcher = DialogWatcher(
+            "AddonManager_DependencyResolutionDialog",
+            QtWidgets.QDialogButtonBox.Yes,
+        )
+        installing_dialog_watcher = DialogWatcher(
+            "AddonManager_InstallingDependenciesDialog",
             QtWidgets.QDialogButtonBox.Cancel,
         )
-        self.installer_gui._report_missing_workbenches(wbs)
-        self.assertTrue(dialog_watcher.dialog_found, "Failed to find the expected dialog box")
-        self.assertTrue(dialog_watcher.button_found, "Failed to find the expected button")
+        proceed_monitor = AsynchronousMonitor(gui.proceed)
+        cancel_monitor = AsynchronousMonitor(gui.cancel)
 
-    def test_resolve_dependencies_then_install(self):
-        class MissingDependenciesMock:
-            def __init__(self):
-                self.external_addons = ["addon_1", "addon_2"]
-                self.python_requires = ["py_req_1", "py_req_2"]
-                self.python_optional = ["py_opt_1", "py_opt_2"]
+        # Act
+        gui.run()
+        while dialog_watcher.timer.isActive() or installing_dialog_watcher.timer.isActive():
+            QtCore.QCoreApplication.processEvents()
 
-        missing = MissingDependenciesMock()
-        dialog_watcher = DialogWatcher(
-            translate("DependencyResolutionDialog", "Resolve Dependencies"),
-            QtWidgets.QDialogButtonBox.Cancel,
+        # Assert
+        self.assertTrue(
+            dialog_watcher.dialog_found, "Failed to find the Resolve Dependencies dialog box"
         )
-        self.installer_gui._resolve_dependencies_then_install(missing)
-        self.assertTrue(dialog_watcher.dialog_found, "Failed to find the expected dialog box")
-        self.assertTrue(dialog_watcher.button_found, "Failed to find the expected button")
-
-    def test_check_python_version_bad(self):
-        class MissingDependenciesMock:
-            def __init__(self):
-                self.python_min_version = {"major": 3, "minor": 9999}
-
-        missing = MissingDependenciesMock()
-        dialog_watcher = DialogWatcher(
-            translate("AddonsInstaller", "Incompatible Python version"),
-            QtWidgets.QDialogButtonBox.Cancel,
+        self.assertTrue(
+            installing_dialog_watcher.dialog_found,
+            "Failed to find the Installing Dependencies dialog box",
         )
-        stop_installing = self.installer_gui._check_python_version(missing)
-        self.assertTrue(dialog_watcher.dialog_found, "Failed to find the expected dialog box")
-        self.assertTrue(dialog_watcher.button_found, "Failed to find the expected button")
-        self.assertTrue(stop_installing, "Failed to halt installation on bad Python version")
+        proceed_monitor.wait_for_at_most(500)
+        self.assertTrue(proceed_monitor.good())
+        self.assertFalse(cancel_monitor.good())
+        self.assertIsNone(gui.dependency_installer)
 
-    def test_check_python_version_good(self):
-        class MissingDependenciesMock:
-            def __init__(self):
-                self.python_min_version = {"major": 3, "minor": 0}
+    @patch("addonmanager_installer_gui.utils.blocking_get", MagicMock(return_value=None))
+    @patch("addonmanager_installer_gui.AddonInstaller")
+    @patch("addonmanager_installer_gui.DependencyInstaller")
+    def test_run_with_optional_checked_allowed_package_installs_package(
+        self, mock_dep_installer_class, mock_addon_installer_class
+    ):
+        # Arrange
+        mock_dep_installer_class.side_effect = self.MockDependencyInstaller
+        mock_addon_installer_class.side_effect = self.MockAddonInstaller
+        mock_dependencies = self.create_mock_deps(python_optional=["in_the_allowlist"])
+        gui = AddonDependencyInstallerGUI([], mock_dependencies)
 
-        missing = MissingDependenciesMock()
-        stop_installing = self.installer_gui._check_python_version(missing)
-        self.assertFalse(stop_installing, "Failed to continue installation on good Python version")
+        def check_widget_and_continue(dlg):
+            list_widgets = dlg.findChildren(QtWidgets.QListWidget)
+            found = False
+            for list_widget in list_widgets:
+                for i in range(list_widget.count()):
+                    item = list_widget.item(i)
+                    if (
+                        item.text() == "in_the_allowlist"
+                        and item.flags() & QtCore.Qt.ItemIsUserCheckable
+                    ):
+                        item.setCheckState(QtCore.Qt.Checked)
+                        found = True
+                        break
+            if found:
+                button_boxes = dlg.findChildren(QtWidgets.QDialogButtonBox)
+                if len(button_boxes) == 1:
+                    button_to_click = button_boxes[0].button(QtWidgets.QDialogButtonBox.Yes)
+                    if button_to_click:
+                        button_to_click.click()
+                        return
+            dlg.reject()
 
-    def test_clean_up_optional(self):
-        class MissingDependenciesMock:
-            def __init__(self):
-                self.python_optional = [
-                    "allowed_packages_1",
-                    "allowed_packages_2",
-                    "disallowed_package",
-                ]
+        dialog_interactor = DialogInteractor(
+            "AddonManager_DependencyResolutionDialog", check_widget_and_continue
+        )
 
-        allowed_packages = ["allowed_packages_1", "allowed_packages_2"]
-        missing = MissingDependenciesMock()
-        self.installer_gui.installer.allowed_packages = set(allowed_packages)
-        self.installer_gui._clean_up_optional(missing)
-        self.assertTrue("allowed_packages_1" in missing.python_optional)
-        self.assertTrue("allowed_packages_2" in missing.python_optional)
-        self.assertFalse("disallowed_package" in missing.python_optional)
+        # Act
+        gui.run()
+        while dialog_interactor.timer.isActive():
+            QtCore.QCoreApplication.processEvents()
 
-    def intercept_run_dependency_installer(self, addons, python_requires, python_optional):
-        self.assertEqual(python_requires, ["py_req_1", "py_req_2"])
-        self.assertEqual(python_optional, ["py_opt_1", "py_opt_2"])
-        self.assertEqual(addons[0].name, "addon_1")
-        self.assertEqual(addons[1].name, "addon_2")
+        self.assertTrue(dialog_interactor.dialog_found)
 
-    def test_dependency_dialog_yes_clicked(self):
-        class DialogMock:
-            class ListWidgetMock:
-                class ListWidgetItemMock:
-                    def __init__(self, name):
-                        self.name = name
-
-                    def text(self):
-                        return self.name
-
-                    def checkState(self):
-                        return QtCore.Qt.Checked
-
-                def __init__(self, items):
-                    self.list = []
-                    for item in items:
-                        self.list.append(DialogMock.ListWidgetMock.ListWidgetItemMock(item))
-
-                def count(self):
-                    return len(self.list)
-
-                def item(self, i):
-                    return self.list[i]
-
-            def __init__(self):
-                self.listWidgetAddons = DialogMock.ListWidgetMock(["addon_1", "addon_2"])
-                self.listWidgetPythonRequired = DialogMock.ListWidgetMock(["py_req_1", "py_req_2"])
-                self.listWidgetPythonOptional = DialogMock.ListWidgetMock(["py_opt_1", "py_opt_2"])
-
-        class AddonMock:
-            def __init__(self, name):
-                self.name = name
-
-        self.installer_gui.dependency_dialog = DialogMock()
-        self.installer_gui.addons = [AddonMock("addon_1"), AddonMock("addon_2")]
-        self.installer_gui._run_dependency_installer = self.intercept_run_dependency_installer
-        self.installer_gui._dependency_dialog_yes_clicked()
+        gui.shutdown()
 
 
 class TestMacroInstallerGui(unittest.TestCase):
@@ -392,11 +693,13 @@ class TestMacroInstallerGui(unittest.TestCase):
         self.skipTest("Test not updated to handle running outside FreeCAD")
         preferences_settings = {
             "alwaysAskForToolbar": False,
+            "FirstTimeAskingForToolbar": True,
             "CustomToolbarName": "UnitTestCustomToolbar",
         }
         preferences_replacement = fci.Preferences(preferences_settings)
-        with patch("addonmanager_installer_gui.fci.Preferences") as preferences:
-            preferences = lambda: preferences_replacement
+        with patch(
+            "addonmanager_installer_gui.fci.Preferences", return_value=preferences_replacement
+        ):
             result = self.installer._ask_for_toolbar([])
         self.assertIsNotNone(result)
         self.assertTrue(hasattr(result, "get"))
@@ -405,12 +708,16 @@ class TestMacroInstallerGui(unittest.TestCase):
 
     def test_ask_for_toolbar_with_dialog_cancelled(self):
         """If the user cancels the dialog no toolbar is created"""
-        preferences_settings = {"alwaysAskForToolbar": True}
+        preferences_settings = {
+            "alwaysAskForToolbar": True,
+            "FirstTimeAskingForToolbar": True,
+        }
         preferences_replacement = fci.Preferences(preferences_settings)
-        with patch("addonmanager_installer_gui.fci.Preferences") as preferences:
-            preferences = lambda: preferences_replacement
+        with patch(
+            "addonmanager_installer_gui.fci.Preferences", return_value=preferences_replacement
+        ):
             _ = DialogWatcher(
-                translate("select_toolbar_dialog", "Select Toolbar"),
+                "AddonManager_SelectToolbarDialog",
                 QtWidgets.QDialogButtonBox.Cancel,
             )
             result = self.installer._ask_for_toolbar([])
@@ -427,7 +734,7 @@ class TestMacroInstallerGui(unittest.TestCase):
         fake_custom_toolbar_group.set("Name", "UnitTestCustomToolbar")
         self.installer._create_new_custom_toolbar = lambda: fake_custom_toolbar_group
         dialog_watcher = DialogWatcher(
-            translate("select_toolbar_dialog", "Select Toolbar"),
+            "AddonManager_SelectToolbarDialog",
             QtWidgets.QDialogButtonBox.Ok,
         )
         result = self.installer._ask_for_toolbar([])
@@ -445,8 +752,8 @@ class TestMacroInstallerGui(unittest.TestCase):
         # Third test: the user selects a custom toolbar in the dialog, and checks the box to always
         # ask.
         self.skipTest("Test not updated to handle running outside FreeCAD")
-        dialog_interactor = DialogInteractor(
-            translate("select_toolbar_dialog", "Select Toolbar"),
+        _ = DialogInteractor(
+            "AddonManager_SelectToolbarDialog",
             self.interactor_selection_option_and_checkbox,
         )
         toolbar_names = ["UT_TB_1", "UT_TB_2", "UT_TB_3"]
@@ -498,7 +805,7 @@ class TestMacroInstallerGui(unittest.TestCase):
         self.skipTest("Migration from addon_params is not reflected in the test yet")
         self.installer.addon_params.SetBool("dontShowAddMacroButtonDialog", False)
         dialog_watcher = DialogWatcher(
-            translate("toolbar_button", "Add button?"),
+            "AddonManager_AddMacroButtonDialog",
             QtWidgets.QDialogButtonBox.No,
         )
         # Note: that dialog does not use a QButtonBox, so we can really only test its
@@ -515,7 +822,7 @@ class TestMacroInstallerGui(unittest.TestCase):
         self.installer._install_toolbar_button()
         self.assertTrue(tbi.install_macro_to_toolbar_called)
         self.assertFalse(tbi.ask_for_toolbar_called)
-        self.assertTrue("Custom_1" in self.installer.toolbar_params.GetGroups())
+        self.assertIn("Custom_1", self.installer.toolbar_params.GetGroups())
 
     def test_install_toolbar_button_existing_custom_toolbar_1(self):
         self.skipTest("Migration from toolbar_params is not reflected in the test yet")

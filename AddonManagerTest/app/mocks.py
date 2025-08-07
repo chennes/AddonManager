@@ -26,8 +26,7 @@
 # pylint: disable=too-few-public-methods,too-many-instance-attributes,missing-function-docstring
 
 import os
-from typing import Union, List
-import xml.etree.ElementTree as ElemTree
+from typing import List
 
 
 class GitFailed(RuntimeError):
@@ -100,7 +99,6 @@ class MockAddon:
         self.update_status = None
         self.metadata = None
         self.icon_file = None
-        self.last_updated = None
         self.requires = set()
         self.python_requires = set()
         self.python_optional = set()
@@ -113,6 +111,9 @@ class MockAddon:
     @staticmethod
     def get_best_icon_relative_path():
         return ""
+
+    def get_zip_url(self):
+        return self.url
 
 
 class MockMacro:

@@ -22,6 +22,7 @@
 # ***************************************************************************
 
 import sys
+from typing import Optional
 
 try:
     from PySide import QtCore, QtWidgets
@@ -59,14 +60,21 @@ class DialogInteractor(QtCore.QObject):
             1
         )  # At 10 this occasionally left open dialogs; less than 1 produced failed tests
 
+    @staticmethod
+    def iterate_widgets(widget: QtWidgets.QWidget):
+        yield widget
+        for child in widget.findChildren(QtWidgets.QWidget):
+            yield from DialogInteractor.iterate_widgets(child)
+
     def run(self):
-        widget = QtWidgets.QApplication.activeModalWidget()
-        if widget and self._dialog_matches(widget):
-            # Found the dialog we are looking for: now try to run the interaction
-            if self.interaction is not None and callable(self.interaction):
-                self.interaction(widget)
-            self.dialog_found = True
-            self.timer.stop()
+        for top_widget in QtWidgets.QApplication.topLevelWidgets():
+            for widget in DialogInteractor.iterate_widgets(top_widget):
+                if widget and self._dialog_matches(widget):
+                    # Found the widget we are looking for: now try to run the interaction
+                    if self.interaction is not None and callable(self.interaction):
+                        self.interaction(widget)
+                    self.dialog_found = True
+                    self.timer.stop()
 
         self.has_run = True
         self.execution_counter += 1
@@ -75,14 +83,8 @@ class DialogInteractor(QtCore.QObject):
             self.timer.stop()
 
     def _dialog_matches(self, widget) -> bool:
-        # Is this the widget we are looking for? Only applies on Linux and Windows: macOS
-        # doesn't set the title of a modal dialog:
-        os = QtCore.QSysInfo.productType()  # Qt5 gives "osx", Qt6 gives "macos"
-        if os in ["osx", "macos"] or (
-            hasattr(widget, "windowTitle")
-            and callable(widget.windowTitle)
-            and widget.windowTitle() == self.dialog_to_watch_for
-        ):
+        # Is this the widget we are looking for?
+        if widget.objectName() == self.dialog_to_watch_for:
             return True
         return False
 
@@ -155,3 +157,49 @@ class AsynchronousMonitor:
 
     def good(self) -> bool:
         return self.signal_catcher.caught and not self.signal_catcher.killed
+
+
+class MockNetworkManagerGuiUp:
+    """A mock network manager that behaves roughly like the real thing but never does any network
+    or filesystem access and can simulate various failure scenarios. Uses real Qt signals and can
+    be used across threads. Requires a running event loop. Designed to allow UI evaluation by
+    taking real wall-clock time to complete events, or to speed up testing by using very short
+    timers to simulate network requests."""
+
+    completed = QtCore.Signal(int, int, QtCore.QByteArray)
+    content_length = QtCore.Signal(int, int, int)
+    progress_made = QtCore.Signal(int, int, int)
+    progress_complete = QtCore.Signal(int, int, str)
+
+    def __init__(self, wall_clock_ms: int = 1, simulate_failure: bool = False):
+        pass
+
+    def query_download_size(self, url: str, timeout_ms: int = 30000):
+        pass
+
+    def submit_unmonitored_get(
+        self,
+        url: str,
+        timeout_ms: int = 30000,
+    ) -> int:
+        pass
+
+    def submit_monitored_get(
+        self,
+        url: str,
+        timeout_ms: int = 30000,
+    ) -> int:
+        pass
+
+    def blocking_get(
+        self,
+        url: str,
+        timeout_ms: int = 30000,
+    ) -> Optional[QtCore.QByteArray]:
+        pass
+
+    def abort_all(self):
+        pass
+
+    def abort(self, index: int):
+        pass

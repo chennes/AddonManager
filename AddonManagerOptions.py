@@ -21,7 +21,7 @@
 # *                                                                         *
 # ***************************************************************************
 
-"""Contains a the Addon Manager's preferences dialog management class"""
+"""Contains the Addon Manager's preferences dialog management class"""
 
 import os
 
@@ -40,6 +40,7 @@ class AddonManagerOptions:
 
     def __init__(self, _=None):
         self.form = fci.loadUi(os.path.join(os.path.dirname(__file__), "AddonManagerOptions.ui"))
+        self.form.setObjectName("AddonManager_PreferencesTab")
         self.table_model = CustomRepoDataModel()
         self.form.customRepositoriesTableView.setModel(self.table_model)
         icon_path = os.path.join(os.path.dirname(__file__), "Resources", "icons")
@@ -97,7 +98,7 @@ class AddonManagerOptions:
                     pref.SetString(str(pref_entry, "utf-8"), text)
                 elif widget.metaObject().className() == "Gui::PrefFileChooser":
                     filename = str(widget.property("fileName"))
-                    filename = pref.SetString(str(pref_entry, "utf-8"), filename)
+                    pref.SetString(str(pref_entry, "utf-8"), filename)
 
         # Recurse over children
         if isinstance(widget, QtCore.QObject):
@@ -185,7 +186,7 @@ class CustomRepoDataModel(QtCore.QAbstractTableModel):
         self.load_model()
 
     def load_model(self):
-        """Load the data from the preferences entry"""
+        """Load the data from the preference entry"""
         pref_entry: str = self.pref.GetString("CustomRepositories", "")
 
         # The entry is saved as a space- and newline-delimited text block: break it into its
@@ -290,12 +291,13 @@ class CustomRepositoryDialog:
         self.dialog = fci.loadUi(
             os.path.join(os.path.dirname(__file__), "AddonManagerOptions_AddCustomRepository.ui")
         )
+        self.dialog.setObjectName("AddonManager_AddCustomRepositoryDialog")
 
     def exec(self):
-        """Run the dialog modally, and return either None or a tuple or (url,branch)"""
+        """Run the dialog as a modal, and return either None or a tuple of (url,branch)"""
         result = self.dialog.exec()
         if result == QtWidgets.QDialog.Accepted:
             url = self.dialog.urlLineEdit.text()
             branch = self.dialog.branchLineEdit.text()
-            return (url, branch)
-        return (None, None)
+            return url, branch
+        return None, None

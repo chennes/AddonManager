@@ -29,12 +29,9 @@ import os
 import shutil
 import tempfile
 from zipfile import ZipFile
-import sys
-
-sys.path.append("../../")  # So the IDE can find the imports below
 
 from addonmanager_installer import InstallationMethod, AddonInstaller, MacroInstaller
-from addonmanager_git import GitManager, initialize_git
+from addonmanager_git import initialize_git
 from addonmanager_metadata import MetadataReader
 from Addon import Addon
 from AddonManagerTest.app.mocks import MockAddon, MockMacro
@@ -169,19 +166,28 @@ class TestAddonInstaller(unittest.TestCase):
 
     def test_move_code_out_of_subdirectory(self):
         """All files are moved out and the subdirectory is deleted"""
-        self.mock_addon.url = "https://something.com/something_else/something"
-        installer = AddonInstaller(self.mock_addon, [])
-        with tempfile.TemporaryDirectory() as temp_dir:
-            subdir = os.path.join(temp_dir, f"something-{self.mock_addon.branch}")
-            os.mkdir(subdir)
-            with open(os.path.join(subdir, "README.txt"), "w", encoding="utf-8") as f:
-                f.write("# Test file for unit testing")
-            with open(os.path.join(subdir, "AnotherFile.txt"), "w", encoding="utf-8") as f:
-                f.write("# Test file for unit testing")
-            installer._move_code_out_of_subdirectory(temp_dir)
-            self.assertTrue(os.path.isfile(os.path.join(temp_dir, "README.txt")))
-            self.assertTrue(os.path.isfile(os.path.join(temp_dir, "AnotherFile.txt")))
-            self.assertFalse(os.path.isdir(subdir))
+        test_urls = [
+            "https://something.com/something_else/something",
+            "https://something.com/something_else/something.git",
+            "https://something.com/something_else/something/",
+            "https://something.com/something_else/something.git/",
+        ]
+        for url in test_urls:
+            with self.subTest(url=url):
+                self.mock_addon.url = url
+                installer = AddonInstaller(self.mock_addon, [])
+                # TODO: Someday use a mock filesystem instead of a temp dir
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    subdir = os.path.join(temp_dir, f"something-{self.mock_addon.branch}")
+                    os.mkdir(subdir)
+                    with open(os.path.join(subdir, "README.txt"), "w", encoding="utf-8") as f:
+                        f.write("# Test file for unit testing")
+                    with open(os.path.join(subdir, "AnotherFile.txt"), "w", encoding="utf-8") as f:
+                        f.write("# Test file for unit testing")
+                    installer._move_code_out_of_subdirectory(temp_dir)
+                    self.assertTrue(os.path.isfile(os.path.join(temp_dir, "README.txt")))
+                    self.assertTrue(os.path.isfile(os.path.join(temp_dir, "AnotherFile.txt")))
+                    self.assertFalse(os.path.isdir(subdir))
 
     def test_install_by_git(self):
         """Test using git to install. Depends on there being a local git
@@ -202,6 +208,7 @@ class TestAddonInstaller(unittest.TestCase):
             mock_addon.url = os.path.join(temp_dir, "test_repo")
             mock_addon.branch = "main"
             installer = AddonInstaller(mock_addon, [])
+            installer.git_manager = git_manager  # Make sure it's been created
             installer.installation_path = os.path.join(temp_dir, "installed_addon")
             installer._install_by_git()
 
@@ -241,6 +248,7 @@ class TestAddonInstaller(unittest.TestCase):
             self.assertEqual(method, InstallationMethod.COPY)
             git_manager = initialize_git()
             if git_manager:
+                installer.git_manager = git_manager
                 method = installer._determine_install_method(temp_dir, InstallationMethod.GIT)
                 self.assertEqual(method, InstallationMethod.GIT)
             method = installer._determine_install_method(temp_dir, InstallationMethod.ZIP)
@@ -258,6 +266,7 @@ class TestAddonInstaller(unittest.TestCase):
             self.assertEqual(method, InstallationMethod.COPY)
             git_manager = initialize_git()
             if git_manager:
+                installer.git_manager = git_manager
                 method = installer._determine_install_method(temp_dir, InstallationMethod.GIT)
                 self.assertEqual(method, InstallationMethod.GIT)
             method = installer._determine_install_method(temp_dir, InstallationMethod.ZIP)
@@ -352,7 +361,7 @@ class TestAddonInstaller(unittest.TestCase):
                 method = installer._determine_install_method(temp_file, InstallationMethod.ANY)
                 self.assertEqual(
                     method,
-                    InstallationMethod.GIT,
+                    InstallationMethod.ZIP,
                     f"Failed to allow git access to {site} URL",
                 )
 

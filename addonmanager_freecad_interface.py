@@ -43,6 +43,11 @@ try:
 
     try:
         from freecad.utils import get_python_exe
+
+        try:
+            _ = get_python_exe()
+        except AttributeError as e:
+            raise RuntimeError("Could not get the FreeCAD python executable") from e
     except ImportError:
         # This was only added in FreeCAD 1.0 -- to support FreeCAD 0.21 a backup strategy must be
         # used. This code is borrowed from FreeCAD 1.1dev.
@@ -107,7 +112,11 @@ except ImportError:
     try:
         from PySide6 import QtCore, QtWidgets
 
-        GuiUp = True if QtWidgets.QApplication.instance() else False
+        GuiUp = (
+            True
+            if hasattr(QtWidgets, "QApplication") and QtWidgets.QApplication.instance()
+            else False
+        )
         from PySide6.QtUiTools import QUiLoader
     except ImportError:
         try:
@@ -255,16 +264,19 @@ class DataPaths:
     def __del__(self):
         self.reference_count -= 1
         if not FreeCAD and self.reference_count <= 0:
-            paths = [self.data_dir, self.mod_dir, self.cache_dir, self.macro_dir, self.mod_dir]
-            for path in paths:
-                try:
-                    os.rmdir(path)
-                except FileNotFoundError:
-                    pass
-            self.data_dir = None
-            self.mod_dir = None
-            self.cache_dir = None
-            self.macro_dir = None
+            self._delete_paths()
+
+    def _delete_paths(self):
+        if FreeCAD:
+            return
+        paths = [self.data_dir, self.mod_dir, self.cache_dir, self.macro_dir, self.mod_dir]
+        for path in paths:
+            if os.path.isdir(path):
+                os.rmdir(path)
+        self.data_dir = None
+        self.mod_dir = None
+        self.cache_dir = None
+        self.macro_dir = None
 
 
 class Preferences:

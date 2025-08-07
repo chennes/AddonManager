@@ -31,12 +31,12 @@ import addonmanager_freecad_interface as fci
 
 # Get whatever version of PySide we can
 try:
-    from PySide import QtCore, QtWidgets  # Use the FreeCAD wrapper
+    from PySide import QtCore  # Use the FreeCAD wrapper
 except ImportError:
     try:
-        from PySide6 import QtCore, QtWidgets  # Outside FreeCAD, try Qt6 first
+        from PySide6 import QtCore  # Outside FreeCAD, try Qt6 first
     except ImportError:
-        from PySide2 import QtCore, QtWidgets  # Fall back to Qt5
+        from PySide2 import QtCore  # Fall back to Qt5
 
 import addonmanager_utilities as utils
 from addonmanager_installer import AddonInstaller, MacroInstaller
@@ -87,8 +87,8 @@ class DependencyInstaller(QtCore.QObject):
             if not QtCore.QThread.currentThread().isInterruptionRequested():
                 self._install_addons()
                 self.finished_successfully = self.required_succeeded
-        except RuntimeError:
-            pass
+        except RuntimeError as e:
+            fci.Console.PrintError(str(e) + "\n")
         self.finished.emit(self.finished_successfully)
 
     def _install_python_packages(self):
@@ -197,7 +197,7 @@ class DependencyInstaller(QtCore.QObject):
             result = installer.run()  # Run in this thread, which should be off the GUI thread
             if not result:
                 self.failure.emit(
-                    translate("AddonsInstaller", "Installation of Addon {} failed").format(
+                    translate("AddonsInstaller", "Installation of addon {} failed").format(
                         addon.name
                     ),
                     "",

@@ -31,7 +31,6 @@ from enum import IntEnum, auto
 from typing import Tuple, Dict, List, Optional
 
 from addonmanager_licenses import get_license_manager
-import addonmanager_freecad_interface as fci
 
 try:
     # If this system provides a secure parser, use that:
@@ -222,7 +221,7 @@ def get_first_supported_freecad_version(metadata: Metadata) -> Optional[Version]
     """Look through all content items of this metadata element and determine what the
     first version of freecad that ANY of the items support is. For example, if it
     contains several workbenches, some of which require v0.20, and some 0.21, then
-    0.20 is returned. Returns None if frecadmin is unset by any part of this object."""
+    0.20 is returned. Returns None if freecadmin is unset by any part of this object."""
 
     current_earliest = metadata.freecadmin if metadata.freecadmin is not None else None
     for content_class in metadata.content.values():
@@ -248,6 +247,7 @@ def get_repo_url_from_metadata(metadata: Metadata) -> str:
     for url in metadata.url:
         if url.type == UrlType.repository:
             return url.location
+    return ""
 
 
 class MetadataReader:
@@ -292,7 +292,7 @@ class MetadataReader:
                 metadata.__dict__[tag] = Version(from_string=child.text)
             except ValueError:
                 print(
-                    f"Invalid version specified for tag {tag} in Addon {metadata.name}: {child.text}"
+                    f"Invalid version specified for tag {tag} in addon {metadata.name}: {child.text}"
                 )
                 metadata.__dict__[tag] = Version(from_list=[0, 0, 0])
         elif tag in ["tag", "file"]:
