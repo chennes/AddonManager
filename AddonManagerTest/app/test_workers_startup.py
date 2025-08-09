@@ -101,10 +101,13 @@ class TestCreateAddonListWorker(unittest.TestCase):
             ]
         return json.dumps(catalog_dict)
 
+    @patch("addonmanager_workers_startup.InstallationManifest")
     @patch("addonmanager_workers_startup.CreateAddonListWorker.addon_repo")
-    def test_process_addon_catalog_single(self, mock_addon_repo_signal):
+    def test_process_addon_catalog_single(self, mock_addon_repo_signal, mock_manifest_class):
         # Arrange
         catalog_text = TestCreateAddonListWorker.create_fake_addon_catalog_json(1)
+        mock_manifest_instance = self.MockManifest()
+        mock_manifest_class.return_value = mock_manifest_instance
 
         # Act
         addonmanager_workers_startup.CreateAddonListWorker().process_addon_cache(catalog_text)
@@ -112,10 +115,21 @@ class TestCreateAddonListWorker(unittest.TestCase):
         # Assert
         mock_addon_repo_signal.emit.assert_called_once()
 
+    class MockManifest:
+        def __init__(self):
+            self.old_backups = []
+
+        def contains(self, _):
+            return False
+
+    @patch("addonmanager_workers_startup.InstallationManifest")
     @patch("addonmanager_workers_startup.CreateAddonListWorker.addon_repo")
-    def test_process_addon_catalog_multiple(self, mock_addon_repo_signal):
+    def test_process_addon_catalog_multiple(self, mock_addon_repo_signal, mock_manifest_class):
         # Arrange
         catalog_text = TestCreateAddonListWorker.create_fake_addon_catalog_json(10)
+
+        mock_manifest_instance = self.MockManifest()
+        mock_manifest_class.return_value = mock_manifest_instance
 
         # Act
         addonmanager_workers_startup.CreateAddonListWorker().process_addon_cache(catalog_text)
@@ -123,13 +137,19 @@ class TestCreateAddonListWorker(unittest.TestCase):
         # Assert
         self.assertEqual(mock_addon_repo_signal.emit.call_count, 10)
 
+    @patch("addonmanager_workers_startup.InstallationManifest")
     @patch("addonmanager_workers_startup.CreateAddonListWorker.addon_repo")
     @patch("addonmanager_workers_startup.fci.Console")
-    def test_process_addon_catalog_with_user_override(self, _, mock_addon_repo_signal):
+    def test_process_addon_catalog_with_user_override(
+        self, _, mock_addon_repo_signal, mock_manifest_class
+    ):
         # Arrange
         catalog_text = TestCreateAddonListWorker.create_fake_addon_catalog_json(10)
         worker = addonmanager_workers_startup.CreateAddonListWorker()
         worker.package_names = ["FakeAddon1", "FakeAddon2"]
+
+        mock_manifest_instance = self.MockManifest()
+        mock_manifest_class.return_value = mock_manifest_instance
 
         # Act
         worker.process_addon_cache(catalog_text)

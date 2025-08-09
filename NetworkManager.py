@@ -318,9 +318,9 @@ class NetworkManager(QtCore.QObject):
         if operation == QtNetwork.QNetworkAccessManager.GetOperation:
             reply = self.QNAM.get(request)
         elif operation == QtNetwork.QNetworkAccessManager.HeadOperation:
-            reply = self.QNAM.sendCustomRequest(request, b"HEAD")
+            reply = self.QNAM.head(request)
         else:
-            raise NotImplementedError(f"Unknown operation {operation}")
+            raise NotImplementedError(f"Unknown operation {operation.name}")
         self.replies[index] = reply
 
         self.__last_started_index = index
@@ -655,6 +655,8 @@ class NetworkManager(QtCore.QObject):
         else:
             if index in self.monitored_connections:
                 self.progress_complete.emit(index, response_code, "")
+            elif reply.operation() == QtNetwork.QNetworkAccessManager.HeadOperation:
+                self.content_length.emit(index, response_code, 0)
             else:
                 self.completed.emit(index, response_code, None)
         self.replies.pop(index)
