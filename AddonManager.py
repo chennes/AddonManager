@@ -27,9 +27,10 @@ import functools
 import shutil
 import tempfile
 import threading
-from typing import Dict
+from typing import Dict, List
 
 from PySideWrapper import QtGui, QtCore, QtWidgets, QtSvg
+from Widgets.addonmanager_utility_dialogs import MessageDialog
 
 from addonmanager_workers_startup import (
     CreateAddonListWorker,
@@ -441,6 +442,7 @@ class CommandAddonManager(QtCore.QObject):
         self.create_addon_list_worker = CreateAddonListWorker()
         self.create_addon_list_worker.addon_repo.connect(self.add_addon_repo)
         self.update_progress_bar(translate("AddonsInstaller", "Creating addon list"), 10, 100)
+        self.create_addon_list_worker.old_backups_found.connect(self.found_old_backups)
         self.create_addon_list_worker.finished.connect(self.do_next_startup_phase)  # Link to step 2
         self.create_addon_list_worker.start()
 
@@ -764,6 +766,52 @@ class CommandAddonManager(QtCore.QObject):
         QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(addons_folder))
         return
 
+    @staticmethod
+    def found_old_backups(backups: List[str]):
+        handling = fci.Preferences().get("old_backup_handling")
+        if handling.lower().strip() == "never":
+            return
+        if handling.lower().strip() == "always":
+            delete_old_backups(backups)
+            return
+
+        backup_string = (
+            translate(
+                "AddonsInstaller",
+                f"The following auto-generated backups were found in your Mod directory:",
+            )
+            + "\n"
+        )
+        for backup in backups:
+            backup_string += "• " + str(backup) + "\n"
+        backup_string += translate("AddonsInstaller", "Do you want to delete them now?")
+        dlg = QtWidgets.QMessageBox()
+        dlg.setObjectName("AddonManager_FoundOldBackups")
+        dlg.setText(backup_string)
+        dlg.setStandardButtons(
+            QtWidgets.QMessageBox.YesToAll
+            | QtWidgets.QMessageBox.Yes
+            | QtWidgets.QMessageBox.No
+            | QtWidgets.QMessageBox.NoToAll
+        )
+        dlg.setDefaultButton(QtWidgets.QMessageBox.No)
+        dlg.button(QtWidgets.QMessageBox.YesToAll).setText(
+            translate("AddonsInstaller", "Always", "'Always' delete old backups")
+        )
+        dlg.button(QtWidgets.QMessageBox.NoToAll).setText(
+            translate("AddonsInstaller", "Never", "'Never' delete old backups")
+        )
+        result = dlg.exec_()
+
+        if result == QtWidgets.QMessageBox.NoToAll:
+            fci.Preferences().set("old_backup_handling", "never")
+            return
+        if result == QtWidgets.QMessageBox.No:
+            return
+        if result == QtWidgets.QMessageBox.YesToAll:
+            fci.Preferences().set("old_backup_handling", "always")
+        delete_old_backups(backups)
+
 
 # Some utility functions
 
@@ -789,6 +837,14 @@ def revert_to_backup(addon: Addon) -> None:
     if os.path.exists(original + ".pre_update_backup"):
         shutil.rmtree(original, ignore_errors=True)
         shutil.copytree(original + ".pre_update_backup", original, dirs_exist_ok=True)
+
+
+def delete_old_backups(backups) -> None:
+    """Delete old backups found in the Mod directory."""
+    for backup in backups:
+        full_path = os.path.join(fci.DataPaths().mod_dir, backup)
+        if os.path.exists(full_path):
+            shutil.rmtree(full_path, ignore_errors=True)
 
 
 # @}
