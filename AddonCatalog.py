@@ -341,8 +341,7 @@ class AddonCatalog:
 
     def get_available_branches(self, addon_id: str) -> List[str]:
         """For a given ID, get the list of available branches compatible with this version of
-        FreeCAD along with the branch display name. Either field may be empty, but not both. The
-        first entry in the list is expected to be the "primary".
+        FreeCAD.
         :return: A list of branch display names (or git refs, if no display name is available)"""
         if addon_id not in self._dictionary:
             return []

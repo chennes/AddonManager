@@ -246,23 +246,13 @@ class CreateAddonListWorker(QtCore.QThread):
                 )
                 continue
 
-            primary_addon = None
-            installed_branch = None
+            installed_branch_name = None
             if manifest.contains(addon_id):
                 # Then this addon is currently installed: make sure we use the correct branch
-                installed_branch = manifest.get_addon_info(addon_id)["branch_display_name"]
+                installed_branch_name = manifest.get_addon_info(addon_id)["branch_display_name"]
                 fci.Console.PrintLog(
-                    f"Found installed addon '{addon_id}' with branch '{installed_branch}'\n"
+                    f"Found installed addon '{addon_id}' with branch '{installed_branch_name}'\n"
                 )
-                for branch_display_name in branches:
-                    if branch_display_name == installed_branch:
-                        primary_addon = branch_display_name
-                        break
-                if primary_addon is None:
-                    fci.Console.PrintError(
-                        f"Failed to find the installed branch '{installed_branch}' for addon '{addon_id}', skipping it.\n"
-                    )
-                    continue
             addon_instances = {}
             name_of_first_entry = None
             for branch_display_name in branches:
@@ -288,7 +278,9 @@ class CreateAddonListWorker(QtCore.QThread):
                     f"Failed to load the addon {addon_id} from the addon catalog, skipping it.\n"
                 )
                 continue
-            primary_branch_name = installed_branch if installed_branch else name_of_first_entry
+            primary_branch_name = (
+                installed_branch_name if installed_branch_name else name_of_first_entry
+            )
             for branch_display_name in branches:
                 if branch_display_name != primary_branch_name:
                     # Only add non-primary addons to the sub_addons list so that the primary addon
@@ -296,12 +288,6 @@ class CreateAddonListWorker(QtCore.QThread):
                     addon_instances[primary_branch_name].sub_addons[branch_display_name] = (
                         addon_instances[branch_display_name]
                     )
-
-            if name_of_first_entry is None:
-                fci.Console.PrintError(
-                    f"Failed to load the addon {addon_id} from the addon catalog, skipping it.\n"
-                )
-                continue
             self.addon_repo.emit(addon_instances[primary_branch_name])
 
         if manifest.old_backups:
