@@ -30,7 +30,6 @@ import threading
 from typing import Dict, List
 
 from PySideWrapper import QtGui, QtCore, QtWidgets, QtSvg
-from Widgets.addonmanager_utility_dialogs import MessageDialog
 
 from addonmanager_workers_startup import (
     CreateAddonListWorker,
