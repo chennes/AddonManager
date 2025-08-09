@@ -46,7 +46,6 @@ import addonmanager_freecad_interface as fci
 
 translate = fci.translate
 
-# Workers only have one public method by design
 # pylint: disable=c-extension-no-member, too-few-public-methods, too-many-instance-attributes
 
 

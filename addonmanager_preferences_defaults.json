@@ -31,5 +31,6 @@
     "last_fetched_addon_catalog_cache_hash": "Cache never fetched, no hash available",
     "last_fetched_macro_cache_hash": "Cache never fetched, no hash available",
     "macro_cache_url": "https://addons.freecad.org/macro_cache.zip",
+    "old_backup_handling": "ask",
     "readWarning2022": false
 }
