@@ -27,8 +27,7 @@ from Addon import Addon
 import addonmanager_utilities as utils
 import addonmanager_freecad_interface as fci
 
-from enum import IntEnum, Enum, auto
-from html.parser import HTMLParser
+from enum import IntEnum
 from typing import Optional
 
 import NetworkManager
@@ -72,61 +71,9 @@ class ReadmeController(QtCore.QObject):
         self.stop = False
         self.readme_data = None
         if self.addon.repo_type == Addon.Kind.MACRO:
-            self.url = self.addon.macro.wiki
-            if not self.url:
-                self.url = self.addon.macro.url
-            if not self.url:
-                self.widget.setText(
-                    translate(
-                        "AddonsInstaller",
-                        "Loading info for {} from the FreeCAD Macro Recipes wiki...",
-                    ).format(self.addon.display_name, self.url)
-                )
-                return
+            self._create_wiki_display()
         else:
-            self.url = utils.get_readme_url(repo)
-            if self.addon.metadata and self.addon.metadata.url:
-                for url in self.addon.metadata.url:
-                    if url.type == UrlType.readme:
-                        if self.url != url.location:
-                            fci.Console.PrintLog("README url does not match expected location\n")
-                            fci.Console.PrintLog(f"Expected: {self.url}\n")
-                            fci.Console.PrintLog(f"package.xml contents: {url.location}\n")
-                            fci.Console.PrintLog(
-                                "Note to addon devs: package.xml now expects a"
-                                " url to the raw MD data, now that Qt can render"
-                                " it without having it transformed to HTML.\n"
-                            )
-                        self.url = url.location
-                        if "/blob/" in self.url:
-                            fci.Console.PrintLog("Attempting to replace 'blob' with 'raw'...\n")
-                            self.url = self.url.replace("/blob/", "/raw/")
-                        elif "/src/" in self.url and "codeberg" in self.url:
-                            fci.Console.PrintLog(
-                                "Attempting to replace 'src' with 'raw' in codeberg URL..."
-                            )
-                            self.url = self.url.replace("/src/", "/raw/")
-
-        self.widget.setUrl(self.url)
-
-        self.widget.setText(
-            translate("AddonsInstaller", "Loading page for {} from {}...").format(
-                self.addon.display_name, self.url
-            )
-        )
-
-        if self.url[0] == "/":
-            if self.url[:3] == ".md":
-                self.readme_data_type = ReadmeDataType.Markdown
-            elif self.url[:5] == ".html":
-                self.readme_data_type = ReadmeDataType.Html
-
-            with open(self.url, "r") as fd:
-                self._process_package_download("".join(fd.readlines()))
-        else:
-            self.readme_request_index = NetworkManager.AM_NETWORK_MANAGER.submit_unmonitored_get(
-                self.url
-            )
+            self._create_non_wiki_display()
 
     def _download_completed(self, index: int, code: int, data: QtCore.QByteArray) -> None:
         """Callback for handling a completed README file download."""
@@ -159,16 +106,9 @@ class ReadmeController(QtCore.QObject):
                     self.set_addon(self.addon)  # Trigger a reload of the page now with resources
 
     def _process_package_download(self, data: str):
-        if self.addon.repo_type == Addon.Kind.MACRO:
-            parser = WikiCleaner()
-            parser.feed(data)
-            self.readme_data = parser.final_html
-            self.readme_data_type = ReadmeDataType.Html
-            self.widget.setHtml(parser.final_html)
-        else:
-            self.readme_data = data
-            self.readme_data_type = ReadmeDataType.Markdown
-            self.widget.setMarkdown(data)
+        self.readme_data = data
+        self.readme_data_type = ReadmeDataType.Markdown
+        self.widget.setMarkdown(data)
 
     def _process_resource_download(self, resource_name: str, resource_data: bytes):
         image = QtGui.QImage.fromData(resource_data)
@@ -208,112 +148,81 @@ class ReadmeController(QtCore.QObject):
         lhs, slash, _ = base_url.rpartition("/")
         return lhs + slash + file
 
+    def _create_wiki_display(self):
+        """The Addon Manager used to parse the wiki page and display it in the Qt widget. This was
+        very fragile and is no longer used. Now, display the metadata we have for the wiki and
+        provide a link to the Wiki page for the macro, which will open in an external browser."""
 
-class WikiCleaner(HTMLParser):
-    """This HTML parser cleans up FreeCAD Macro Wiki Page for display in a
-    QTextBrowser widget (which does not deal will with tables used as formatting,
-    etc.) It strips out any tables, and extracts the mw-parser-output div as the only
-    thing that actually gets displayed. It also discards anything inside the [edit]
-    spans that litter wiki output."""
+        markdown = f"# {self.addon.display_name}\n\n"
+        if self.addon.macro.comment:
+            markdown += f"{self.addon.macro.comment}\n\n"
+        elif self.addon.macro.desc:
+            markdown += f"{self.addon.macro.desc}\n\n"
+        if self.addon.macro.author:
+            markdown += f"* Author: {self.addon.macro.author}\n"
+        if self.addon.macro.version:
+            markdown += f"* Version: {self.addon.macro.version}\n"
+        if self.addon.macro.date:
+            markdown += f"* Date: {self.addon.macro.date}\n"
+        if self.addon.macro.license:
+            markdown += f"* License: {self.addon.macro.license}\n"
+        if self.addon.macro.url:
+            markdown += f"* URL: [{self.addon.macro.url}]({self.addon.macro.url})\n"
+        wiki_page_name = self.addon.macro.name.replace(" ", "_")
+        wiki_page_name = wiki_page_name.replace("&", "%26")
+        wiki_page_name = wiki_page_name.replace("+", "%2B")
+        url = "https://wiki.freecad.org/Macro_" + wiki_page_name
+        if url != self.addon.macro.url:
+            markdown += f"* Wiki page: [{url}]({url})\n"
+        if self.addon.macro.code:
+            markdown += "\n## Macro Code\n\n```python\n"
+            markdown += self.addon.macro.code
+            markdown += "\n```\n"
+        self.readme_data = markdown
+        self.readme_data_type = ReadmeDataType.Markdown
+        self.widget.setMarkdown(markdown)
 
-    class State(Enum):
-        BeforeMacroContent = auto()
-        InMacroContent = auto()
-        InTable = auto()
-        InEditSpan = auto()
-        AfterMacroContent = auto()
+    def _create_non_wiki_display(self):
+        self.url = utils.get_readme_url(self.addon)
+        if self.addon.metadata and self.addon.metadata.url:
+            for url in self.addon.metadata.url:
+                if url.type == UrlType.readme:
+                    if self.url != url.location:
+                        fci.Console.PrintLog("README url does not match expected location\n")
+                        fci.Console.PrintLog(f"Expected: {self.url}\n")
+                        fci.Console.PrintLog(f"package.xml contents: {url.location}\n")
+                        fci.Console.PrintLog(
+                            "Note to addon devs: package.xml now expects a"
+                            " url to the raw MD data, now that Qt can render"
+                            " it without having it transformed to HTML.\n"
+                        )
+                    self.url = url.location
+                    if "/blob/" in self.url:
+                        fci.Console.PrintLog("Attempting to replace 'blob' with 'raw'...\n")
+                        self.url = self.url.replace("/blob/", "/raw/")
+                    elif "/src/" in self.url and "codeberg" in self.url:
+                        fci.Console.PrintLog(
+                            "Attempting to replace 'src' with 'raw' in codeberg URL..."
+                        )
+                        self.url = self.url.replace("/src/", "/raw/")
 
-    def __init__(self):
-        super().__init__()
-        self.depth_in_div = 0
-        self.depth_in_span = 0
-        self.depth_in_table = 0
-        self.final_html = "<html><body>"
-        self.previous_state = WikiCleaner.State.BeforeMacroContent
-        self.state = WikiCleaner.State.BeforeMacroContent
+        self.widget.setUrl(self.url)
 
-    def handle_starttag(self, tag: str, attrs):
-        if tag == "div":
-            self.handle_div_start(attrs)
-        elif tag == "span":
-            self.handle_span_start(attrs)
-        elif tag == "table":
-            self.handle_table_start(attrs)
+        self.widget.setText(
+            translate("AddonsInstaller", "Loading page for {} from {}...").format(
+                self.addon.display_name, self.url
+            )
+        )
+
+        if self.url[0] == "/":
+            if self.url.lower().endswith(".md"):
+                self.readme_data_type = ReadmeDataType.Markdown
+            elif self.url.lower().endswith(".html"):
+                self.readme_data_type = ReadmeDataType.Html
+
+            with open(self.url, "r") as fd:
+                self._process_package_download("".join(fd.readlines()))
         else:
-            if self.state == WikiCleaner.State.InMacroContent:
-                self.add_tag_to_html(tag, attrs)
-
-    def handle_div_start(self, attrs):
-        for name, value in attrs:
-            if name == "class" and value == "mw-parser-output":
-                self.previous_state = self.state
-                self.state = WikiCleaner.State.InMacroContent
-        if self.state == WikiCleaner.State.InMacroContent:
-            self.depth_in_div += 1
-            self.add_tag_to_html("div", attrs)
-
-    def handle_span_start(self, attrs):
-        for name, value in attrs:
-            if name == "class" and value == "mw-editsection":
-                self.previous_state = self.state
-                self.state = WikiCleaner.State.InEditSpan
-                break
-        if self.state == WikiCleaner.State.InEditSpan:
-            self.depth_in_span += 1
-        elif WikiCleaner.State.InMacroContent:
-            self.add_tag_to_html("span", attrs)
-
-    def handle_table_start(self, unused):
-        if self.state != WikiCleaner.State.InTable:
-            self.previous_state = self.state
-            self.state = WikiCleaner.State.InTable
-        self.depth_in_table += 1
-
-    def add_tag_to_html(self, tag, attrs=None):
-        self.final_html += f"<{tag}"
-        if attrs:
-            self.final_html += " "
-            for attr, value in attrs:
-                self.final_html += f"{attr}='{value}'"
-        self.final_html += ">\n"
-
-    def handle_endtag(self, tag):
-        if tag == "table":
-            self.handle_table_end()
-        elif tag == "span":
-            self.handle_span_end()
-        elif tag == "div":
-            self.handle_div_end()
-        else:
-            if self.state == WikiCleaner.State.InMacroContent:
-                self.add_tag_to_html(f"/{tag}")
-
-    def handle_span_end(self):
-        if self.state == WikiCleaner.State.InEditSpan:
-            self.depth_in_span -= 1
-            if self.depth_in_span <= 0:
-                self.depth_in_span = 0
-                self.state = self.previous_state
-        else:
-            self.add_tag_to_html(f"/span")
-
-    def handle_div_end(self):
-        if self.state == WikiCleaner.State.InMacroContent:
-            self.depth_in_div -= 1
-            if self.depth_in_div <= 0:
-                self.depth_in_div = 0
-                self.state = WikiCleaner.State.AfterMacroContent
-                self.final_html += "</body></html>"
-        else:
-            self.add_tag_to_html(f"/div")
-
-    def handle_table_end(self):
-        if self.state == WikiCleaner.State.InTable:
-            self.depth_in_table -= 1
-            if self.depth_in_table <= 0:
-                self.depth_in_table = 0
-                self.state = self.previous_state
-
-    def handle_data(self, data):
-        if self.state == WikiCleaner.State.InMacroContent:
-            self.final_html += data
+            self.readme_request_index = NetworkManager.AM_NETWORK_MANAGER.submit_unmonitored_get(
+                self.url
+            )
