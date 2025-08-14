@@ -67,7 +67,11 @@ class WidgetAddonButtons(QtWidgets.QWidget):
         self.update.setVisible(can_check_for_updates)
 
     def set_installation_status(
-        self, installed: bool, available_branches: List[str], disabled: bool
+        self,
+        installed: bool,
+        available_branches: List[str],
+        disabled: bool,
+        can_be_disabled: bool = True,
     ):
         """Set up the buttons for a given installation status.
         :param installed: Whether the addon is currently installed or not.
@@ -100,8 +104,12 @@ class WidgetAddonButtons(QtWidgets.QWidget):
                 self.actions.append(new_action)
                 self.branch_menu.addAction(new_action)
 
+        if can_be_disabled:
             self.enable.setVisible(installed and disabled)
             self.disable.setVisible(installed and not disabled)
+        else:
+            self.enable.setVisible(False)
+            self.disable.setVisible(False)
         self.retranslateUi(None)
 
     def action_activated(self, _):
