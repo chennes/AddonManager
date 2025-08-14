@@ -620,7 +620,7 @@ class CommandAddonManager(QtCore.QObject):
         else:
             repo.set_status(Addon.Status.NO_UPDATE_AVAILABLE)
         self.item_model.reload_item(repo)
-        self.composite_view.package_details_controller.show_repo(repo)
+        self.composite_view.package_details_controller.show_addon(repo)
 
     def prep_for_install(self, installing_addon: Addon):
         """To prepare for installing an addon, we need to see if this is the current active branch:
@@ -712,7 +712,7 @@ class CommandAddonManager(QtCore.QObject):
         if repo.status() == Addon.Status.PENDING_RESTART:
             self.restart_required = True
         self.item_model.reload_item(repo)
-        self.composite_view.package_details_controller.show_repo(repo)
+        self.composite_view.package_details_controller.show_addon(repo)
         if repo in self.packages_with_updates:
             self.packages_with_updates.remove(repo)
             self.enable_updates(len(self.packages_with_updates))

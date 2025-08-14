@@ -134,7 +134,7 @@ class CompositeView(QtWidgets.QWidget):
     def addon_selected(self, addon):
         """Depending on the display_style, show addon details (possibly hiding the package_list
         widget in the process."""
-        self.package_details_controller.show_repo(addon)
+        self.package_details_controller.show_addon(addon)
         if self.display_style != AddonManagerDisplayStyle.COMPOSITE:
             self.scroll_position = (
                 self.package_list.ui.listPackages.verticalScrollBar().sliderPosition()
