@@ -845,9 +845,11 @@ def revert_to_backup(addon: Addon) -> None:
 def delete_old_backups(backups) -> None:
     """Delete old backups found in the Mod directory."""
     for backup in backups:
-        full_path = os.path.join(fci.DataPaths().mod_dir, backup)
+        full_path = str(os.path.join(fci.DataPaths().mod_dir, backup))
         if os.path.exists(full_path):
-            shutil.rmtree(full_path, ignore_errors=True)
+            success = utils.rmdir(full_path)
+            if not success:
+                fci.Console.PrintError(f"Failed to delete {full_path}\n")
 
 
 # @}
