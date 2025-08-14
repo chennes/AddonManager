@@ -535,7 +535,7 @@ class MacroInstaller(QtCore.QObject):
     # installation was requested for (usually of class Addon, but any class that provides a macro
     # can be used).
     success = QtCore.Signal(object)
-    failure = QtCore.Signal(object)
+    failure = QtCore.Signal(object, str)
 
     # Finished: regardless of the outcome, this is emitted when all work that is going to be done
     # is done (i.e. whatever thread this is running in can quit).
