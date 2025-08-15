@@ -321,8 +321,8 @@ class Macro:
             filename = self.icon.rsplit("/", 1)[-1]
             try:
                 with open(os.path.join(macro_dir, filename), "wb") as f:
-                    f.write(base64.b64decode(self.icon_data))
-            except (OSError, UnicodeDecodeError, binascii.Error) as e:
+                    f.write(self.icon_data)
+            except (OSError, UnicodeDecodeError) as e:
                 warnings.append(f"Failed to create {filename}")
                 fci.Console.PrintWarning(f"Failed to create {filename}: {e}\n")
 
