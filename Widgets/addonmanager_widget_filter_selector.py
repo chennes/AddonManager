@@ -99,7 +99,7 @@ class WidgetFilterSelector(QtWidgets.QComboBox):
             (FilterType.PACKAGE_CONTENTS, ContentFilter.MACRO),
         )
         self.addItem(
-            translate("AddonsInstaller", "Preference Pack"),
+            translate("AddonsInstaller", "Preference pack"),
             (FilterType.PACKAGE_CONTENTS, ContentFilter.PREFERENCE_PACK),
         )
         self.addItem(

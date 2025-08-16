@@ -71,7 +71,7 @@ class AddonStatus(IntEnum):
         if self.value == AddonStatus.WAITING:
             return ""
         if self.value == AddonStatus.INSTALLING:
-            return translate("AddonsInstaller", "Installing") + "..."
+            return translate("AddonsInstaller", "Installing") + "…"
         if self.value == AddonStatus.SUCCEEDED:
             return translate("AddonsInstaller", "Succeeded")
         if self.value == AddonStatus.FAILED:

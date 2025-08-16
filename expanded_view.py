@@ -148,7 +148,7 @@ class Ui_ExpandedView(object):
             QtCore.QCoreApplication.translate("ExpandedView", "Maintainer", None)
         )
         self.labelStatus.setText(
-            QtCore.QCoreApplication.translate("ExpandedView", "Update Available", None)
+            QtCore.QCoreApplication.translate("ExpandedView", "Update available", None)
         )
 
     # retranslateUi

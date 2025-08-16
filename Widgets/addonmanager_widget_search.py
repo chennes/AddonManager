@@ -86,5 +86,5 @@ class WidgetSearch(QtWidgets.QWidget):
 
     def retranslateUi(self, _):
         self.filter_line_edit.setPlaceholderText(
-            QtCore.QCoreApplication.translate("AddonsInstaller", "Search...", None)
+            QtCore.QCoreApplication.translate("AddonsInstaller", "Search…", None)
         )

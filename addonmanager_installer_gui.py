@@ -697,7 +697,7 @@ class AddonDependencyInstallerGUI(QtCore.QObject):
 
         self.dependency_installation_dialog = QtWidgets.QMessageBox(
             QtWidgets.QMessageBox.Information,
-            translate("AddonsInstaller", "Installing dependencies", "Window title"),
+            translate("AddonsInstaller", "Installing Dependencies", "Window title"),
             translate("AddonsInstaller", "Installing dependencies…", "Window text"),
             QtWidgets.QMessageBox.Cancel,
             parent=utils.get_main_am_window(),

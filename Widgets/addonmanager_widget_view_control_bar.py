@@ -144,13 +144,13 @@ class WidgetViewControlBar(QtWidgets.QWidget):
             translate("AddonsInstaller", "Alphabetical", "Sort order"), SortOptions.Alphabetical
         )
         self.sort_selector.addItem(
-            translate("AddonsInstaller", "Last Updated", "Sort order"), SortOptions.LastUpdated
+            translate("AddonsInstaller", "Last updated", "Sort order"), SortOptions.LastUpdated
         )
         self.sort_selector.addItem(
-            translate("AddonsInstaller", "Date Created", "Sort order"), SortOptions.DateAdded
+            translate("AddonsInstaller", "Date created", "Sort order"), SortOptions.DateAdded
         )
         self.sort_selector.addItem(
-            translate("AddonsInstaller", "GitHub Stars", "Sort order"), SortOptions.Stars
+            translate("AddonsInstaller", "GitHub stars", "Sort order"), SortOptions.Stars
         )
         if self.has_rankings:
             self.sort_selector.addItem(

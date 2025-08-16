@@ -93,7 +93,7 @@ class Ui_CompactView(object):
             QtCore.QCoreApplication.translate("CompactView", "Description", None)
         )
         self.labelStatus.setText(
-            QtCore.QCoreApplication.translate("CompactView", "Update Available", None)
+            QtCore.QCoreApplication.translate("CompactView", "Update available", None)
         )
 
     # retranslateUi

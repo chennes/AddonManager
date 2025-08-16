@@ -130,7 +130,7 @@ class AddonUninstaller(QtCore.QObject):
             else:
                 error_message = translate(
                     "AddonsInstaller",
-                    "Could not find addon {} to remove it.",
+                    "Could not find addon {} to remove it",
                 ).format(self.addon_to_remove.name)
         if success:
             manifest = InstallationManifest()
@@ -155,7 +155,7 @@ class AddonUninstaller(QtCore.QObject):
                 fci.Console.PrintError(
                     translate(
                         "AddonsInstaller",
-                        "Execution of addon's uninstall.py script failed. Proceeding with uninstall...",
+                        "Execution of addon's uninstall.py script failed. Proceeding with uninstall…",
                     )
                     + "\n"
                 )
