@@ -30,6 +30,7 @@ from typing import List
 from addonmanager_freecad_interface import translate
 
 from PySideWrapper import QtCore, QtGui, QtWidgets
+from Widgets.spinner import Spinner
 
 
 class WidgetAddonButtons(QtWidgets.QWidget):
@@ -49,6 +50,9 @@ class WidgetAddonButtons(QtWidgets.QWidget):
     def set_update_available(self, update_available: bool):
         """Set the update availability."""
         self.update.setVisible(update_available)
+
+    def set_update_check_status(self, checking: bool):
+        self.spinner.setVisible(checking)
 
     def set_installation_status(
         self,
@@ -136,10 +140,10 @@ class WidgetAddonButtons(QtWidgets.QWidget):
         self.disable = QtWidgets.QPushButton(self)
         self.update = QtWidgets.QPushButton(self)
         self.run_macro = QtWidgets.QPushButton(self)
-        self.check_for_update = QtWidgets.QPushButton(self)
+        self.spinner = Spinner(self)
         self.horizontal_layout.addWidget(self.back)
         self.horizontal_layout.addStretch()
-        self.horizontal_layout.addWidget(self.check_for_update)
+        self.horizontal_layout.addWidget(self.spinner)
         self.horizontal_layout.addWidget(self.install)
         self.horizontal_layout.addWidget(self.uninstall)
         self.horizontal_layout.addWidget(self.enable)
@@ -158,7 +162,6 @@ class WidgetAddonButtons(QtWidgets.QWidget):
         )
 
     def retranslateUi(self, _):
-        self.check_for_update.setText(translate("AddonsInstaller", "Check for Update"))
         if self.setup_to_change_branch:
             self.install.setText(translate("AddonsInstaller", "Switch to Branch"))
         elif self.is_addon_manager:
@@ -170,6 +173,7 @@ class WidgetAddonButtons(QtWidgets.QWidget):
         self.update.setText(translate("AddonsInstaller", "Update"))
         self.run_macro.setText(translate("AddonsInstaller", "Run"))
         self.back.setToolTip(translate("AddonsInstaller", "Return to Package List"))
+        self.spinner.setToolTip(translate("AddonsInstaller", "Checking for Updates…"))
         if self.is_addon_manager:
             self.uninstall.setText(translate("AddonsInstaller", "Revert to Built-In"))
         else:

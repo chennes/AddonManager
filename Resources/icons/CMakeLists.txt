@@ -16,6 +16,7 @@ SET(AddonManagerResourceFilesIcons
     regex_ok.svg
     sort_ascending.svg
     sort_descending.svg
+    spinner.svg
     view-refresh.svg
 )
 

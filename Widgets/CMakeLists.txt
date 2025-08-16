@@ -11,6 +11,7 @@ SET(AddonManagerWidget_SRCS
     addonmanager_widget_search.py
     addonmanager_widget_view_control_bar.py
     addonmanager_widget_view_selector.py
+    spinner.py
 )
 
 SOURCE_GROUP("" FILES ${AddonManagerWidget_SRCS})
