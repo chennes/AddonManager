@@ -24,6 +24,7 @@
 """Defines the Addon class to encapsulate information about FreeCAD Addons"""
 
 import datetime
+import importlib.util
 import os
 import re
 from urllib.parse import urlparse, urlunparse
@@ -31,6 +32,14 @@ from typing import Set, List, Optional
 from threading import Lock
 from enum import IntEnum, auto
 import xml.etree.ElementTree
+
+try:
+    import importlib.metadata as importlib_metadata
+except ImportError:
+    try:
+        import importlib_metadata
+    except ImportError:
+        importlib_metadata = None
 
 import addonmanager_freecad_interface as fci
 from addonmanager_macro import Macro
@@ -733,46 +742,64 @@ class MissingDependencies:
                     self.wbs.append(dep)
 
         # Check the Python dependencies:
-        self.python_min_version = max(self.python_min_version, deps.python_min_version)
-        for py_dep in deps.python_requires:
-            if py_dep not in self.python_requires:
-                try:
-                    __import__(py_dep)
-                except ImportError:
-                    self.python_requires.append(py_dep)
-                except (OSError, NameError, TypeError, RuntimeError) as e:
-                    fci.Console.PrintWarning(
-                        translate(
-                            "AddonsInstaller",
-                            "Got an error when trying to import {}",
-                        ).format(py_dep)
-                        + ":\n"
-                        + str(e)
-                    )
 
-        self.python_optional = []
+        # Python version:
+        self.python_min_version = max(self.python_min_version, deps.python_min_version)
+
+        # Required packages -- only add if it's not in the list already and is not installed
+        for py_dep in deps.python_requires:
+            if py_dep not in self.python_requires and not self.package_is_installed(py_dep):
+                self.python_requires.append(py_dep)
+
+        # Optional packages -- only add if it's not in the list already and is not installed
         for py_dep in deps.python_optional:
-            try:
-                __import__(py_dep)
-            except ImportError:
+            if py_dep not in self.python_optional and not self.package_is_installed(py_dep):
                 self.python_optional.append(py_dep)
-            except (OSError, NameError, TypeError, RuntimeError) as e:
-                fci.Console.PrintWarning(
-                    translate(
-                        "AddonsInstaller",
-                        "Got an error when trying to import {}",
-                    ).format(py_dep)
-                    + ":\n"
-                    + str(e)
-                )
 
         self.wbs.sort()
         self.external_addons.sort()
         self.python_requires.sort()
         self.python_optional.sort()
+
+        # Something on the optional list *and* the required list should be removed from
+        # optional (since it's *not* optional)
         self.python_optional = [
             option for option in self.python_optional if option not in self.python_requires
         ]
+
+    @staticmethod
+    def package_is_installed(package_name: str) -> bool:
+        """Check to see if a Python package is installed (i.e., if it can be imported).
+
+        Returns False if the running version of Python can't check the metadata for the package, and
+        the package can't be directly imported by its given name (e.g. `python-distutils`, which
+        gets imported as `distutils` instead, so won't match the simple test). This only applies to
+        Python < 3.8.
+
+        :param package_name: The PyPI name of the package to check for.
+        :return: True if the package is installed, False otherwise."""
+
+        # The simplest test: can we import it with the stated dependency name?
+        if importlib.util.find_spec(package_name) is not None:
+            return True
+
+        # On Python 3.8 and later, or if the importlib_metadata package is installed, we
+        # can do the check by PyPI package name:
+        if importlib_metadata is None:
+            fci.Console.PrintMessage(
+                f"Cannot check for installation of `{package_name}`... marking it for "
+                "reinstallation to be safe\n"
+            )
+            return False
+
+        try:
+            # Only the side effect matters here: if this call succeeds, the package is installed.
+            # If an exception is raised, it is not.
+            _ = importlib_metadata.distribution(package_name)
+        except importlib_metadata.PackageNotFoundError:
+            return False
+
+        return True
 
 
 def cycle_to_sub_addon(original: Addon, sub_addon: Addon, addon_model):
