@@ -83,7 +83,7 @@ class TestUpdateAllGUI(TestCase):
         def update_button_clicker(window):
             buttons = window.findChildren(QtWidgets.QPushButton)
             for button in buttons:
-                if button.text() == fci.translate("AddonsInstaller", "Update selected addons"):
+                if button.text() == fci.translate("AddonsInstaller", "Update Selected Addons"):
                     button.click()
                     return
 

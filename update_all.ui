@@ -46,7 +46,7 @@
    <item>
     <widget class="QPushButton" name="update_button">
      <property name="text">
-      <string>Update selected addons</string>
+      <string>Update Selected Addons</string>
      </property>
     </widget>
    </item>

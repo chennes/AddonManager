@@ -170,12 +170,12 @@ class PackageDetailsView(QtWidgets.QWidget):
         if disabled:
             message = translate(
                 "AddonsInstaller",
-                "This addon will be disabled next time you restart FreeCAD.",
+                "This addon will be disabled when restarting FreeCAD",
             )
         else:
             message = translate(
                 "AddonsInstaller",
-                "This addon will be enabled next time you restart FreeCAD.",
+                "This addon will be enabled when restarting FreeCAD",
             )
         self.message_label.setText(f"<h3>{message}</h3>")
         self.message_label.setStyleSheet("color:" + attention_color_string())
@@ -185,7 +185,7 @@ class PackageDetailsView(QtWidgets.QWidget):
         needed."""
         message_string = "<h3>"
         message_string += translate(
-            "AddonsInstaller", "Changed to branch '{}' -- please restart to use the addon."
+            "AddonsInstaller", "Changed to branch '{}' -- restart FreeCAD to use the addon"
         ).format(branch)
         message_string += "</h3>"
         self.message_label.setText(message_string)
