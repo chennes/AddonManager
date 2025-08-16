@@ -120,9 +120,10 @@ class PackageDetailsController(QtCore.QObject):
                 if self.addon.repo_type == Addon.Kind.MACRO
                 else os.path.join(self.addon.mod_directory, self.addon.name)
             )
-            self.ui.set_disabled(self.addon.is_disabled())
 
         if self.addon.status() == Addon.Status.UNCHECKED:
+            # If the user is looking at this addon, and it has not been checked for updates (e.g.,
+            # it is a custom addon that has to directly query its git repo), then do that check now.
             if not self.update_check_thread:
                 self.update_check_thread = QtCore.QThread()
                 self.update_check_thread.setObjectName(
@@ -131,13 +132,9 @@ class PackageDetailsController(QtCore.QObject):
             self.check_for_update_worker = CheckSingleUpdateWorker(self.addon)
             self.check_for_update_worker.moveToThread(self.update_check_thread)
             self.update_check_thread.finished.connect(self.check_for_update_worker.deleteLater)
-            self.ui.button_bar.check_for_update.clicked.connect(
-                self.check_for_update_worker.do_work
-            )
+            self.update_check_thread.started.connect(self.check_for_update_worker.do_work)
             self.check_for_update_worker.update_status.connect(self.display_repo_status)
             self.update_check_thread.start()
-        else:
-            self.ui.button_bar.check_for_update.hide()
 
         flags = WarningFlags()
         self.ui.set_warning_flags(flags)
@@ -154,7 +151,9 @@ class PackageDetailsController(QtCore.QObject):
             disabled=self.addon.is_disabled(),
         )
         self.ui.button_bar.set_can_run(False)
-        self.ui.button_bar.set_can_check_for_updates(True if self.addon.cache_directory else False)
+        self.ui.button_bar.set_update_available(
+            self.addon.status() == Addon.Status.UPDATE_AVAILABLE
+        )
         if self.addon.name == "AddonManager":
             self.ui.button_bar.setup_for_addon_manager()  # Must happen AFTER other config steps
 
@@ -166,7 +165,6 @@ class PackageDetailsController(QtCore.QObject):
             can_be_disabled=False,
         )
         self.ui.button_bar.set_can_run(True)
-        self.ui.button_bar.set_can_check_for_updates(False)
 
     def enable_clicked(self) -> None:
         """Called by the Enable button, enables this Addon and updates GUI to reflect
