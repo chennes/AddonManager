@@ -385,7 +385,7 @@ class CommandAddonManager(QtCore.QObject):
             m.setText(
                 translate(
                     "AddonsInstaller",
-                    "You must restart FreeCAD for changes to take effect.",
+                    "Restart FreeCAD for changes to take effect",
                 )
             )
             m.setIcon(QtWidgets.QMessageBox.Icon.Warning)
@@ -396,8 +396,8 @@ class CommandAddonManager(QtCore.QObject):
             m.setDefaultButton(QtWidgets.QMessageBox.StandardButton.Cancel)
             ok_btn = m.button(QtWidgets.QMessageBox.StandardButton.Ok)
             cancel_btn = m.button(QtWidgets.QMessageBox.StandardButton.Cancel)
-            ok_btn.setText(translate("AddonsInstaller", "Restart now"))
-            cancel_btn.setText(translate("AddonsInstaller", "Restart later"))
+            ok_btn.setText(translate("AddonsInstaller", "Restart Now"))
+            cancel_btn.setText(translate("AddonsInstaller", "Restart Later"))
             ret = m.exec_()
             if ret == QtWidgets.QMessageBox.StandardButton.Ok:
                 # restart FreeCAD after a delay to give time to this dialog to close
@@ -640,7 +640,7 @@ class CommandAddonManager(QtCore.QObject):
             fci.Console.PrintError(
                 translate(
                     "AddonsInstaller",
-                    "Cannot launch a new installer until the previous one has finished.",
+                    "Cannot launch a new installer until the previous one has finished",
                 )
             )
             return
@@ -667,7 +667,7 @@ class CommandAddonManager(QtCore.QObject):
             fci.Console.PrintError(
                 translate(
                     "AddonsInstaller",
-                    "Cannot launch a new installer until the previous one has finished.",
+                    "Cannot launch a new installer until the previous one has finished",
                 )
             )
             return
@@ -738,7 +738,7 @@ class CommandAddonManager(QtCore.QObject):
                 temp_install_succeeded = macro.install(temp_dir)
                 if not temp_install_succeeded:
                     fci.Console.PrintError(
-                        translate("AddonsInstaller", "Temporary installation of macro failed.")
+                        translate("AddonsInstaller", "Temporary installation of macro failed")
                     )
                     return
                 macro_path = os.path.join(temp_dir, macro.filename)
@@ -752,7 +752,7 @@ class CommandAddonManager(QtCore.QObject):
             fci.Console.PrintError(
                 translate(
                     "AddonsInstaller",
-                    "Cannot launch a new installer until the previous one has finished.",
+                    "Cannot launch a new installer until the previous one has finished",
                 )
             )
             return
@@ -787,7 +787,7 @@ class CommandAddonManager(QtCore.QObject):
         )
         for backup in backups:
             backup_string += "• " + str(backup) + "\n"
-        backup_string += translate("AddonsInstaller", "Do you want to delete them now?")
+        backup_string += translate("AddonsInstaller", "Delete them now?")
         dlg = QtWidgets.QMessageBox()
         dlg.setObjectName("AddonManager_FoundOldBackups")
         dlg.setText(backup_string)

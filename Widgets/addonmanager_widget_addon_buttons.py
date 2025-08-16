@@ -166,9 +166,9 @@ class WidgetAddonButtons(QtWidgets.QWidget):
     def retranslateUi(self, _):
         self.check_for_update.setText(translate("AddonsInstaller", "Check for Update"))
         if self.setup_to_change_branch:
-            self.install.setText(translate("AddonsInstaller", "Switch to branch"))
+            self.install.setText(translate("AddonsInstaller", "Switch to Branch"))
         elif self.is_addon_manager:
-            self.install.setText(translate("AddonsInstaller", "Override built-in"))
+            self.install.setText(translate("AddonsInstaller", "Override Built-In"))
         else:
             self.install.setText(translate("AddonsInstaller", "Install"))
         self.disable.setText(translate("AddonsInstaller", "Disable"))
@@ -177,6 +177,6 @@ class WidgetAddonButtons(QtWidgets.QWidget):
         self.run_macro.setText(translate("AddonsInstaller", "Run"))
         self.back.setToolTip(translate("AddonsInstaller", "Return to Package List"))
         if self.is_addon_manager:
-            self.uninstall.setText(translate("AddonsInstaller", "Revert to built-in"))
+            self.uninstall.setText(translate("AddonsInstaller", "Revert to Built-In"))
         else:
             self.uninstall.setText(translate("AddonsInstaller", "Uninstall"))
