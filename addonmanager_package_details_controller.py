@@ -98,6 +98,8 @@ class PackageDetailsController(QtCore.QObject):
                 self.worker.requestInterruption()
                 self.worker.wait()
 
+        self.ui.button_bar.set_update_check_status(False)
+
         installed = self.addon.status() != Addon.Status.NOT_INSTALLED
         self.ui.set_installed(installed)
         if self.addon.metadata is not None:
@@ -135,6 +137,8 @@ class PackageDetailsController(QtCore.QObject):
             self.update_check_thread.started.connect(self.check_for_update_worker.do_work)
             self.check_for_update_worker.update_status.connect(self.display_repo_status)
             self.update_check_thread.start()
+            if self.update_check_thread.isRunning():
+                self.ui.button_bar.set_update_check_status(True)
 
         flags = WarningFlags()
         self.ui.set_warning_flags(flags)
@@ -241,3 +245,4 @@ class PackageDetailsController(QtCore.QObject):
     def display_repo_status(self, addon):
         self.update_status.emit(self.addon)
         self.show_addon(self.addon)
+        self.ui.button_bar.set_update_check_status(False)
