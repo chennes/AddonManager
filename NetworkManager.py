@@ -413,8 +413,10 @@ class NetworkManager(QtCore.QObject):
             p = self.blocking_get(url, timeout_ms)
             if p is not None or attempt >= max_attempts:
                 return p
+            if QtCore.QThread.currentThread().isInterruptionRequested():
+                return None
             fci.Console.PrintWarning(
-                f"Failed to get {url}, retrying in {delay_ms}ms... (attempt {attempt} of {max_attempts})"
+                f"Failed to get {url}, retrying in {delay_ms}ms... (attempt {attempt} of {max_attempts})\n"
             )
             time.sleep(delay_ms / 1000)
 
