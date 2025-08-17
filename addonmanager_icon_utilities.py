@@ -24,7 +24,6 @@
 import re
 import os
 from typing import Optional
-import zlib
 
 from PySideWrapper import QtCore, QtGui, QtSvg
 
@@ -91,12 +90,28 @@ def is_gzip(data: bytes) -> bool:
     return len(data) >= 2 and data[0] == 0x1F and data[1] == 0x8B
 
 
+MAX_GZIP_EXPANSION_RATIO = 16
+MAX_GZIP_OUTPUT_ABS = 512 * 1024  # 512 KiB
+
+
 def decompress_gzip_limited(data: bytes) -> Optional[bytes]:
-    """Decompress GZIP safely with a max output cap; return None if it fails or exceeds cap."""
+    """Allow compressed size ≤ MAX_ICON_BYTES; read at most a small, bounded amount.
+    Returns None on failure or if output would excede the bound."""
+    if not isinstance(data, (bytes, bytearray, memoryview)):
+        return None
+    if len(data) > MAX_ICON_BYTES:
+        return None
+
+    import io, gzip, zlib
+
+    max_out = min(MAX_GZIP_OUTPUT_ABS, MAX_GZIP_EXPANSION_RATIO * len(data))
     try:
-        # wbits=16+MAX_WBITS tells zlib there’s a gzip wrapper; max_length caps output
-        return zlib.decompress(data, wbits=16 + zlib.MAX_WBITS, bufsize=MAX_ICON_BYTES)
-    except (zlib.error, TypeError, ValueError):
+        with gzip.GzipFile(fileobj=io.BytesIO(data)) as f:
+            out = f.read(max_out + 1)  # stream, don’t inflate unbounded
+        if len(out) > max_out:
+            return None
+        return out
+    except (OSError, EOFError, zlib.error, ValueError, TypeError):
         return None
 
 
@@ -110,7 +125,7 @@ class SvgIconEngine(QtGui.QIconEngine):
 
     def pixmap(self, size: QtCore.QSize, mode, state):
         pixmap = QtGui.QPixmap(size)
-        pixmap.fill(QtCore.Qt.transparent)
+        pixmap.fill(QtCore.Qt.transparent)  # type: ignore[arg-type]
         painter = QtGui.QPainter(pixmap)
         self.renderer.render(painter)
         painter.end()
@@ -161,7 +176,7 @@ def get_icon_for_addon(addon: Addon, update: bool = False) -> QtGui.QIcon:
                     f"Icon data for macro '{addon.display_name}' is invalid:\n{e}\n"
                 )
         elif addon.macro.xpm:
-            xpm = QtGui.QImage.fromData(addon.macro.xpm.strip().encode("utf-8"), format="XPM")
+            xpm = QtGui.QImage.fromData(addon.macro.xpm.strip().encode("utf-8"), format="XPM")  # type: ignore[arg-type]
             if xpm.isNull() or xpm.width() == 0 or xpm.height() == 0:
                 fci.Console.PrintWarning(
                     f"The XPM icon data for macro '{addon.display_name}' is invalid (please report this to the macro's author, {addon.macro.author})\n"
