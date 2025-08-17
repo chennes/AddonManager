@@ -27,6 +27,7 @@ resource."""
 
 import json
 import os.path
+from typing import Optional
 
 import addonmanager_freecad_interface as fci
 
@@ -125,15 +126,12 @@ class SPDXLicenseManager:
             return ""
         return self.license_data[spdx_id]["detailsUrl"]
 
-    def normalize(self, license_string: str) -> str:
+    def normalize(self, license_string: str) -> Optional[str]:
         """Given a potentially non-compliant license string, attempt to normalize it to match an
         SPDX record. Takes a conservative view and tries not to over-expand stated rights (e.g.
         it will select 'GPL-3.0-only' rather than 'GPL-3.0-or-later' when given just GPL3)."""
         if self.name(license_string):
             return license_string
-        fci.Console.PrintLog(
-            f"Attempting to normalize non-compliant license '" f"{license_string}'... "
-        )
         normed = license_string.replace("lgpl", "LGPL").replace("gpl", "GPL")
         normed = (
             normed.replace(" ", "-")
@@ -146,21 +144,17 @@ class SPDXLicenseManager:
             normed = normed[:-1]
             or_later = "-or-later"
         if self.name(normed + or_later):
-            fci.Console.PrintLog(f"found valid SPDX license ID {normed}\n")
             return normed + or_later
         # If it still doesn't match, try some other things
         while "--" in normed:
             normed = normed.replace("--", "-")
 
         if self.name(normed + or_later):
-            fci.Console.PrintLog(f"found valid SPDX license ID {normed}\n")
             return normed + or_later
         normed += ".0"
         if self.name(normed + or_later):
-            fci.Console.PrintLog(f"found valid SPDX license ID {normed}\n")
             return normed + or_later
-        fci.Console.PrintLog(f"failed to normalize (typo in ID or invalid version number??)\n")
-        return license_string  # We failed to normalize this one
+        return None  # We failed to normalize this one
 
 
 _LICENSE_MANAGER = None  # Internal use only, see get_license_manager()
