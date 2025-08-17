@@ -16,6 +16,7 @@ SET(AddonManager_SRCS
     addonmanager_firstrun.py
     addonmanager_freecad_interface.py
     addonmanager_git.py
+    addonmanager_icon_utilities.py
     addonmanager_installation_manifest.py
     addonmanager_installer_gui.py
     addonmanager_installer.py
