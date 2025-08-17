@@ -96,7 +96,7 @@ MAX_GZIP_OUTPUT_ABS = 512 * 1024  # 512 KiB
 
 def decompress_gzip_limited(data: bytes) -> Optional[bytes]:
     """Allow compressed size ≤ MAX_ICON_BYTES; read at most a small, bounded amount.
-    Returns None on failure or if output would excede the bound."""
+    Returns None on failure or if output would exceed the bound."""
     if not isinstance(data, (bytes, bytearray, memoryview)):
         return None
     if len(data) > MAX_ICON_BYTES:
