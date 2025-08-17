@@ -233,9 +233,6 @@ class AddonCatalogEntry:
                     wb_name = wb.strip()
                     if wb_name:
                         repo.requires.add(wb_name)
-                        fci.Console.PrintLog(
-                            f"{repo.display_name} requires FreeCAD addon '{wb_name}'\n"
-                        )
 
             elif line.startswith("pylibs="):
                 python_dependencies = line.split("=")[1].split(",")
@@ -243,9 +240,6 @@ class AddonCatalogEntry:
                     dep = pl.strip()
                     if dep:
                         repo.python_requires.add(dep)
-                        fci.Console.PrintLog(
-                            f"{repo.display_name} requires python package '{dep}'\n"
-                        )
 
             elif line.startswith("optionalpylibs="):
                 optional_python_dependencies = line.split("=")[1].split(",")
@@ -253,10 +247,6 @@ class AddonCatalogEntry:
                     dep = pl.strip()
                     if dep:
                         repo.python_optional.add(dep)
-                        fci.Console.PrintLog(
-                            f"{repo.display_name} optionally imports python package"
-                            + f" '{pl.strip()}'\n"
-                        )
 
     @staticmethod
     def _load_requirements_txt(repo: Addon, data: str):

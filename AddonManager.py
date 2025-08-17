@@ -29,7 +29,7 @@ import tempfile
 import threading
 from typing import Dict, List
 
-from PySideWrapper import QtGui, QtCore, QtWidgets, QtSvg
+from PySideWrapper import QtGui, QtCore, QtWidgets
 
 from addonmanager_workers_startup import (
     CreateAddonListWorker,
@@ -38,6 +38,7 @@ from addonmanager_workers_startup import (
     GetAddonScoreWorker,
 )
 from addonmanager_installer_gui import AddonInstallerGUI, MacroInstallerGUI
+from addonmanager_icon_utilities import get_icon_for_addon
 from addonmanager_uninstaller_gui import AddonUninstallerGUI
 from addonmanager_update_all_gui import UpdateAllGUI
 import addonmanager_utilities as utils
@@ -90,84 +91,6 @@ are downloaded instead.
 #  @{
 
 INSTANCE = None
-
-
-class SvgIconEngine(QtGui.QIconEngine):
-    def __init__(self, svg_bytes: bytes):
-        super().__init__()
-        self.renderer = QtSvg.QSvgRenderer(QtCore.QByteArray(svg_bytes))
-
-    def paint(self, painter: QtGui.QPainter, rect: QtCore.QRect, mode, state):
-        self.renderer.render(painter, rect)
-
-    def pixmap(self, size: QtCore.QSize, mode, state):
-        pixmap = QtGui.QPixmap(size)
-        pixmap.fill(QtCore.Qt.transparent)
-        painter = QtGui.QPainter(pixmap)
-        self.renderer.render(painter)
-        painter.end()
-        return pixmap
-
-
-def scalable_icon_from_svg_bytes(svg_bytes: bytes) -> QtGui.QIcon:
-    engine = SvgIconEngine(svg_bytes)
-    return QtGui.QIcon(engine)
-
-
-def get_icon(repo: Addon, update: bool = False) -> QtGui.QIcon:
-    """Returns an icon for an Addon. Uses a cached icon if possible, unless `update` is True,
-    in which case the icon is regenerated."""
-
-    icon_path = os.path.join(os.path.dirname(__file__), "Resources", "icons")
-    path = ""
-
-    if not update:
-        if repo.icon and not repo.icon.isNull() and repo.icon.isValid():
-            return repo.icon
-        elif repo.icon_data:
-            repo.icon = scalable_icon_from_svg_bytes(repo.icon_data)
-            return repo.icon
-
-    default_icon = QtGui.QIcon(os.path.join(icon_path, "document-package.svg"))
-    if repo.repo_type == Addon.Kind.WORKBENCH:
-        default_icon = QtGui.QIcon(os.path.join(icon_path, "document-package.svg"))
-    elif repo.repo_type == Addon.Kind.MACRO:
-        if repo.macro and repo.macro.icon_data:
-            if repo.macro.icon_extension == "svg":
-                default_icon = scalable_icon_from_svg_bytes(repo.macro.icon_data)
-            else:
-                pixmap = QtGui.QPixmap()
-                pixmap.loadFromData(repo.macro.icon_data)
-                default_icon = QtGui.QIcon(pixmap)
-        elif repo.macro and repo.macro.xpm:
-            cache_path = fci.DataPaths().cache_dir
-            am_path = os.path.join(cache_path, "AddonManager", "MacroIcons")
-            os.makedirs(am_path, exist_ok=True)
-            path = os.path.join(am_path, repo.name + "_icon.xpm")
-            if not os.path.exists(path):
-                with open(path, "w") as f:
-                    f.write(repo.macro.xpm)
-            default_icon = QtGui.QIcon(repo.macro.xpm)
-        else:
-            default_icon = QtGui.QIcon(os.path.join(icon_path, "document-python.svg"))
-    elif repo.repo_type == Addon.Kind.PACKAGE:
-        # The cache might not have been downloaded yet, check to see if it's there...
-        if repo.icon_data:
-            default_icon = scalable_icon_from_svg_bytes(repo.icon_data)
-        elif repo.contains_workbench():
-            default_icon = QtGui.QIcon(os.path.join(icon_path, "document-package.svg"))
-        elif repo.contains_macro():
-            default_icon = QtGui.QIcon(os.path.join(icon_path, "document-python.svg"))
-        else:
-            default_icon = QtGui.QIcon(os.path.join(icon_path, "document-package.svg"))
-
-    if QtCore.QFile.exists(path):
-        addon_icon = QtGui.QIcon(path)
-    else:
-        addon_icon = default_icon
-    repo.icon = addon_icon
-
-    return addon_icon
 
 
 class CommandAddonManager(QtCore.QObject):
@@ -456,7 +379,7 @@ class CommandAddonManager(QtCore.QObject):
         """Called when the named package has either new metadata or a new icon (or both)"""
 
         with self.lock:
-            repo.icon = get_icon(repo, update=True)
+            repo.icon = get_icon_for_addon(repo, update=True)
             self.item_model.reload_item(repo)
 
     def select_addon(self) -> None:
@@ -593,7 +516,7 @@ class CommandAddonManager(QtCore.QObject):
         """adds a workbench to the list"""
 
         if addon_repo.icon is None or addon_repo.icon.isNull():
-            addon_repo.icon = get_icon(addon_repo)
+            addon_repo.icon = get_icon_for_addon(addon_repo)
         for repo in self.item_model.repos:
             if repo.name == addon_repo.name:
                 # self.item_model.reload_item(repo) # If we want to have later additions superseded
