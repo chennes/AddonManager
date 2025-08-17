@@ -207,7 +207,17 @@ class MacroParser:
     def _cleanup_license(self):
         if get_license_manager is not None:
             lm = get_license_manager()
-            self.parse_results["license"] = lm.normalize(self.parse_results["license"])
+            normed_license = lm.normalize(self.parse_results["license"])
+            if not normed_license:
+                fci.Console.PrintWarning(
+                    f"Failed to normalize license {self.parse_results['license']} for macro '{self.name}'\n"
+                )
+                return
+            elif normed_license != self.parse_results["license"]:
+                fci.Console.PrintMessage(
+                    f"Normalized license {self.parse_results['license']} for macro '{self.name}' to {normed_license}\n"
+                )
+                self.parse_results["license"] = normed_license
 
     def _apply_special_handling(self, key: str, line: str):
         # Macro authors are supposed to be providing strings here, but in some

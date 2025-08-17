@@ -304,7 +304,7 @@ class MetadataReader:
             metadata.__dict__[tag].append(MetadataReader._parse_contact(child))
         elif tag == "license":
             # List of licenses
-            metadata.license.append(MetadataReader._parse_license(child))
+            metadata.license.append(MetadataReader._parse_license(child, metadata.name))
         elif tag == "url":
             # List of urls
             metadata.url.append(MetadataReader._parse_url(child))
@@ -320,11 +320,18 @@ class MetadataReader:
         return Contact(name=child.text, email=email)
 
     @staticmethod
-    def _parse_license(child: ET.Element) -> License:
+    def _parse_license(child: ET.Element, name: str) -> License:
         file = child.attrib["file"] if "file" in child.attrib else ""
         license_id = child.text
         lm = get_license_manager()
-        license_id = lm.normalize(license_id)
+        normed_license = lm.normalize(license_id)
+        if not normed_license:
+            print(f"Unrecognized SPDX license ID specified for addon '{name}': '{license_id}'")
+        elif normed_license != license_id:
+            print(
+                f"Unrecognized license string '{license_id}' normalized to SPDX license ID '{normed_license}' for addon '{name}'"
+            )
+            license_id = normed_license
         return License(name=license_id, file=file)
 
     @staticmethod
