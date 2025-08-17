@@ -244,8 +244,8 @@ class NetworkManager(QtCore.QObject):
                 )
                 + "\n"
             )
-            noProxyCheck = True
-            systemProxyCheck = False
+            noProxyCheck = False
+            systemProxyCheck = True
             userProxyCheck = False
             fci.Preferences().set("NoProxyCheck", noProxyCheck)
             fci.Preferences().set("SystemProxyCheck", systemProxyCheck)
@@ -259,9 +259,9 @@ class NetworkManager(QtCore.QObject):
                 )
                 + "\n"
             )
-            noProxyCheck = True
+            systemProxyCheck = True
             userProxyCheck = False
-            fci.Preferences().set("NoProxyCheck", noProxyCheck)
+            fci.Preferences().set("SystemProxyCheck", systemProxyCheck)
             fci.Preferences().set("UserProxyCheck", userProxyCheck)
         return noProxyCheck, systemProxyCheck, userProxyCheck, proxy_string
 
