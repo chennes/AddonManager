@@ -169,6 +169,8 @@ class CreateAddonListWorker(QtCore.QThread):
         p = NetworkManager.AM_NETWORK_MANAGER.blocking_get_with_retries(
             url, cls.ATTEMPT_TIMEOUT_MS, cls.MAX_ATTEMPTS, cls.RETRY_DELAY_MS
         )
+        if QtCore.QThread.currentThread().isInterruptionRequested():
+            return ""
         if not p:
             raise RuntimeError(
                 f"Failed to download cache from {url} after {cls.MAX_ATTEMPTS} attempts"
@@ -210,6 +212,8 @@ class CreateAddonListWorker(QtCore.QThread):
         p = NetworkManager.AM_NETWORK_MANAGER.blocking_get_with_retries(
             hash_url, cls.ATTEMPT_TIMEOUT_MS, cls.MAX_ATTEMPTS, cls.RETRY_DELAY_MS
         )
+        if QtCore.QThread.currentThread().isInterruptionRequested():
+            return False
         if not p:
             raise RuntimeError(
                 f"Failed to download cache hash from remote server {hash_url} after {cls.MAX_ATTEMPTS} attempts"
@@ -557,6 +561,8 @@ class GetBasicAddonStatsWorker(QtCore.QThread):
         fetch_result = NetworkManager.AM_NETWORK_MANAGER.blocking_get_with_retries(
             self.url, self.ATTEMPT_TIMEOUT_MS, self.MAX_ATTEMPTS, self.RETRY_DELAY_MS
         )
+        if QtCore.QThread.currentThread().isInterruptionRequested():
+            return
         if fetch_result is None:
             fci.Console.PrintError(
                 translate(
@@ -597,6 +603,8 @@ class GetAddonScoreWorker(QtCore.QThread):
             fetch_result = NetworkManager.AM_NETWORK_MANAGER.blocking_get_with_retries(
                 self.url, self.ATTEMPT_TIMEOUT_MS, self.MAX_ATTEMPTS, self.RETRY_DELAY_MS
             )
+            if QtCore.QThread.currentThread().isInterruptionRequested():
+                return
             if fetch_result is None:
                 fci.Console.PrintError(
                     translate(
