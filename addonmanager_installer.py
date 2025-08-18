@@ -43,6 +43,7 @@ import addonmanager_utilities as utils
 from addonmanager_installation_manifest import InstallationManifest
 from addonmanager_metadata import get_branch_from_metadata
 from addonmanager_git import initialize_git, GitFailed
+from addonmanager_icon_utilities import get_icon_for_addon
 
 if fci.FreeCADGui:
     import NetworkManager  # Requires an event loop
@@ -451,6 +452,7 @@ class AddonInstaller(QtCore.QObject):
         """Perform any necessary additional steps after installing the addon."""
         self._update_metadata()
         extra_files = self._install_macros()
+        _ = get_icon_for_addon(self.addon_to_install)  # In case we changed branch and need new one
         manifest = InstallationManifest()
         if manifest.contains(self.addon_to_install.name):
             manifest.record_update(
