@@ -452,7 +452,9 @@ class AddonInstaller(QtCore.QObject):
         """Perform any necessary additional steps after installing the addon."""
         self._update_metadata()
         extra_files = self._install_macros()
-        _ = get_icon_for_addon(self.addon_to_install)  # In case we changed branch and need new one
+        if self.addon_to_install.icon_data is not None:
+            # In case we changed branches and now need to ensure that the actual QIcon was generated
+            _ = get_icon_for_addon(self.addon_to_install)
         manifest = InstallationManifest()
         if manifest.contains(self.addon_to_install.name):
             manifest.record_update(

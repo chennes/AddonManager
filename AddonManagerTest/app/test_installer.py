@@ -210,6 +210,7 @@ class TestAddonInstaller(unittest.TestCase):
             mock_addon = MockAddon()
             mock_addon.url = os.path.join(temp_dir, "test_repo")
             mock_addon.branch = "main"
+            mock_addon.icon = None
             installer = AddonInstaller(mock_addon, [])
             installer.git_manager = git_manager  # Make sure it's been created
             installer.installation_path = os.path.join(temp_dir, "installed_addon")
