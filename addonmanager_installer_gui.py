@@ -377,21 +377,36 @@ class MacroInstallerGUI(QtCore.QObject):
             + " "
             + self.addon_to_install.display_name
         )
-        if self.addon_to_install.macro.icon:
-            if os.path.isabs(self.addon_to_install.macro.icon):
-                pixmap_text = os.path.normpath(self.addon_to_install.macro.icon)
-            else:
-                pixmap_text = os.path.normpath(
-                    os.path.join(self.macro_dir, self.addon_to_install.macro.icon)
+        try:
+            if self.addon_to_install.macro.icon:
+                _, ext = os.path.splitext(self.addon_to_install.macro.icon)
+                extension = ext[1:].lower() if ext else "png"
+                if self.addon_to_install.macro.icon_data:
+                    macro_name = self.addon_to_install.macro.name
+                    icon_file = os.path.normpath(
+                        os.path.join(self.macro_dir, f"{macro_name}_icon.{extension}")
+                    )
+                    with open(icon_file, "wb") as f:
+                        f.write(self.addon_to_install.macro.icon_data)
+                    pixmap_text = icon_file
+                else:
+                    fci.Console.PrintMessage(
+                        f"No cached icon data for {self.addon_to_install.macro.name}\n"
+                    )
+                    pixmap_text = None
+            elif self.addon_to_install.macro.xpm:
+                icon_file = os.path.normpath(
+                    os.path.join(self.macro_dir, self.addon_to_install.macro.name + "_icon.xpm")
                 )
-        elif self.addon_to_install.macro.xpm:
-            icon_file = os.path.normpath(
-                os.path.join(self.macro_dir, self.addon_to_install.macro.name + "_icon.xpm")
+                with open(icon_file, "w", encoding="utf-8") as f:
+                    f.write(self.addon_to_install.macro.xpm)
+                pixmap_text = icon_file
+            else:
+                pixmap_text = None
+        except OSError:
+            fci.Console.PrintWarning(
+                f"Could not create icon for {self.addon_to_install.macro.name} in {self.macro_dir}\n"
             )
-            with open(icon_file, "w", encoding="utf-8") as f:
-                f.write(self.addon_to_install.macro.xpm)
-            pixmap_text = icon_file
-        else:
             pixmap_text = None
 
         # Add this command to that toolbar
