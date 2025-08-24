@@ -37,6 +37,7 @@ class ConnectionCheckerGUI(QtCore.QObject):
     starts to take too long, and an error message if the network cannot be accessed."""
 
     connection_available = QtCore.Signal()
+    no_connection = QtCore.Signal()
     check_complete = QtCore.Signal()
 
     def __init__(self):
@@ -87,12 +88,13 @@ class ConnectionCheckerGUI(QtCore.QObject):
         # This must run on the main GUI thread
         if hasattr(self, "connection_check_message") and self.connection_check_message:
             self.connection_check_message.close()
+        self.no_connection.emit()
         MessageDialog.show_modal(
             MessageDialog.DialogType.ERROR,
             "AddonManager_ConnectionFailedDialog",
             translate("AddonsInstaller", "Connection failed"),
             message,
-            QtWidgets.QMessageBox.OK,
+            QtWidgets.QMessageBox.Ok,
         )
         self._disconnect_signals()
         self.check_complete.emit()

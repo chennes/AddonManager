@@ -63,7 +63,7 @@ class ConnectionChecker(QtCore.QThread):
         self.done = False
         NetworkManager.AM_NETWORK_MANAGER.completed.connect(self.connection_data_received)
         self.request_id = NetworkManager.AM_NETWORK_MANAGER.submit_unmonitored_get(
-            url, timeout_ms=30000
+            url, timeout_ms=30000, disable_cache=True
         )
         while not self.done:
             if QtCore.QThread.currentThread().isInterruptionRequested():
