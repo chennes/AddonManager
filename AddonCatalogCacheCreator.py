@@ -35,13 +35,13 @@ import io
 import json
 import os
 import requests
-import shutil
 import subprocess
 import xml.etree.ElementTree
 import zipfile
 
 import AddonCatalog
 import addonmanager_metadata
+import addonmanager_utilities as utils
 
 
 ADDON_CATALOG_URL = (
@@ -271,7 +271,7 @@ class CacheWriter:
             return
         extract_to_dir = self.get_directory_name(addon_id, index, catalog_entry)
         if os.path.exists(extract_to_dir):
-            shutil.rmtree(extract_to_dir)
+            utils.rmdir(extract_to_dir)
         os.makedirs(extract_to_dir, exist_ok=True)
 
         with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
@@ -309,24 +309,32 @@ class CacheWriter:
             print(f"Updating {name}", flush=True)
             old_dir = os.getcwd()
             os.chdir(os.path.join(old_dir, name))
-            # Determine if we are dealing with a tag, branch, or hash
-            git_ref_type = CacheWriter.determine_git_ref_type(name, url, branch)
-            command = ["git", "fetch"]
-            completed_process = subprocess.run(command)
-            if completed_process.returncode != 0:
-                os.chdir(old_dir)
-                raise RuntimeError(f"git fetch failed for {name}")
-            command = ["git", "checkout", branch, "--quiet"]
-            completed_process = subprocess.run(command)
-            if completed_process.returncode != 0:
-                os.chdir(old_dir)
-                raise RuntimeError(f"git checkout failed for {name} branch {branch}")
-            if git_ref_type == GitRefType.BRANCH:
-                command = ["git", "merge", "--quiet"]
+            try:
+                # Determine if we are dealing with a tag, branch, or hash
+                git_ref_type = CacheWriter.determine_git_ref_type(name, url, branch)
+                command = ["git", "fetch"]
                 completed_process = subprocess.run(command)
                 if completed_process.returncode != 0:
                     os.chdir(old_dir)
-                    raise RuntimeError(f"git merge failed for {name} branch {branch}")
+                    raise RuntimeError(f"git fetch failed for {name}")
+                command = ["git", "checkout", branch, "--quiet"]
+                completed_process = subprocess.run(command)
+                if completed_process.returncode != 0:
+                    os.chdir(old_dir)
+                    raise RuntimeError(f"git checkout failed for {name} branch {branch}")
+                if git_ref_type == GitRefType.BRANCH:
+                    command = ["git", "merge", "--quiet"]
+                    completed_process = subprocess.run(command)
+                    if completed_process.returncode != 0:
+                        os.chdir(old_dir)
+                        raise RuntimeError(f"git merge failed for {name} branch {branch}")
+            except RuntimeError as e:
+                # In the event of basically ANY error, delete the original and re-clone.
+                print(e)
+                print("Deleting and re-cloning the original repo")
+                os.chdir(old_dir)
+                utils.rmdir(os.path.join(old_dir, name))
+                CacheWriter.clone_or_update(name, url, branch)
             os.chdir(old_dir)
 
     def find_file(
@@ -430,16 +438,18 @@ class CacheWriter:
                     except (OSError, FileNotFoundError, RuntimeError) as e:
                         print(f"WARNING: Could not add {full_path} to zip archive: {e}")
         try:
+            good = False
             with zipfile.ZipFile(temp_file_path, "r") as zf:
-                if zf.testzip() is None:
-                    if os.path.exists(zip_file_path):
-                        os.remove(zip_file_path)
-                    os.rename(temp_file_path, zip_file_path)
-                else:
-                    os.remove(temp_file_path)
-                    print(
-                        f"Failed to create zip file {zip_file_path} for addon {addon_id}: data is corrupt"
-                    )
+                good = zf.testzip() is None
+            if good:
+                if os.path.exists(zip_file_path):
+                    os.remove(zip_file_path)
+                os.rename(temp_file_path, zip_file_path)
+            else:
+                os.remove(temp_file_path)
+                print(
+                    f"Failed to create zip file {zip_file_path} for addon {addon_id}: data is corrupt"
+                )
         except zipfile.BadZipFile:
             if os.path.exists(temp_file_path):
                 os.remove(temp_file_path)
