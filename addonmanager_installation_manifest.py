@@ -80,6 +80,8 @@ class InstallationManifest:
             self._scan_mod_path_for_extras(catalog)
 
     def _migrate_to_manifest_file(self, catalog: AddonCatalog):
+        if not os.path.exists(fci.DataPaths().mod_dir):
+            os.makedirs(fci.DataPaths().mod_dir)
         dirs_in_mod = os.listdir(fci.DataPaths().mod_dir)
         for addon_id in dirs_in_mod:
             branches = []
