@@ -10,6 +10,8 @@ SET(AddonManagerResourceFilesIcons
     document-python.svg
     expanded_view.svg
     gear.svg
+    list-add.svg
+    list-remove.svg
     preferences-addon_manager.svg
     process-stop.svg
     regex_bad.svg
