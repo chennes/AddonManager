@@ -584,6 +584,13 @@ def create_pip_call(args: List[str]) -> List[str]:
 
     if using_system_pip_installation_location():
         args = remove_options_and_arg(args, ["--target", "--path"])
+    elif "--target" in args or "--path" in args:
+        # If we are not running in some sort of container, and are instead trying to install to a
+        # specific directory, pip will complain because it doesn't know that we're effectively
+        # using this as a virtual env: it's not accessible to non-FreeCAD installations (at least,
+        # not without some extra work on the user's part). So add the --break-system-packages flag
+        # so pip will allow us to write to the --target directory
+        args.append("--break-system-packages")
 
     if snap_package:
         call_args = ["pip", "--disable-pip-version-check"]
