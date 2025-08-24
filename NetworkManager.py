@@ -338,7 +338,7 @@ class NetworkManager(QtCore.QObject):
             current_index = next(self.counting_iterator)  # A thread-safe counter
             item = QueueItem(
                 current_index,
-                self.__create_get_request(url, timeout_ms),
+                self.__create_get_request(url, timeout_ms, disable_cache=true),
                 track_progress=False,
                 operation=QtNetwork.QNetworkAccessManager.HeadOperation,
             )
@@ -347,9 +347,7 @@ class NetworkManager(QtCore.QObject):
             return current_index
 
     def submit_unmonitored_get(
-        self,
-        url: str,
-        timeout_ms: int = default_timeout,
+        self, url: str, timeout_ms: int = default_timeout, disable_cache: bool = False
     ) -> int:
         """Adds this request to the queue, and returns an index that can be used by calling code
         in conjunction with the completed() signal to handle the results of the call. All data is
@@ -360,16 +358,16 @@ class NetworkManager(QtCore.QObject):
         # Use a queue because we can only put things on the QNAM from the main event loop thread
         self.queue.put(
             QueueItem(
-                current_index, self.__create_get_request(url, timeout_ms), track_progress=False
+                current_index,
+                self.__create_get_request(url, timeout_ms, disable_cache),
+                track_progress=False,
             )
         )
         self.__request_queued.emit()
         return current_index
 
     def submit_monitored_get(
-        self,
-        url: str,
-        timeout_ms: int = default_timeout,
+        self, url: str, timeout_ms: int = default_timeout, disable_cache: bool = False
     ) -> int:
         """Adds this request to the queue, and returns an index that can be used by calling code
         in conjunction with the progress_made() and progress_completed() signals to handle the
@@ -382,7 +380,9 @@ class NetworkManager(QtCore.QObject):
         # Use a queue because we can only put things on the QNAM from the main event loop thread
         self.queue.put(
             QueueItem(
-                current_index, self.__create_get_request(url, timeout_ms), track_progress=True
+                current_index,
+                self.__create_get_request(url, timeout_ms, disable_cache),
+                track_progress=True,
             )
         )
         self.__request_queued.emit()
@@ -394,6 +394,7 @@ class NetworkManager(QtCore.QObject):
         timeout_ms: int = default_timeout,
         max_attempts: int = 3,
         delay_ms: int = 1000,
+        disable_cache: bool = False,
     ):
         """Submits a GET request to the QNetworkAccessManager and blocks until it is complete. Do
         not use on the main GUI thread, it will prevent any event processing while it blocks.
@@ -421,9 +422,7 @@ class NetworkManager(QtCore.QObject):
             time.sleep(delay_ms / 1000)
 
     def blocking_get(
-        self,
-        url: str,
-        timeout_ms: int = default_timeout,
+        self, url: str, timeout_ms: int = default_timeout, disable_cache: bool = False
     ) -> Optional[QtCore.QByteArray]:
         """Submits a GET request to the QNetworkAccessManager and blocks until it is complete. Do
         not use on the main GUI thread, it will prevent any event processing while it blocks.
@@ -438,7 +437,9 @@ class NetworkManager(QtCore.QObject):
 
         self.queue.put(
             QueueItem(
-                current_index, self.__create_get_request(url, timeout_ms), track_progress=False
+                current_index,
+                self.__create_get_request(url, timeout_ms, disable_cache),
+                track_progress=False,
             )
         )
         self.__request_queued.emit()
@@ -476,18 +477,27 @@ class NetworkManager(QtCore.QObject):
                 self.synchronous_complete[index] = True
 
     @staticmethod
-    def __create_get_request(url: str, timeout_ms: int) -> QtNetwork.QNetworkRequest:
+    def __create_get_request(
+        url: str, timeout_ms: int, disable_cache: bool
+    ) -> QtNetwork.QNetworkRequest:
         """Construct a network request to a given URL"""
         request = QtNetwork.QNetworkRequest(QtCore.QUrl(url))
         request.setAttribute(
             QtNetwork.QNetworkRequest.RedirectPolicyAttribute,
             QtNetwork.QNetworkRequest.ManualRedirectPolicy,
         )
-        request.setAttribute(QtNetwork.QNetworkRequest.CacheSaveControlAttribute, True)
-        request.setAttribute(
-            QtNetwork.QNetworkRequest.CacheLoadControlAttribute,
-            QtNetwork.QNetworkRequest.PreferNetwork,
-        )
+        if disable_cache:
+            request.setAttribute(QtNetwork.QNetworkRequest.CacheSaveControlAttribute, False)
+            request.setAttribute(
+                QtNetwork.QNetworkRequest.CacheLoadControlAttribute,
+                QtNetwork.QNetworkRequest.AlwaysNetwork,
+            )
+        else:
+            request.setAttribute(QtNetwork.QNetworkRequest.CacheSaveControlAttribute, True)
+            request.setAttribute(
+                QtNetwork.QNetworkRequest.CacheLoadControlAttribute,
+                QtNetwork.QNetworkRequest.PreferNetwork,
+            )
         if hasattr(request, "setTransferTimeout"):
             # Added in Qt 5.15
             # In Qt 5, the function setTransferTimeout seems to accept
@@ -630,8 +640,13 @@ class NetworkManager(QtCore.QObject):
                 if hasattr(request, "transferTimeout"):
                     timeout_ms = request.transferTimeout()
             new_url = reply.attribute(QtNetwork.QNetworkRequest.RedirectionTargetAttribute)
+            disable_cache = not reply.request().attribute(
+                QtNetwork.QNetworkRequest.CacheSaveControlAttribute
+            )
             self.__launch_request(
-                index, self.__create_get_request(new_url, timeout_ms), reply.operation()
+                index,
+                self.__create_get_request(new_url, timeout_ms, disable_cache=disable_cache),
+                reply.operation(),
             )
             return  # The task is not done, so get out of this method now
         if reply.error() != QtNetwork.QNetworkReply.NetworkError.OperationCanceledError:
