@@ -338,7 +338,7 @@ class NetworkManager(QtCore.QObject):
             current_index = next(self.counting_iterator)  # A thread-safe counter
             item = QueueItem(
                 current_index,
-                self.__create_get_request(url, timeout_ms, disable_cache=true),
+                self.__create_get_request(url, timeout_ms, disable_cache=True),
                 track_progress=False,
                 operation=QtNetwork.QNetworkAccessManager.HeadOperation,
             )
