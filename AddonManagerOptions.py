@@ -48,9 +48,10 @@ def is_ip(host: str) -> bool:
         return False
 
 
-DOMAIN_REGEX = re.compile(
-    r"^(?=.{1,253}$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)" r"(\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*$"
-)
+# Simple regex for valid domain names. Not exhaustive, but hopefully good enough.
+# * Each label starts/ends with alphanumeric, can contain hyphens.
+# * TLD must be at least 2 letters.
+DOMAIN_REGEX = re.compile(r"^(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,}$")
 
 
 def is_domain(host: str) -> bool:
