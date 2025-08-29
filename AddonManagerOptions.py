@@ -44,7 +44,8 @@ def test_proxy_connection(
 
     nam = QtNetwork.QNetworkAccessManager()
     nam.setProxy(proxy)
-    req = QtNetwork.QNetworkRequest(QtCore.QUrl("https://addons.freecad.org/status"))
+    url = fci.Preferences().get("status_test_url")
+    req = QtNetwork.QNetworkRequest(QtCore.QUrl(url))
     req.setAttribute(QtNetwork.QNetworkRequest.Http2AllowedAttribute, False)
     reply = nam.get(req)
     loop = QtCore.QEventLoop()
@@ -199,7 +200,8 @@ class AddonManagerOptions:
         self.form.proxyPortLineEdit.setText(str(fci.Preferences().get("proxy_port")))
 
     def fill_proxy_with_system_settings(self):
-        query = QtNetwork.QNetworkProxyQuery(QtCore.QUrl("https://addons.freecad.org/status"))
+        url = fci.Preferences().get("status_test_url")
+        query = QtNetwork.QNetworkProxyQuery(QtCore.QUrl(url))
         proxy = QtNetwork.QNetworkProxyFactory.systemProxyForQuery(query)
         if proxy and proxy[0] and proxy[0].hostName() and proxy[0].port() > 0:
             self.form.proxyHostLineEdit.setText(proxy[0].hostName())
@@ -244,9 +246,8 @@ class AddonManagerOptions:
             proxy = QtNetwork.QNetworkProxy.NoProxy
         else:
             if proxy_type == AddonManagerOptions.ProxyType.system:
-                query = QtNetwork.QNetworkProxyQuery(
-                    QtCore.QUrl("https://addons.freecad.org/status")
-                )
+                url = fci.Preferences().get("status_test_url")
+                query = QtNetwork.QNetworkProxyQuery(QtCore.QUrl(url))
                 proxies = QtNetwork.QNetworkProxyFactory.systemProxyForQuery(query)
                 if proxies and proxies[0] and proxies[0].hostName() and proxies[0].port() > 0:
                     proxy = proxies[0]
