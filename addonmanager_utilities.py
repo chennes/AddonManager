@@ -608,7 +608,8 @@ def create_pip_call(args: List[str]) -> List[str]:
     host = ""
     port = 8080
     if proxy_type == "system":
-        query = QtNetwork.QNetworkProxyQuery(QtCore.QUrl("https://addons.freecad.org/status"))
+        url = fci.Preferences().get("status_test_url")
+        query = QtNetwork.QNetworkProxyQuery(QtCore.QUrl(url))
         proxies = QtNetwork.QNetworkProxyFactory.systemProxyForQuery(query)
         if proxies and proxies[0] and proxies[0].hostName() and proxies[0].port() > 0:
             use_proxy = True
