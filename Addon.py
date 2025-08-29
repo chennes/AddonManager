@@ -28,7 +28,7 @@ import importlib.util
 import os
 import re
 from urllib.parse import urlparse, urlunparse
-from typing import Set, List, Optional
+from typing import Dict, Set, List, Optional
 from threading import Lock
 from enum import IntEnum, auto
 import xml.etree.ElementTree
@@ -136,9 +136,9 @@ class Addon:
         """Addon dependency information"""
 
         def __init__(self):
-            self.required_external_addons = []  # A list of Addons
-            self.blockers = []  # A list of Addons
-            self.replaces = []  # A list of Addons
+            self.required_external_addons: List["Addon"] = []
+            self.blockers: List["Addon"] = []
+            self.replaces: List["Addon"] = []
             self.internal_workbenches: Set[str] = set()  # Required internal workbenches
             self.python_requires: Set[str] = set()
             self.python_optional: Set[str] = set()
@@ -488,7 +488,7 @@ class Addon:
         """Determine if this package contains an "other" content item"""
         return self.contains_packaged_content("other")
 
-    def walk_dependency_tree(self, all_repos, deps):
+    def walk_dependency_tree(self, all_repos: Dict[str, "Addon"], deps: Dependencies):
         """Compute the total dependency tree for this repo (recursive)
         - all_repos is a dictionary of repos, keyed on the name of the repo
         - deps is an Addon.Dependency object encapsulating all the types of dependency
@@ -521,7 +521,8 @@ class Addon:
 
         for dep in self.blocks:
             if dep in all_repos:
-                deps.blockers[dep] = all_repos[dep]
+                if all_repos[dep] not in deps.blockers:
+                    deps.blockers.append(all_repos[dep])
 
     def status(self):
         """Threadsafe access to the current update status"""
@@ -701,10 +702,10 @@ class MissingDependencies:
     """
 
     def __init__(self):
-        self.external_addons = []
-        self.wbs = []
-        self.python_requires = []
-        self.python_optional = []
+        self.external_addons: List[Addon] = []
+        self.wbs: List[str] = []
+        self.python_requires: List[str] = []
+        self.python_optional: List[str] = []
         self.python_min_version = Version(from_list=[3, 0, 0])
 
     def import_from_addon(self, repo: Addon, all_repos: List[Addon]):
@@ -723,7 +724,7 @@ class MissingDependencies:
 
         for dep in deps.required_external_addons:
             if dep.status() == Addon.Status.NOT_INSTALLED:
-                self.external_addons.append(dep.name)
+                self.external_addons.append(dep)
 
         # Now check the loaded addons to see if we are missing an internal workbench:
         if fci.FreeCADGui:
