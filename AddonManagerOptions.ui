@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>757</width>
+    <width>569</width>
     <height>783</height>
    </rect>
   </property>
@@ -135,64 +135,126 @@
     </layout>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QGroupBox" name="proxyGroupBox">
+     <property name="toolTip">
+      <string>Use a proxy server for access to addon data</string>
+     </property>
      <property name="title">
-      <string>Proxy</string>
+      <string>Proxy addon manager traffic</string>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="Gui::PrefRadioButton" name="guiprefradiobuttonnoproxy">
-        <property name="text">
-         <string>No proxy</string>
+       <layout class="QHBoxLayout" name="proxyMainButtonLayout">
+        <property name="spacing">
+         <number>0</number>
         </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-        <property name="prefEntry" stdset="0">
-         <cstring>NoProxyCheck</cstring>
-        </property>
-        <property name="prefPath" stdset="0">
-         <cstring>Addons</cstring>
-        </property>
-       </widget>
+        <item>
+         <widget class="QPushButton" name="systemProxyButton">
+          <property name="toolTip">
+           <string>Use the system's proxy settings</string>
+          </property>
+          <property name="text">
+           <string>System</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive">
+           <bool>true</bool>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="customProxyButton">
+          <property name="toolTip">
+           <string>Use custom proxy settings</string>
+          </property>
+          <property name="text">
+           <string>Custom</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive">
+           <bool>true</bool>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="Gui::PrefRadioButton" name="guiprefradiobuttonsystemproxy">
-        <property name="text">
-         <string>User system proxy</string>
-        </property>
-        <property name="prefEntry" stdset="0">
-         <cstring>SystemProxyCheck</cstring>
-        </property>
-        <property name="prefPath" stdset="0">
-         <cstring>Addons</cstring>
-        </property>
-       </widget>
+       <layout class="QGridLayout" name="proxyHostSettingLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="proxyHostLabel">
+          <property name="text">
+           <string>Host</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="proxyPortLabel">
+          <property name="text">
+           <string>Port</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLineEdit" name="proxyHostLineEdit"/>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="proxyColonSeparatorLabel">
+          <property name="text">
+           <string>:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLineEdit" name="proxyPortLineEdit"/>
+        </item>
+        <item row="1" column="3">
+         <widget class="QToolButton" name="proxyTestButton">
+          <property name="toolTip">
+           <string>Test these proxy settings</string>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="Gui::PrefRadioButton" name="guiprefradiobuttonuserproxy">
-        <property name="text">
-         <string>User-defined proxy</string>
+       <widget class="QGroupBox" name="proxyStatusTestGroupBox">
+        <property name="title">
+         <string>Connection Test</string>
         </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-        <property name="prefEntry" stdset="0">
-         <cstring>UserProxyCheck</cstring>
-        </property>
-        <property name="prefPath" stdset="0">
-         <cstring>Addons</cstring>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="Gui::PrefLineEdit" name="guipreflineedituserproxy">
-        <property name="prefEntry" stdset="0">
-         <cstring>ProxyUrl</cstring>
-        </property>
-        <property name="prefPath" stdset="0">
-         <cstring>Addons</cstring>
-        </property>
+        <layout class="QHBoxLayout" name="proxyStatusTestLayout">
+         <item>
+          <widget class="QLabel" name="proxyStatusTestOutputLabel">
+           <property name="text">
+            <string></string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>
@@ -247,11 +309,6 @@
   <customwidget>
    <class>Gui::PrefCheckBox</class>
    <extends>QCheckBox</extends>
-   <header>Gui/PrefWidgets.h</header>
-  </customwidget>
-  <customwidget>
-   <class>Gui::PrefRadioButton</class>
-   <extends>QRadioButton</extends>
    <header>Gui/PrefWidgets.h</header>
   </customwidget>
   <customwidget>
