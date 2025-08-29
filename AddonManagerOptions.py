@@ -25,17 +25,42 @@
 
 import os
 from enum import StrEnum, IntEnum
+import ipaddress
+import re
 from typing import Tuple
 
 import addonmanager_freecad_interface as fci
 from addonmanager_preferences_migrations import migrate_proxy_settings_2025
 from NetworkManager import ForceReinitializeNetworkManager
 
-from PySideWrapper import QtCore, QtGui, QtWidgets, QtNetwork
+from PySideWrapper import QtCore, QtGui, QtWidgets, QtNetwork, QtSvg
 
 translate = fci.translate
 
 # pylint: disable=too-few-public-methods
+
+
+def is_ip(host: str) -> bool:
+    try:
+        ipaddress.ip_address(host)
+        return True
+    except ValueError:
+        return False
+
+
+DOMAIN_REGEX = re.compile(
+    r"^(?=.{1,253}$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)" r"(\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*$"
+)
+
+
+def is_domain(host: str) -> bool:
+    return DOMAIN_REGEX.match(host) is not None
+
+
+def is_valid_host(host: str) -> bool:
+    if not host:
+        return False
+    return is_ip(host) or is_domain(host)
 
 
 def test_proxy_connection(
@@ -133,6 +158,8 @@ class AddonManagerOptions:
         self.form.customRepositoriesTableView.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeToContents
         )
+        line_height = self.form.customRepositoriesTableView.verticalHeader().defaultSectionSize()
+        self.form.customRepositoriesTableView.setFixedHeight(line_height * 6.5)
 
         self.form.addCustomRepositoryButton.clicked.connect(self._add_custom_repo_clicked)
         self.form.removeCustomRepositoryButton.clicked.connect(self._remove_custom_repo_clicked)
@@ -154,11 +181,26 @@ class AddonManagerOptions:
         int_validator = QtGui.QIntValidator(1, 65535)  # Valid range for port numbers
         self.form.proxyPortLineEdit.setValidator(int_validator)
 
-        # Not a 100% valid hostname, but good enough for our purposes (for now)
         hostname_regex = QtCore.QRegularExpression(
             r"^[A-Za-z0-9]+(?:[-A-Za-z0-9]*[A-Za-z0-9])?(?:\.[A-Za-z0-9]+(?:[-A-Za-z0-9]*[A-Za-z0-9])?)*$"
         )
         self.form.proxyHostLineEdit.setValidator(QtGui.QRegularExpressionValidator(hostname_regex))
+
+        fm = QtGui.QFontMetrics(self.form.proxyPortLineEdit.font())
+        char_width = fm.horizontalAdvance("M")
+        target_width = char_width * 5 + 10  # Five chars max, plus some padding
+        self.form.proxyPortLineEdit.setFixedWidth(target_width)
+
+        renderer = QtSvg.QSvgRenderer(os.path.join(icon_path, "regex_bad.svg"))
+        pixmap = QtGui.QPixmap(char_width, char_width)
+        pixmap.fill(QtCore.Qt.transparent)  # keep background transparent
+        painter = QtGui.QPainter(pixmap)
+        renderer.render(painter)  # renders the whole SVG scaled to pixmap
+        painter.end()
+
+        self.form.proxyHostInvalidIcon.setPixmap(pixmap)
+        self.form.proxyHostInvalidIcon.setToolTip(translate("AddonsInstaller", "Invalid hostname"))
+        self.form.proxyHostInvalidIcon.hide()
 
         self.form.proxyStatusTestGroupBox.setVisible(False)
 
@@ -233,6 +275,16 @@ class AddonManagerOptions:
 
     def _proxy_changed(self):
         self._set_proxy_test_button_state(AddonManagerOptions.ProxyTestStatus.untested)
+        self.form.proxyStatusTestGroupBox.setVisible(False)
+        if self._proxy_type_from_ui() == AddonManagerOptions.ProxyType.custom:
+            if is_valid_host(self.form.proxyHostLineEdit.text()):
+                self.form.proxyTestButton.setEnabled(True)
+                self.form.proxyHostInvalidIcon.hide()
+            else:
+                self.form.proxyTestButton.setEnabled(False)
+                self.form.proxyHostInvalidIcon.show()
+        else:
+            self.form.proxyHostInvalidIcon.hide()
 
     def _test_proxy(self):
         """Callback: when the test proxy button is clicked, test the proxy settings"""
