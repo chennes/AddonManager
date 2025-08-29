@@ -25,7 +25,7 @@
 import threading
 from enum import IntEnum, auto
 import os
-from typing import List
+from typing import List, Set
 
 import NetworkManager
 from PySideWrapper import QtCore, QtWidgets
@@ -264,7 +264,9 @@ class UpdateAllGUI(QtCore.QObject):
             if required_wbs:
                 fci.Console.PrintMessage(f"  Required Workbenches: {required_wbs}\n")
             if required_addons:
-                fci.Console.PrintMessage(f"  Required Addons: {required_addons}\n")
+                fci.Console.PrintMessage(
+                    f"  Required Addons: {','.join([x.display_name for x in required_addons])}\n"
+                )
             if required_python_modules:
                 fci.Console.PrintMessage(f"  Required Python Modules: {required_python_modules}\n")
             if optional_python_modules:
@@ -282,17 +284,17 @@ class UpdateAllGUI(QtCore.QObject):
 
     def handle_missing_dependencies(
         self,
-        addons,
-        required_wbs,
-        required_addons,
-        required_python_modules,
-        optional_python_modules,
+        addons: List[Addon],
+        required_wbs: Set[str],
+        required_addons: Set[Addon],
+        required_python_modules: Set[str],
+        optional_python_modules: Set[str],
     ):
         missing_dependencies = MissingDependencies()
-        missing_dependencies.wbs = required_wbs
-        missing_dependencies.external_addons = required_addons
-        missing_dependencies.python_requires = required_python_modules
-        missing_dependencies.python_optional = optional_python_modules
+        missing_dependencies.wbs = list(required_wbs)
+        missing_dependencies.external_addons = list(required_addons)
+        missing_dependencies.python_requires = list(required_python_modules)
+        missing_dependencies.python_optional = list(optional_python_modules)
         self.dependency_installer = AddonDependencyInstallerGUI(addons, missing_dependencies)
         self.dependency_installer.cancel.connect(self.cancel)
         self.dependency_installer.proceed.connect(self.check_for_git_migration)
