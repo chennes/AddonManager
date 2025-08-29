@@ -613,7 +613,7 @@ class AddonDependencyInstallerGUI(QtCore.QObject):
         """Ask the user how they want to handle dependencies, do that, then install."""
 
         for addon in self.deps.external_addons:
-            self.dependency_dialog.listWidgetAddons.addItem(addon)
+            self.dependency_dialog.listWidgetAddons.addItem(addon.display_name)
         for mod in self.deps.python_requires:
             self.dependency_dialog.listWidgetPythonRequired.addItem(mod)
         for mod in self.deps.python_optional:
@@ -674,17 +674,8 @@ class AddonDependencyInstallerGUI(QtCore.QObject):
         self.deps.python_optional = good_packages
 
     def _dependency_dialog_yes_clicked(self) -> None:
-        # Get the lists out of the dialog:
-        addons = []
-        for row in range(self.dependency_dialog.listWidgetAddons.count()):
-            item = self.dependency_dialog.listWidgetAddons.item(row)
-            addons.append(item.text())
-
-        python_requires = []
-        for row in range(self.dependency_dialog.listWidgetPythonRequired.count()):
-            item = self.dependency_dialog.listWidgetPythonRequired.item(row)
-            python_requires.append(item.text())
-
+        addons = self.deps.external_addons
+        python_requires = self.deps.python_requires
         python_optional = []
         for row in range(self.dependency_dialog.listWidgetPythonOptional.count()):
             item = self.dependency_dialog.listWidgetPythonOptional.item(row)
