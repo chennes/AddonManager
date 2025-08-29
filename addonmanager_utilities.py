@@ -621,7 +621,7 @@ def create_pip_call(args: List[str]) -> List[str]:
         port = fci.Preferences().get("proxy_port")
 
     if use_proxy:
-        call_args.extend(["--proxy", f"https://{host}:{port}"])
+        call_args.extend(["--proxy", f"http://{host}:{port}"])
 
     call_args.extend(args)
     return call_args
