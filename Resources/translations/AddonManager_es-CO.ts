@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="da" sourcelanguage="en">
+<TS version="2.1" language="es-CO" sourcelanguage="en">
   <context>
     <name>AddCustomRepositoryDialog</name>
     <message>
@@ -11,12 +11,12 @@
     <message>
       <location filename="../../AddonManagerOptions_AddCustomRepository.ui" line="20"/>
       <source>Repository URL</source>
-      <translation>Repo-URL</translation>
+      <translation>URL del repositorio</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions_AddCustomRepository.ui" line="30"/>
       <source>Branch</source>
-      <translation>Gren</translation>
+      <translation>Rama</translation>
     </message>
   </context>
   <context>
@@ -24,12 +24,12 @@
     <message>
       <location filename="../../addonmanager_uninstaller_gui.py" line="122"/>
       <source>Finished removing {}</source>
-      <translation>Fjernelse af {} udført</translation>
+      <translation>Se terminó de eliminar {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller_gui.py" line="134"/>
       <source>Failed to remove some files</source>
-      <translation>Kunne ikke fjerne visse filer</translation>
+      <translation>Error al eliminar algunos archivos</translation>
     </message>
   </context>
   <context>
@@ -37,7 +37,7 @@
     <message>
       <location filename="../../addonmanager_update_all_gui.py" line="229"/>
       <source>Finished updating the following addons</source>
-      <translation>Opdatering af flg. tilføjelser udført</translation>
+      <translation>Finalizó la actualización de los siguientes complementos</translation>
     </message>
   </context>
   <context>
@@ -53,28 +53,28 @@
     <message>
       <location filename="../../Addon.py" line="369"/>
       <source>{}: Unrecognized internal workbench &apos;{}&apos;</source>
-      <translation>{}: Ukendt internt arbejdsbord &apos;{}&apos;</translation>
+      <translation>{}: Banco de trabajo interno no reconocido &apos;{}&apos;</translation>
     </message>
     <message>
       <location filename="../../Addon.py" line="402"/>
       <source>Addon Developer Warning: Repository URL set in package.xml file for addon {} ({}) does not match the URL it was fetched from ({})</source>
-      <translation>Tiløjelsesudvikleradvarsel: Repo-URL angivet i package.xml fil til tilføjelsen {} ({}) matcher ikke URL'en, den blev hentet fra ({})</translation>
+      <translation>Advertencia de desarrollador de complementos: la URL del repositorio establecida en el archivo package.xml para el complemento {} ({}) no coincide con la URL de la que fue obtenida ({})</translation>
     </message>
     <message>
       <location filename="../../Addon.py" line="410"/>
       <source>Addon Developer Warning: Repository branch set in package.xml file for addon {} ({}) does not match the branch it was fetched from ({})</source>
-      <translation>Tiløjelsesudvikleradvarsel: Repo-grenen angivet i package.xml fil til tilføjelsen {} ({}) matcher ikke grenen, den blev hentet fra ({})</translation>
+      <translation>Advertencia de desarrollador de complementos: la rama de repositorio establecida en el archivo package.xml para el complemento {} ({}) no coincide con la rama de la que fue obtenida ({})</translation>
     </message>
     <message>
       <location filename="../../Addon.py" line="715"/>
       <location filename="../../Addon.py" line="731"/>
       <source>Got an error when trying to import {}</source>
-      <translation>Fik en fejl under forsøget på at importere {}</translation>
+      <translation>Se ha producido un error al intentar importar {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_connection_checker.py" line="66"/>
       <source>Checking connection</source>
-      <translation>Tjekker forbindelse</translation>
+      <translation>Comprobando conexión</translation>
     </message>
     <message>
       <location filename="../../addonmanager_connection_checker.py" line="67"/>
@@ -84,22 +84,22 @@
     <message>
       <location filename="../../addonmanager_connection_checker.py" line="89"/>
       <source>Connection failed</source>
-      <translation>Forbindelse fejlede</translation>
+      <translation>Conexión fallida</translation>
     </message>
     <message>
       <location filename="../../addonmanager_dependency_installer.py" line="146"/>
       <source>Installation of Python package {} failed</source>
-      <translation>Installation af Python-pakken {} mislykkedes</translation>
+      <translation>La instalación del paquete de Python {} falló</translation>
     </message>
     <message>
       <location filename="../../addonmanager_dependency_installer.py" line="171"/>
       <source>Installation of optional package failed</source>
-      <translation>Installation af den valgfrie pakke {} mislykkedes</translation>
+      <translation>La instalación del paquete opcional falló</translation>
     </message>
     <message>
       <location filename="../../addonmanager_dependency_installer.py" line="190"/>
       <source>Installing required dependency {}</source>
-      <translation>Installerer krævet afhængighed {}</translation>
+      <translation>Instalando dependencia requerida {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_dependency_installer.py" line="200"/>
@@ -114,7 +114,7 @@
     <message>
       <location filename="../../addonmanager_git.py" line="161"/>
       <source>Backing up the original directory and re-cloning</source>
-      <translation>Sikkerhedskopiering af den oprindelige mappe og genkloning</translation>
+      <translation>Copia de seguridad del directorio original y re-clonando</translation>
     </message>
     <message>
       <location filename="../../addonmanager_git.py" line="266"/>
@@ -124,43 +124,43 @@
     <message>
       <location filename="../../addonmanager_git.py" line="407"/>
       <source>Git branch rename failed with the following message:</source>
-      <translation>Grenomdøbning mislykkedes med flg. meddelelse:</translation>
+      <translation>Error al renombrar la rama Git con el siguiente mensaje:</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="170"/>
       <source>This addon requires Python packages that are not installed, and cannot be installed automatically. To use this addon you must install the following Python packages manually:</source>
-      <translation>Denne tilføjelse kræver Python-pakker, som ikke er installeret, og som kan ikke installeres automatisk. For at bruge denne tilføjelse skal du installere følgende Python-pakker manuelt:</translation>
+      <translation>Este complemento requiere paquetes de Python que no están instalados y no se pueden instalar automáticamente. Para utilizar este complemento debe instalar manualmente los siguientes paquetes de Python:</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="176"/>
       <source>Too many to list</source>
-      <translation>For mange at opliste</translation>
+      <translation>Demasiado para enlistar</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="181"/>
       <location filename="../../addonmanager_installer_gui.py" line="218"/>
       <source>Missing Requirement</source>
-      <translation>Manglende betingelse</translation>
+      <translation>Requisitos faltantes</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="201"/>
       <source>Addon &apos;{}&apos; requires &apos;{}&apos;, which is not available in your copy of FreeCAD.</source>
-      <translation>Tilføjelsen &apos;{}&apos; kræver &apos;{}&apos;, der er utilgængelig i denne FreeCAD.</translation>
+      <translation>El complemento &apos;{}&apos; requiere &apos;{}&apos;, el cual no está disponible en su copia de FreeCAD.</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="209"/>
       <source>Addon &apos;{}&apos; requires the following workbenches, which are not available in your copy of FreeCAD:</source>
-      <translation>Tilføjelsen &apos;{}&apos; kræver flg. arbejdsborde, som er utilgængelige i denne FreeCAD:</translation>
+      <translation>El complemento &apos;{}&apos; requiere los siguientes bancos de trabajo, los cuales no están disponibles en su copia de FreeCAD:</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="216"/>
       <source>Press OK to install anyway.</source>
-      <translation>Tryk OK for at installere alligevel.</translation>
+      <translation>Pulse OK para instalar de todos modos.</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="260"/>
       <source>Incompatible Python version</source>
-      <translation>Inkompatibel Python-version</translation>
+      <translation>Versión de Python incompatible</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="264"/>
@@ -170,59 +170,59 @@
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="285"/>
       <source>Optional dependency on {} ignored because it is not in the allow-list</source>
-      <translation type="unfinished"/>
+      <translation>Dependencia opcional de {} ignorada porque no está en la lista permitida</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="330"/>
       <location filename="../../addonmanager_installer_gui.py" line="331"/>
       <source>Installing dependencies</source>
-      <translation>Installation af afhængigheder</translation>
+      <translation>Instalando dependencias</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="346"/>
       <source>Cannot execute Python</source>
-      <translation>Kan ikke eksekvere Python</translation>
+      <translation>No se puede ejecutar Python</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="351"/>
       <source>Failed to automatically locate your Python executable, or the path is set incorrectly. Please check the Addon Manager preferences setting for the path to Python.</source>
-      <translation>Automatisk lokalisering af Python-eksekverbare mislykkedes, eller forkert angivet sti. Tjek Tilføjelseshåndtering-præferenceindstillingen for stien til Python.</translation>
+      <translation>No se pudo localizar automáticamente el ejecutable de Python, o la ruta está configurada incorrectamente. Por favor, compruebe la configuración de preferencias del Administrador de complementos para la ruta a Python.</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="355"/>
       <source>Dependencies could not be installed. Continue with installation of {} anyway?</source>
-      <translation>Afhængigheder kunne ikke installeres. Fortsæt installation af {} alligevel?</translation>
+      <translation>No se pudieron instalar las dependencias. ¿Continuar con la instalación de {} de cualquier forma?</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="370"/>
       <source>Cannot execute pip</source>
-      <translation>Kan ikke eksekvere pip</translation>
+      <translation>No se puede ejecutar pip</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="376"/>
       <source>Failed to execute pip, which may be missing from your Python installation. Please ensure your system has pip installed and try again. The failed command was:</source>
-      <translation>Mislykkedes at eksekvere pip, der måske mangler i Python-installationen. Tjek, at systemet har pip installeret og forsøg igen. Den fejlede kommando var:</translation>
+      <translation>Fallo al ejecutar pip, podría faltar en tu instalación de Python. Por favor, asegúrese de que su sistema tiene pip instalado y vuelva a intentarlo. El comando fallido fue:</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="380"/>
       <location filename="../../addonmanager_installer_gui.py" line="405"/>
       <source>Continue with installation of {} anyway?</source>
-      <translation>Fortsæt med installation af {} alligevel?</translation>
+      <translation>¿Continuar con la instalación de {} de todos modos?</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="397"/>
       <source>Package installation failed</source>
-      <translation>Pakkeinstallation mislykkedes</translation>
+      <translation>Error al instalar el paquete</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="401"/>
       <source>See Report View for detailed failure log.</source>
-      <translation>Se Rapportvisning for detaljeret fejllog.</translation>
+      <translation>Consulte Ver Informe para registro detallado de errores.</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="448"/>
       <source>Installing Addon</source>
-      <translation>Installerer Tilføjelse</translation>
+      <translation>Instalando Complemento</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="449"/>
@@ -232,96 +232,96 @@
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="463"/>
       <source>Cancelling</source>
-      <translation>Afbryder</translation>
+      <translation>Cancelando</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="464"/>
       <source>Cancelling installation of &apos;{}&apos;</source>
-      <translation>Afbryder installationen af &apos;{}&apos;</translation>
+      <translation>Cancelando instalación de &apos;{}&apos;</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="489"/>
       <location filename="../../addonmanager_package_details_controller.py" line="260"/>
       <source>Success</source>
-      <translation>Succes</translation>
+      <translation>Éxito</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="490"/>
       <source>{} was installed successfully</source>
-      <translation>{} er hermed installeret</translation>
+      <translation>{} fue instalado satisfactoriamente</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="502"/>
       <source>Installation Failed</source>
-      <translation>Installation mislykkedes</translation>
+      <translation>Instalación fallida</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="504"/>
       <source>Failed to install {}</source>
-      <translation>Mislykkedes at installere {}</translation>
+      <translation>Error al instalar {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="614"/>
       <source>Create new toolbar</source>
-      <translation>Opret ny værktøjsbjælke</translation>
+      <translation>Crear nueva barra de herramientas</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="684"/>
       <source>A macro installed with the FreeCAD Addon Manager</source>
-      <translation>En makro installeret med FreeCAD Tilføjelseshåndtering</translation>
+      <translation>Una macro instalada con el administrador de complementos de FreeCAD</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="686"/>
       <source>Run</source>
       <comment>Indicates a macro that can be &apos;run&apos;</comment>
-      <translation>Kør</translation>
+      <translation>Ejecutar</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer.py" line="366"/>
       <source>Received {} response code from server</source>
-      <translation type="unfinished"/>
+      <translation>Recibido {} código de respuesta del servidor</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer.py" line="536"/>
       <source>Failed to install macro {}</source>
-      <translation>Mislykkedes at installere makroen {}</translation>
+      <translation>Error al instalar macro {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer.py" line="570"/>
       <source>Failed to create installation manifest file:
 </source>
-      <translation>Mislykkedes at oprette installationsmanifestfil:
+      <translation>Error al crear archivo manifest de instalación:
 </translation>
     </message>
     <message>
       <location filename="../../addonmanager_macro.py" line="161"/>
       <source>Unable to open macro wiki page at {}</source>
-      <translation>Kan ikke åbne makro wiki-siden på {}</translation>
+      <translation>No se puede abrir la página de la wiki de la macro en {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_macro.py" line="174"/>
       <source>Unable to fetch the code of this macro.</source>
-      <translation>Kan ikke hente denne makros kode.</translation>
+      <translation>No se puede obtener el código de esta macro.</translation>
     </message>
     <message>
       <location filename="../../addonmanager_macro.py" line="189"/>
       <source>Unable to retrieve a description from the wiki for macro {}</source>
-      <translation>Kan ikke hente en beskrivelse fra wiki'en til makroen {}</translation>
+      <translation>No se puede recuperar una descripción de la wiki para la macro {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_macro.py" line="221"/>
       <source>Unable to open macro code URL {}</source>
-      <translation>Kan ikke åbne makrokode-URL'en {}</translation>
+      <translation>No se puede abrir la URL del código de la macro {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_macro.py" line="354"/>
       <source>Unable to fetch macro-specified file {} from {}</source>
-      <translation>Kan ikke hente makrospecificeret fil {} fra {}</translation>
+      <translation>No se puede obtener el archivo especificado macro {} de {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_macro.py" line="362"/>
       <source>Could not locate macro-specified file {} (expected at {})</source>
-      <translation>Kunne ikke finde makrospecificeret fil {} (forventet på {})</translation>
+      <translation>No se pudo encontrar el archivo especifico para la macro {} (se esperaba en {})</translation>
     </message>
     <message>
       <location filename="../../addonmanager_package_details_controller.py" line="129"/>
@@ -361,57 +361,57 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../addonmanager_readme_controller.py" line="82"/>
       <source>Loading info for {} from the FreeCAD Macro Recipes wiki...</source>
-      <translation>Indlæser info for {} fra FreeCAD Makroopskrifter wiki...</translation>
+      <translation>Cargando información para {} de la wiki de Recetas de Macros de FreeCAD...</translation>
     </message>
     <message>
       <location filename="../../addonmanager_readme_controller.py" line="90"/>
       <source>Loading page for {} from {}...</source>
-      <translation>Indlæser side til {} fra {}...</translation>
+      <translation>Cargando página de {} de {}...</translation>
     </message>
     <message>
       <location filename="../../addonmanager_readme_controller.py" line="108"/>
       <source>Failed to download data from {} -- received response code {}.</source>
-      <translation>Mislykkedes at downloade data fra {} – modtaget svarkode {}.</translation>
+      <translation>Error al descargar datos de {} -- código de respuesta recibido {}.</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller_gui.py" line="86"/>
       <source>Confirm remove</source>
-      <translation>Bekræft fjernelse</translation>
+      <translation>Confirmar eliminación</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller_gui.py" line="87"/>
       <source>Are you sure you want to uninstall {}?</source>
-      <translation>Sikker på, at {} skal afinstalleres?</translation>
+      <translation>¿Está seguro que desea desinstalar {}?</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller_gui.py" line="97"/>
       <source>Removing Addon</source>
-      <translation>Fjerner tilføjelse</translation>
+      <translation>Eliminando complemento</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller_gui.py" line="98"/>
       <source>Removing {}</source>
-      <translation>Fjerner {}</translation>
+      <translation>Eliminando {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller_gui.py" line="121"/>
       <source>Uninstall complete</source>
-      <translation>Afinstallation er færdig</translation>
+      <translation>Desinstalación completa</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller_gui.py" line="133"/>
       <source>Uninstall failed</source>
-      <translation>Afinstallation mislykkedes</translation>
+      <translation>Desinstalación fallida</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller.py" line="110"/>
       <source>An unknown error occurred</source>
-      <translation>En ukendt fejl opstod</translation>
+      <translation>Se produjo un error desconocido</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller.py" line="133"/>
       <source>Could not find addon {} to remove it.</source>
-      <translation>Kunne ikke finde tilføjelsen {} for at fjerne den.</translation>
+      <translation>No se pudo encontrar el complemento {} para eliminarlo.</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller.py" line="157"/>
@@ -421,47 +421,47 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../addonmanager_uninstaller.py" line="176"/>
       <source>Removed extra installed file {}</source>
-      <translation>Fjernede ekstra installeret fil {}</translation>
+      <translation>Archivo extra instalado {} eliminado</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller.py" line="190"/>
       <source>Error while trying to remove extra installed file {}</source>
-      <translation>Fejl under forsøget på at fjerne ekstra installeret fil {}</translation>
+      <translation>Error al intentar eliminar el archivo extra instalado {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller.py" line="254"/>
       <source>Error while trying to remove macro file {}:</source>
-      <translation>Fejl under forsøget på at fjerne makrofilen {}:</translation>
+      <translation>Error al intentar eliminar el archivo macro {}:</translation>
     </message>
     <message>
       <location filename="../../addonmanager_update_all_gui.py" line="80"/>
       <source>Installing</source>
-      <translation>Installerer</translation>
+      <translation>Instalando</translation>
     </message>
     <message>
       <location filename="../../addonmanager_update_all_gui.py" line="83"/>
       <source>Succeeded</source>
-      <translation>Gennemført</translation>
+      <translation>Éxito</translation>
     </message>
     <message>
       <location filename="../../addonmanager_update_all_gui.py" line="85"/>
       <source>Failed</source>
-      <translation>Mislykket</translation>
+      <translation>Falló</translation>
     </message>
     <message>
       <location filename="../../addonmanager_update_all_gui.py" line="235"/>
       <source>Update was cancelled</source>
-      <translation>Opdatering blev afbrudt</translation>
+      <translation>La actualización fue cancelada</translation>
     </message>
     <message>
       <location filename="../../addonmanager_update_all_gui.py" line="236"/>
       <source>some addons may have been updated</source>
-      <translation>nogle tilføjelser kan være blevet opdateret</translation>
+      <translation>algunos complementos podrían haber sido actualizados</translation>
     </message>
     <message>
       <location filename="../../addonmanager_workers_startup.py" line="111"/>
       <source>WARNING: Duplicate addon {} ignored</source>
-      <translation>ADVARSEL: Dublettilføjelsen {} ignoreret</translation>
+      <translation>ADVERTENCIA: Duplicar complemento {} ignorado</translation>
     </message>
     <message>
       <location filename="../../addonmanager_workers_startup.py" line="218"/>
@@ -486,12 +486,12 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../addonmanager_workers_startup.py" line="432"/>
       <source>Failed to read metadata from {name}</source>
-      <translation>Kunne ikke læse metadata fra {name}</translation>
+      <translation>Error al leer los metadatos de {name}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_workers_startup.py" line="456"/>
       <source>Failed to fetch code for macro &apos;{name}&apos;</source>
-      <translation>Kunne ikke hente kode til makroen &apos;{name}&apos;</translation>
+      <translation>Error al obtener el código para el macro &apos;{name}&apos;</translation>
     </message>
     <message>
       <location filename="../../addonmanager_workers_startup.py" line="509"/>
@@ -528,17 +528,17 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../AddonManager.py" line="393"/>
       <source>You must restart FreeCAD for changes to take effect.</source>
-      <translation>FreeCAD skal genstartes for at effektuere ændringerne.</translation>
+      <translation>Debe reiniciar FreeCAD para que los cambios surtan efecto.</translation>
     </message>
     <message>
       <location filename="../../AddonManager.py" line="402"/>
       <source>Restart now</source>
-      <translation>Genstart nu</translation>
+      <translation>Reiniciar ahora</translation>
     </message>
     <message>
       <location filename="../../AddonManager.py" line="403"/>
       <source>Restart later</source>
-      <translation>Genstart senere</translation>
+      <translation>Reiniciar más adelante</translation>
     </message>
     <message>
       <location filename="../../AddonManager.py" line="446"/>
@@ -556,44 +556,44 @@ Please restart to use the new version.</source>
       <location filename="../../AddonManager.py" line="645"/>
       <location filename="../../AddonManager.py" line="730"/>
       <source>Cannot launch a new installer until the previous one has finished.</source>
-      <translation>Kan ikke starte en ny installer, før den foregående er færdig.</translation>
+      <translation>No se puede iniciar un nuevo instalador hasta que el anterior haya terminado.</translation>
     </message>
     <message>
       <location filename="../../AddonManager.py" line="715"/>
       <source>Temporary installation of macro failed.</source>
-      <translation>Midlertidig installation af makro mislykkedes.</translation>
+      <translation>La instalación temporal de la macro falló.</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.py" line="249"/>
       <source>Repository URL</source>
       <comment>Preferences header for custom repositories</comment>
-      <translation>Repo-URL</translation>
+      <translation>URL del repositorio</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.py" line="255"/>
       <source>Branch name</source>
       <comment>Preferences header for custom repositories</comment>
-      <translation>Grennavn</translation>
+      <translation>Nombre de rama</translation>
     </message>
     <message>
       <location filename="../../change_branch.py" line="103"/>
       <source>DANGER: Developer feature</source>
-      <translation>FARE: Udviklerfunktion</translation>
+      <translation>PELIGRO: Función de desarrollador</translation>
     </message>
     <message>
       <location filename="../../change_branch.py" line="110"/>
       <source>DANGER: Switching branches is intended for developers and beta testers, and may result in broken, non-backwards compatible documents, instability, crashes, and/or the premature heat death of the universe. Are you sure you want to continue?</source>
-      <translation>FARE: Skift af grene er beregnet til udviklere og betatestere, og det kan resultere i ødelagte, ikke-bagudkompatible dokumenter, ustabilitet, nedbrud og/eller for tidlig varmedød for universet. Fortsæt alligevel?</translation>
+      <translation>PELIGRO: Cambiar las ramas está destinado para desarrolladores y beta testers y puede resultar en rupturas, documentos no compatibles hacia atrás, inestabilidad, cierres abruptos y/o la prematura muerte térmica del universo. ¿Está seguro de que desea continuar?</translation>
     </message>
     <message>
       <location filename="../../change_branch.py" line="119"/>
       <source>There are local changes</source>
-      <translation>Der er lokale ændringer</translation>
+      <translation>Hay cambios locales</translation>
     </message>
     <message>
       <location filename="../../change_branch.py" line="124"/>
       <source>WARNING: This repo has uncommitted local changes. Are you sure you want to change branches (bringing the changes with you)?</source>
-      <translation>ADVARSEL: Dette repo har ikke-committede lokale ændringer. Sikker på, at der skal skiftes grene (medbringende ændringerne)?</translation>
+      <translation>ADVERTENCIA: Este repositorio tiene cambios locales no confirmados. ¿Está seguro que desea cambiar de rama (trayendo los cambios contigo)?</translation>
     </message>
     <message>
       <location filename="../../change_branch.py" line="155"/>
@@ -619,19 +619,19 @@ Please restart to use the new version.</source>
       <location filename="../../change_branch.py" line="272"/>
       <source>Local</source>
       <comment>Table header for local git ref name</comment>
-      <translation>Lokal</translation>
+      <translation type="unfinished"/>
     </message>
     <message>
       <location filename="../../change_branch.py" line="278"/>
       <source>Remote tracking</source>
       <comment>Table header for git remote tracking branch name</comment>
-      <translation>Fjernsporing</translation>
+      <translation>Rastreo remoto</translation>
     </message>
     <message>
       <location filename="../../change_branch.py" line="284"/>
       <source>Last Updated</source>
       <comment>Table header for git update date</comment>
-      <translation>Senest opdateret</translation>
+      <translation>Actualizado por última vez</translation>
     </message>
     <message>
       <location filename="../../NetworkManager.py" line="200"/>
@@ -641,82 +641,82 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../NetworkManager.py" line="232"/>
       <source>Parameter error: mutually exclusive proxy options set. Resetting to default.</source>
-      <translation>Parameterfejl: Gensidig eksklusiv proxyindstillingssæt. Nulstiller til standard.</translation>
+      <translation>Error de parámetro: conjunto de opciones de proxy mutuamente exclusivas. Reiniciando a valores predeterminados.</translation>
     </message>
     <message>
       <location filename="../../NetworkManager.py" line="247"/>
       <source>Parameter error: user proxy indicated, but no proxy provided. Resetting to default.</source>
-      <translation>Parameterfejl: Brugerproxy indikeret, men ingen proxy angivet. Nulstiller til standard.</translation>
+      <translation>Error de parámetro: se indicado proxy de usuario pero no se proporcionó proxy. Reiniciando al valor predeterminado.</translation>
     </message>
     <message>
       <location filename="../../NetworkManager.py" line="397"/>
       <source>Addon Manager: Unexpected {} response from server</source>
-      <translation>Tilføjelseshåndtering: Uventet {}-svar fra server</translation>
+      <translation>Administrador de complementos: Respuesta {} inesperada del servidor</translation>
     </message>
     <message>
       <location filename="../../NetworkManager.py" line="487"/>
       <source>Error with encrypted connection</source>
-      <translation>Fejl på krypteret forbindelse</translation>
+      <translation>Error con conexión cifrada</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="199"/>
       <source>Click for details about package {}</source>
-      <translation>Klik for detaljer om pakken {}</translation>
+      <translation>Haga clic para obtener detalles sobre el paquete {}</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="205"/>
       <source>Click for details about workbench {}</source>
-      <translation>Klik for detaljer om arbejdsbordet {}</translation>
+      <translation>Haga clic para obtener detalles sobre el banco de trabajo {}</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="207"/>
       <source>Click for details about macro {}</source>
-      <translation>Klik for detaljer om makroen {}</translation>
+      <translation>Haga clic para obtener detalles sobre la macro {}</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="346"/>
       <source>Tags</source>
-      <translation type="unfinished"/>
+      <translation>Etiquetas</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="392"/>
       <source>Maintainer</source>
-      <translation>Vedligeholder</translation>
+      <translation>Mantenedor</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="397"/>
       <source>Maintainers:</source>
-      <translation>Vedligeholdere:</translation>
+      <translation>Mantenedores:</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="404"/>
       <source>Author</source>
-      <translation>Forfatter</translation>
+      <translation>Autor</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="425"/>
       <source>{} ★ on GitHub</source>
-      <translation>{} ★ på GitHub</translation>
+      <translation>{} ★ en GitHub</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="427"/>
       <source>No ★, or not on GitHub</source>
-      <translation>Ingen ★, eller ikke på GitHub</translation>
+      <translation>Sin ★, o no está en GitHub</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="432"/>
       <source>Created </source>
-      <translation>Oprettet </translation>
+      <translation>Creado </translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="440"/>
       <source>Updated </source>
-      <translation>Opdateret </translation>
+      <translation>Actualizado </translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="443"/>
       <source>Score: </source>
-      <translation type="unfinished"/>
+      <translation>Puntuación: </translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="463"/>
@@ -724,13 +724,13 @@ Please restart to use the new version.</source>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="124"/>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="277"/>
       <source>Installed</source>
-      <translation>Installeret</translation>
+      <translation>Instalado</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="465"/>
       <location filename="../../package_list.py" line="527"/>
       <source>Up-to-date</source>
-      <translation>Opdateret</translation>
+      <translation>Al día</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="467"/>
@@ -739,64 +739,64 @@ Please restart to use the new version.</source>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="310"/>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="318"/>
       <source>Update available</source>
-      <translation>Opdatering tilgængelig</translation>
+      <translation>Actualización disponible</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="470"/>
       <location filename="../../package_list.py" line="535"/>
       <source>Pending restart</source>
-      <translation>Afventer genstart</translation>
+      <translation>Reinicio pendiente</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="472"/>
       <location filename="../../package_list.py" line="538"/>
       <source>DISABLED</source>
-      <translation>DEAKTIVERET</translation>
+      <translation>DESHABILITADO</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="487"/>
       <source>Installed version</source>
-      <translation>Installeret version</translation>
+      <translation>Versión instalada</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="496"/>
       <source>Unknown version</source>
-      <translation>Ukendt version</translation>
+      <translation>Versión desconocida</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="506"/>
       <source>Available version</source>
-      <translation>Tilgængelig version</translation>
+      <translation>Versión disponible</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_addon_buttons.py" line="93"/>
       <source>Install</source>
-      <translation>Installation</translation>
+      <translation>Instalar</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_addon_buttons.py" line="94"/>
       <source>Uninstall</source>
-      <translation>Afinstallation</translation>
+      <translation>Desinstalar</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_addon_buttons.py" line="95"/>
       <source>Disable</source>
-      <translation>Deaktivér</translation>
+      <translation>Deshabilitar</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_addon_buttons.py" line="96"/>
       <source>Enable</source>
-      <translation>Aktivér</translation>
+      <translation>Habilitar</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_addon_buttons.py" line="97"/>
       <source>Update</source>
-      <translation>Opdatering</translation>
+      <translation>Actualizar</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_addon_buttons.py" line="98"/>
       <source>Run</source>
-      <translation>Kør</translation>
+      <translation>Ejecutar</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_addon_buttons.py" line="99"/>
@@ -816,28 +816,28 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="88"/>
       <source>Addon Type</source>
-      <translation>Tilføjelsestype</translation>
+      <translation>Tipo de complemento</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="91"/>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="117"/>
       <source>Any</source>
-      <translation>Enhver</translation>
+      <translation>Cualquiera</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="94"/>
       <source>Workbench</source>
-      <translation>Arbejdsbord</translation>
+      <translation>Banco de trabajo</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="98"/>
       <source>Macro</source>
-      <translation>Makro</translation>
+      <translation type="unfinished"/>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="102"/>
       <source>Preference Pack</source>
-      <translation>Præferencepakke</translation>
+      <translation>Paquete de preferencias</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="106"/>
@@ -847,22 +847,22 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="110"/>
       <source>Other</source>
-      <translation type="unfinished"/>
+      <translation>Otros</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="114"/>
       <source>Installation Status</source>
-      <translation>Installationsstatus</translation>
+      <translation>Estado de la instalación</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="120"/>
       <source>Not installed</source>
-      <translation>Ikke installeret</translation>
+      <translation>No instalado</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="243"/>
       <source>Filter</source>
-      <translation type="unfinished"/>
+      <translation>Filtro</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_global_buttons.py" line="93"/>
@@ -882,7 +882,7 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../Widgets/addonmanager_widget_global_buttons.py" line="97"/>
       <source>Close</source>
-      <translation>Luk</translation>
+      <translation>Cerrar</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_global_buttons.py" line="98"/>
@@ -897,12 +897,12 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../Widgets/addonmanager_widget_global_buttons.py" line="108"/>
       <source>No updates available</source>
-      <translation>Ingen opdateringer tilgængelige</translation>
+      <translation>No hay actualizaciones disponibles</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="120"/>
       <source>Repository URL</source>
-      <translation>Repo-URL</translation>
+      <translation>URL del repositorio</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="175"/>
@@ -927,132 +927,132 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="235"/>
       <source>Disabled</source>
-      <translation>Deaktiveret</translation>
+      <translation>Deshabilitado</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="263"/>
       <source>Version {version} installed on {date}</source>
-      <translation>Version {version} installeret pr. {date}</translation>
+      <translation>Versión {version} instalada el {date}</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="270"/>
       <source>Version {version} installed</source>
-      <translation>Version {version} installeret</translation>
+      <translation>Versión {version} instalada</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="274"/>
       <source>Installed on {date}</source>
-      <translation>Installeret pr. {date}</translation>
+      <translation>Instalado el {date}</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="282"/>
       <source>Update check in progress</source>
-      <translation>Opdateringstjek i gang</translation>
+      <translation>Comprobación de actualizaciones en progreso</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="289"/>
       <source>Git tag &apos;{}&apos; checked out, no updates possible</source>
-      <translation>Git-tag &apos;{}&apos; tjekket ud, ingen opdateringer er mulige</translation>
+      <translation>Etiqueta Git &apos;{}&apos; marcada, no es posible actualizar</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="299"/>
       <source>Currently on branch {}, name changed to {}</source>
-      <translation>Aktuelt på gren {}, navn ændret til {}</translation>
+      <translation>Actualmente en la rama {}, nombre cambiado a {}</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="307"/>
       <source>Currently on branch {}, update available to version {}</source>
-      <translation>Pt. på gren {}, opdatering tilgængelig til version {}</translation>
+      <translation>Actualmente en la rama {}, actualización disponible a la versión {}</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="313"/>
       <source>Update available to version {}</source>
-      <translation>Opdatering tilgængelig til version {}</translation>
+      <translation>Actualización disponible a la versión {}</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="319"/>
       <source>This is the latest version available</source>
-      <translation>Dette er seneste tilgængelige version</translation>
+      <translation>Esta es la última versión disponible</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="339"/>
       <source>WARNING: This addon is currently installed, but disabled. Use the &apos;enable&apos; button to re-enable.</source>
-      <translation>ADVARSEL: Denne tilføjelse er p.t. installeret, men deaktiveret. Brug knappen &apos;Aktivér&apos; for at genaktivere.</translation>
+      <translation>ADVERTENCIA: Este complemento está actualmente instalado, pero desactivado. Utilice el botón &apos;habilitar&apos; para reactivarlo.</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="341"/>
       <source>WARNING: This addon is obsolete</source>
-      <translation>ADVARSEL: Denne tilføjelse er forældet</translation>
+      <translation>ATENCIÓN: Este complemento está obsoleto</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="343"/>
       <source>WARNING: This addon is Python 2 only</source>
-      <translation>ADVARSEL: Dette er en ren Python 2-tilføjelse</translation>
+      <translation>ADVERTENCIA: Este complemento es sólo Python 2</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="344"/>
       <source>WARNING: This addon requires FreeCAD {}</source>
-      <translation>ADVARSEL: Denne tilføjelse kræver FreeCAD {}</translation>
+      <translation>ADVERTENCIA: Este complemento requiere FreeCAD {}</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_search.py" line="68"/>
       <source>Filter is valid</source>
-      <translation>Filter er gyldigt</translation>
+      <translation>El filtro es válido</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_search.py" line="77"/>
       <source>Filter regular expression is invalid</source>
-      <translation type="unfinished"/>
+      <translation>La expresión regular del filtro no es válida</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_search.py" line="90"/>
       <source>Search...</source>
-      <translation>Søg...</translation>
+      <translation>Buscar...</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_view_control_bar.py" line="144"/>
       <source>Alphabetical</source>
       <comment>Sort order</comment>
-      <translation>Alfabetisk</translation>
+      <translation>Alfabético</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_view_control_bar.py" line="147"/>
       <source>Last Updated</source>
       <comment>Sort order</comment>
-      <translation>Senest opdateret</translation>
+      <translation>Actualizado por última vez</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_view_control_bar.py" line="150"/>
       <source>Date Created</source>
       <comment>Sort order</comment>
-      <translation>Oprettelsesdato</translation>
+      <translation>Fecha de creación</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_view_control_bar.py" line="153"/>
       <source>GitHub Stars</source>
       <comment>Sort order</comment>
-      <translation>GitHub-stjerner</translation>
+      <translation>Estrellas en GitHub</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_view_control_bar.py" line="157"/>
       <source>Score</source>
       <comment>Sort order</comment>
-      <translation type="unfinished"/>
+      <translation>Puntuación</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_view_selector.py" line="142"/>
       <source>Composite view</source>
-      <translation>Sammensat visning</translation>
+      <translation>Vista compuesta</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_view_selector.py" line="143"/>
       <source>Expanded view</source>
-      <translation>Udvidet visning</translation>
+      <translation>Vista extendida</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_view_selector.py" line="144"/>
       <source>Compact view</source>
-      <translation>Kompakt visning</translation>
+      <translation>Vista compacta</translation>
     </message>
   </context>
   <context>
@@ -1061,29 +1061,29 @@ Please restart to use the new version.</source>
       <location filename="../../compact_view.py" line="87"/>
       <location filename="../../compact_view.ui" line="59"/>
       <source>Icon</source>
-      <translation>Ikon</translation>
+      <translation>Icono</translation>
     </message>
     <message>
       <location filename="../../compact_view.py" line="90"/>
       <source>&lt;b&gt;Package Name&lt;/b&gt;</source>
-      <translation>&lt;b&gt;Pakkenavn&lt;/b&gt;</translation>
+      <translation>&lt;b&gt;Nombre del paquete&lt;/b&gt;</translation>
     </message>
     <message>
       <location filename="../../compact_view.py" line="91"/>
       <location filename="../../compact_view.ui" line="73"/>
       <source>Version</source>
-      <translation type="unfinished"/>
+      <translation>Versión</translation>
     </message>
     <message>
       <location filename="../../compact_view.py" line="94"/>
       <location filename="../../compact_view.ui" line="86"/>
       <source>Description</source>
-      <translation>Beskrivelse</translation>
+      <translation>Descripción</translation>
     </message>
     <message>
       <location filename="../../compact_view.py" line="97"/>
       <source>Update Available</source>
-      <translation>Opdatering tilgængelig</translation>
+      <translation>Actualización disponible</translation>
     </message>
     <message>
       <location filename="../../compact_view.ui" line="66"/>
@@ -1093,7 +1093,7 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../compact_view.ui" line="102"/>
       <source>UpdateAvailable</source>
-      <translation>Opdatering tilgængelig</translation>
+      <translation>Actualización disponible</translation>
     </message>
   </context>
   <context>
@@ -1101,7 +1101,7 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../dependency_resolution_dialog.ui" line="17"/>
       <source>Resolve Dependencies</source>
-      <translation>Løs afhængigheder</translation>
+      <translation>Resolver dependencias</translation>
     </message>
     <message>
       <location filename="../../dependency_resolution_dialog.ui" line="29"/>
@@ -1113,7 +1113,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../dependency_resolution_dialog.ui" line="43"/>
       <source>FreeCAD Addons</source>
-      <translation>FreeCAD-tilføjelser</translation>
+      <translation>Complementos de FreeCAD</translation>
     </message>
     <message>
       <location filename="../../dependency_resolution_dialog.ui" line="55"/>
@@ -1131,7 +1131,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../AddonManager.ui" line="14"/>
       <source>Addon Manager</source>
-      <translation>Tilføjelseshåndtering</translation>
+      <translation>Administrador de complementos</translation>
     </message>
     <message>
       <location filename="../../first_run.ui" line="17"/>
@@ -1146,12 +1146,12 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../first_run.ui" line="93"/>
       <source>Continue</source>
-      <translation type="unfinished"/>
+      <translation>Continuar</translation>
     </message>
     <message>
       <location filename="../../first_run.ui" line="100"/>
       <source>Cancel</source>
-      <translation>Annuller</translation>
+      <translation>Cancelar</translation>
     </message>
   </context>
   <context>
@@ -1160,41 +1160,41 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
       <location filename="../../expanded_view.py" line="136"/>
       <location filename="../../expanded_view.ui" line="68"/>
       <source>Icon</source>
-      <translation>Ikon</translation>
+      <translation>Icono</translation>
     </message>
     <message>
       <location filename="../../expanded_view.py" line="139"/>
       <source>&lt;h1&gt;Package Name&lt;/h1&gt;</source>
-      <translation>&lt;h1&gt;Pakkenavn&lt;/h1&gt;</translation>
+      <translation>&lt;h1&gt;Nombre del paquete&lt;/h1&gt;</translation>
     </message>
     <message>
       <location filename="../../expanded_view.py" line="142"/>
       <location filename="../../expanded_view.ui" line="114"/>
       <source>Version</source>
-      <translation type="unfinished"/>
+      <translation>Versión</translation>
     </message>
     <message>
       <location filename="../../expanded_view.py" line="143"/>
       <location filename="../../expanded_view.ui" line="121"/>
       <source>(tags)</source>
-      <translation type="unfinished"/>
+      <translation>(etiquetas)</translation>
     </message>
     <message>
       <location filename="../../expanded_view.py" line="146"/>
       <location filename="../../expanded_view.ui" line="156"/>
       <source>Description</source>
-      <translation>Beskrivelse</translation>
+      <translation>Descripción</translation>
     </message>
     <message>
       <location filename="../../expanded_view.py" line="149"/>
       <location filename="../../expanded_view.ui" line="178"/>
       <source>Maintainer</source>
-      <translation>Vedligeholder</translation>
+      <translation>Mantenedor</translation>
     </message>
     <message>
       <location filename="../../expanded_view.py" line="152"/>
       <source>Update Available</source>
-      <translation>Opdatering tilgængelig</translation>
+      <translation>Actualización disponible</translation>
     </message>
     <message>
       <location filename="../../expanded_view.ui" line="101"/>
@@ -1204,12 +1204,12 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../expanded_view.ui" line="128"/>
       <source>labelSort</source>
-      <translation>etiketsortering</translation>
+      <translation>Ordenar por etiquetas</translation>
     </message>
     <message>
       <location filename="../../expanded_view.ui" line="193"/>
       <source>UpdateAvailable</source>
-      <translation>Opdatering tilgængelig</translation>
+      <translation>Actualización disponible</translation>
     </message>
   </context>
   <context>
@@ -1262,7 +1262,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../AddonManagerOptions.ui" line="144"/>
       <source>Custom repositories</source>
-      <translation>Tilpasset repos</translation>
+      <translation>Repositorios personalizados</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="198"/>
@@ -1272,12 +1272,12 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../AddonManagerOptions.ui" line="204"/>
       <source>No proxy</source>
-      <translation>Ingen proxy</translation>
+      <translation>Sin proxy</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="220"/>
       <source>User system proxy</source>
-      <translation>Benyt systemproxy</translation>
+      <translation>Usar proxy del sistema</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="233"/>
@@ -1287,7 +1287,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../AddonManagerOptions.ui" line="264"/>
       <source>Score source URL</source>
-      <translation>Scorekilde-URL</translation>
+      <translation>URL de la fuente de puntaje</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="277"/>
@@ -1307,7 +1307,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../AddonManagerOptions.ui" line="334"/>
       <source>Advanced Options</source>
-      <translation>Avancerede indstillinger</translation>
+      <translation>Opciones avanzadas</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="340"/>
@@ -1330,22 +1330,22 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../package_details.ui" line="52"/>
       <source>Install</source>
-      <translation>Installation</translation>
+      <translation>Instalar</translation>
     </message>
     <message>
       <location filename="../../package_details.ui" line="59"/>
       <source>Uninstall</source>
-      <translation>Afinstallation</translation>
+      <translation>Desinstalar</translation>
     </message>
     <message>
       <location filename="../../package_details.ui" line="66"/>
       <source>Update</source>
-      <translation>Opdatering</translation>
+      <translation>Actualizar</translation>
     </message>
     <message>
       <location filename="../../package_details.ui" line="73"/>
       <source>Run Macro</source>
-      <translation>Kør makro</translation>
+      <translation>Ejecutar Macro</translation>
     </message>
     <message>
       <location filename="../../package_details.ui" line="80"/>
@@ -1358,7 +1358,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../PythonDependencyUpdateDialog.ui" line="14"/>
       <source>Manage Python Dependencies</source>
-      <translation>Håndtér Python-afhængigheder</translation>
+      <translation>Administrar dependencias de Python</translation>
     </message>
     <message>
       <location filename="../../PythonDependencyUpdateDialog.ui" line="20"/>
@@ -1386,7 +1386,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../AddonManager.py" line="194"/>
       <source>Addon Manager</source>
-      <translation>Tilføjelseshåndtering</translation>
+      <translation>Administrador de complementos</translation>
     </message>
   </context>
   <context>
@@ -1407,7 +1407,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../update_all.ui" line="14"/>
       <source>Updating Addons</source>
-      <translation>Opdaterer Tilføjelser</translation>
+      <translation>Actualización de Complementos o Extensiones</translation>
     </message>
     <message>
       <location filename="../../update_all.ui" line="23"/>
@@ -1420,7 +1420,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../addonmanager_toolbar_adapter.py" line="45"/>
       <source>Auto-Created Macro Toolbar</source>
-      <translation>Autooprettet Makroværktøjsbjælke</translation>
+      <translation>Barra de herramientas de macros creada automáticamente</translation>
     </message>
   </context>
   <context>
@@ -1433,22 +1433,22 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../add_toolbar_button_dialog.ui" line="20"/>
       <source>Add a toolbar button for this macro?</source>
-      <translation>Tilføj en værktøjsbjælkeknap for denne makro?</translation>
+      <translation>¿Añadir un botón de barra de herramientas para esta macro?</translation>
     </message>
     <message>
       <location filename="../../add_toolbar_button_dialog.ui" line="32"/>
       <source>Yes</source>
-      <translation>Ja</translation>
+      <translation>Sí</translation>
     </message>
     <message>
       <location filename="../../add_toolbar_button_dialog.ui" line="39"/>
       <source>No</source>
-      <translation>Nej</translation>
+      <translation type="unfinished"/>
     </message>
     <message>
       <location filename="../../add_toolbar_button_dialog.ui" line="46"/>
       <source>Never</source>
-      <translation>Aldrig</translation>
+      <translation>Nunca</translation>
     </message>
   </context>
   <context>
@@ -1456,7 +1456,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../change_branch.ui" line="14"/>
       <source>Change Branch</source>
-      <translation>Skift gren</translation>
+      <translation>Cambiar Rama</translation>
     </message>
     <message>
       <location filename="../../change_branch.ui" line="23"/>
@@ -1474,7 +1474,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../proxy_authentication.ui" line="20"/>
       <source>Proxy requires authentication</source>
-      <translation>Proxy kræver godkendelse</translation>
+      <translation>El proxy requiere autenticación</translation>
     </message>
     <message>
       <location filename="../../proxy_authentication.ui" line="29"/>
@@ -1484,7 +1484,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../proxy_authentication.ui" line="42"/>
       <source>Placeholder for proxy address</source>
-      <translation>Variabel til proxyadresse</translation>
+      <translation>Marcador de posición para la dirección del proxy</translation>
     </message>
     <message>
       <location filename="../../proxy_authentication.ui" line="49"/>
@@ -1494,17 +1494,17 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../proxy_authentication.ui" line="56"/>
       <source>Placeholder for proxy realm</source>
-      <translation>Variabel til proxyområde</translation>
+      <translation>Marcador de posición para el domino proxy</translation>
     </message>
     <message>
       <location filename="../../proxy_authentication.ui" line="67"/>
       <source>Username</source>
-      <translation>Brugernavn</translation>
+      <translation>Usuario</translation>
     </message>
     <message>
       <location filename="../../proxy_authentication.ui" line="77"/>
       <source>Password</source>
-      <translation>Adgangskode</translation>
+      <translation>Contraseña</translation>
     </message>
   </context>
   <context>
@@ -1512,7 +1512,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../select_toolbar_dialog.ui" line="14"/>
       <source>Select Toolbar</source>
-      <translation>Vælg Værktøjsbjælke</translation>
+      <translation>Seleccionar barra de herramientas</translation>
     </message>
     <message>
       <location filename="../../select_toolbar_dialog.ui" line="26"/>
@@ -1522,7 +1522,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../select_toolbar_dialog.ui" line="36"/>
       <source>Ask every time</source>
-      <translation>Spørg hver gang</translation>
+      <translation>Preguntar cada vez</translation>
     </message>
   </context>
   <context>
@@ -1535,22 +1535,22 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../toolbar_button.ui" line="20"/>
       <source>Add a toolbar button for this macro?</source>
-      <translation>Tilføj en værktøjsbjælkeknap for denne makro?</translation>
+      <translation>¿Añadir un botón de barra de herramientas para esta macro?</translation>
     </message>
     <message>
       <location filename="../../toolbar_button.ui" line="32"/>
       <source>Yes</source>
-      <translation>Ja</translation>
+      <translation>Sí</translation>
     </message>
     <message>
       <location filename="../../toolbar_button.ui" line="39"/>
       <source>No</source>
-      <translation>Nej</translation>
+      <translation type="unfinished"/>
     </message>
     <message>
       <location filename="../../toolbar_button.ui" line="46"/>
       <source>Never</source>
-      <translation>Aldrig</translation>
+      <translation>Nunca</translation>
     </message>
   </context>
 </TS>
