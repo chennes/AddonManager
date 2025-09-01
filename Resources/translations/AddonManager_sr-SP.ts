@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="da" sourcelanguage="en">
+<TS version="2.1" language="sr" sourcelanguage="en">
   <context>
     <name>AddCustomRepositoryDialog</name>
     <message>
@@ -11,12 +11,12 @@
     <message>
       <location filename="../../AddonManagerOptions_AddCustomRepository.ui" line="20"/>
       <source>Repository URL</source>
-      <translation>Repo-URL</translation>
+      <translation>URL адреса спремишта</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions_AddCustomRepository.ui" line="30"/>
       <source>Branch</source>
-      <translation>Gren</translation>
+      <translation>Грана</translation>
     </message>
   </context>
   <context>
@@ -24,12 +24,12 @@
     <message>
       <location filename="../../addonmanager_uninstaller_gui.py" line="122"/>
       <source>Finished removing {}</source>
-      <translation>Fjernelse af {} udført</translation>
+      <translation>Завршено уклањање {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller_gui.py" line="134"/>
       <source>Failed to remove some files</source>
-      <translation>Kunne ikke fjerne visse filer</translation>
+      <translation>Уклањање неких датотека није успело</translation>
     </message>
   </context>
   <context>
@@ -37,7 +37,7 @@
     <message>
       <location filename="../../addonmanager_update_all_gui.py" line="229"/>
       <source>Finished updating the following addons</source>
-      <translation>Opdatering af flg. tilføjelser udført</translation>
+      <translation>Завршено је ажурирање следећих додатака</translation>
     </message>
   </context>
   <context>
@@ -53,28 +53,28 @@
     <message>
       <location filename="../../Addon.py" line="369"/>
       <source>{}: Unrecognized internal workbench &apos;{}&apos;</source>
-      <translation>{}: Ukendt internt arbejdsbord &apos;{}&apos;</translation>
+      <translation>{}: Непрепознато унутрашње радно окружење &apos;{}&apos;</translation>
     </message>
     <message>
       <location filename="../../Addon.py" line="402"/>
       <source>Addon Developer Warning: Repository URL set in package.xml file for addon {} ({}) does not match the URL it was fetched from ({})</source>
-      <translation>Tiløjelsesudvikleradvarsel: Repo-URL angivet i package.xml fil til tilføjelsen {} ({}) matcher ikke URL'en, den blev hentet fra ({})</translation>
+      <translation>Упозорење за програмере додатака: URL адреса спремишта задата у package.xml датотеци за додатак {} ({}) не одговара URL адреси са које је преузет ({})</translation>
     </message>
     <message>
       <location filename="../../Addon.py" line="410"/>
       <source>Addon Developer Warning: Repository branch set in package.xml file for addon {} ({}) does not match the branch it was fetched from ({})</source>
-      <translation>Tiløjelsesudvikleradvarsel: Repo-grenen angivet i package.xml fil til tilføjelsen {} ({}) matcher ikke grenen, den blev hentet fra ({})</translation>
+      <translation>Упозорење за програмере додатака: Грана спремишта постављена у package.xml датотеци за додатак {} ({}) се не подудара са граном из које је преузета ({})</translation>
     </message>
     <message>
       <location filename="../../Addon.py" line="715"/>
       <location filename="../../Addon.py" line="731"/>
       <source>Got an error when trying to import {}</source>
-      <translation>Fik en fejl under forsøget på at importere {}</translation>
+      <translation>Грешка при покушају увоза {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_connection_checker.py" line="66"/>
       <source>Checking connection</source>
-      <translation>Tjekker forbindelse</translation>
+      <translation>Проверава се веза</translation>
     </message>
     <message>
       <location filename="../../addonmanager_connection_checker.py" line="67"/>
@@ -84,22 +84,22 @@
     <message>
       <location filename="../../addonmanager_connection_checker.py" line="89"/>
       <source>Connection failed</source>
-      <translation>Forbindelse fejlede</translation>
+      <translation>Веза није успостављена</translation>
     </message>
     <message>
       <location filename="../../addonmanager_dependency_installer.py" line="146"/>
       <source>Installation of Python package {} failed</source>
-      <translation>Installation af Python-pakken {} mislykkedes</translation>
+      <translation>Инсталација Python пакета {} није успела</translation>
     </message>
     <message>
       <location filename="../../addonmanager_dependency_installer.py" line="171"/>
       <source>Installation of optional package failed</source>
-      <translation>Installation af den valgfrie pakke {} mislykkedes</translation>
+      <translation>Инсталација необавезног пакета није успела</translation>
     </message>
     <message>
       <location filename="../../addonmanager_dependency_installer.py" line="190"/>
       <source>Installing required dependency {}</source>
-      <translation>Installerer krævet afhængighed {}</translation>
+      <translation>Инсталирање неопходне зависности {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_dependency_installer.py" line="200"/>
@@ -114,7 +114,7 @@
     <message>
       <location filename="../../addonmanager_git.py" line="161"/>
       <source>Backing up the original directory and re-cloning</source>
-      <translation>Sikkerhedskopiering af den oprindelige mappe og genkloning</translation>
+      <translation>Прављење резервне копије оригиналне фасцикле и поновно клонирање</translation>
     </message>
     <message>
       <location filename="../../addonmanager_git.py" line="266"/>
@@ -124,43 +124,43 @@
     <message>
       <location filename="../../addonmanager_git.py" line="407"/>
       <source>Git branch rename failed with the following message:</source>
-      <translation>Grenomdøbning mislykkedes med flg. meddelelse:</translation>
+      <translation>Преименовање Git гране није успело са следећом поруком:</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="170"/>
       <source>This addon requires Python packages that are not installed, and cannot be installed automatically. To use this addon you must install the following Python packages manually:</source>
-      <translation>Denne tilføjelse kræver Python-pakker, som ikke er installeret, og som kan ikke installeres automatisk. For at bruge denne tilføjelse skal du installere følgende Python-pakker manuelt:</translation>
+      <translation>Овај додатак захтева Python пакете који нису инсталирани и не могу се инсталирати аутоматски. Да бисте користили овај додатак, морате ручно да инсталирате следеће Python пакете:</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="176"/>
       <source>Too many to list</source>
-      <translation>For mange at opliste</translation>
+      <translation>Превише их је да би се излистали</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="181"/>
       <location filename="../../addonmanager_installer_gui.py" line="218"/>
       <source>Missing Requirement</source>
-      <translation>Manglende betingelse</translation>
+      <translation>Недостаје Захтев</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="201"/>
       <source>Addon &apos;{}&apos; requires &apos;{}&apos;, which is not available in your copy of FreeCAD.</source>
-      <translation>Tilføjelsen &apos;{}&apos; kræver &apos;{}&apos;, der er utilgængelig i denne FreeCAD.</translation>
+      <translation>Додатак &apos;{}&apos; захтева &apos;{}&apos;, што није доступно у твојојј копији FreeCAD-а.</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="209"/>
       <source>Addon &apos;{}&apos; requires the following workbenches, which are not available in your copy of FreeCAD:</source>
-      <translation>Tilføjelsen &apos;{}&apos; kræver flg. arbejdsborde, som er utilgængelige i denne FreeCAD:</translation>
+      <translation>Додатак &apos;{}&apos; захтева следећа радна окружења, која нису доступна у твојој копији FreeCAD-а:</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="216"/>
       <source>Press OK to install anyway.</source>
-      <translation>Tryk OK for at installere alligevel.</translation>
+      <translation>Притисни У реду да би ипак инсталирао.</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="260"/>
       <source>Incompatible Python version</source>
-      <translation>Inkompatibel Python-version</translation>
+      <translation>Некомпатибилна верзија Python-а</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="264"/>
@@ -170,59 +170,59 @@
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="285"/>
       <source>Optional dependency on {} ignored because it is not in the allow-list</source>
-      <translation type="unfinished"/>
+      <translation>Необавезна зависност од {} се занемарује јер се не налази на листи дозвољених</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="330"/>
       <location filename="../../addonmanager_installer_gui.py" line="331"/>
       <source>Installing dependencies</source>
-      <translation>Installation af afhængigheder</translation>
+      <translation>Инсталирање зависности</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="346"/>
       <source>Cannot execute Python</source>
-      <translation>Kan ikke eksekvere Python</translation>
+      <translation>Није могуће извршити Python</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="351"/>
       <source>Failed to automatically locate your Python executable, or the path is set incorrectly. Please check the Addon Manager preferences setting for the path to Python.</source>
-      <translation>Automatisk lokalisering af Python-eksekverbare mislykkedes, eller forkert angivet sti. Tjek Tilføjelseshåndtering-præferenceindstillingen for stien til Python.</translation>
+      <translation>Аутоматско проналажење извршне датотеке Python-а није успело, или је путања погрешно задата. Провери исправност ове путање у подешавањима за Менаџер додатака.</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="355"/>
       <source>Dependencies could not be installed. Continue with installation of {} anyway?</source>
-      <translation>Afhængigheder kunne ikke installeres. Fortsæt installation af {} alligevel?</translation>
+      <translation>Зависности се не могу инсталирати. Желиш ли ипак наставити са инсталацијом {}?</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="370"/>
       <source>Cannot execute pip</source>
-      <translation>Kan ikke eksekvere pip</translation>
+      <translation>Није могуће извршити pip</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="376"/>
       <source>Failed to execute pip, which may be missing from your Python installation. Please ensure your system has pip installed and try again. The failed command was:</source>
-      <translation>Mislykkedes at eksekvere pip, der måske mangler i Python-installationen. Tjek, at systemet har pip installeret og forsøg igen. Den fejlede kommando var:</translation>
+      <translation>Извршавање pip-а није успело, изгледа да он недостаје у твојој Python инсталацији. Увери се да твој систем има инсталиран pip и покушај поново. Неуспела команда је била:</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="380"/>
       <location filename="../../addonmanager_installer_gui.py" line="405"/>
       <source>Continue with installation of {} anyway?</source>
-      <translation>Fortsæt med installation af {} alligevel?</translation>
+      <translation>Желиш ли ипак наставити са инсталацијом {}?</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="397"/>
       <source>Package installation failed</source>
-      <translation>Pakkeinstallation mislykkedes</translation>
+      <translation>Инсталирање пакета није успело</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="401"/>
       <source>See Report View for detailed failure log.</source>
-      <translation>Se Rapportvisning for detaljeret fejllog.</translation>
+      <translation>Погледај Прегледач објава за детаљан дневник грешака.</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="448"/>
       <source>Installing Addon</source>
-      <translation>Installerer Tilføjelse</translation>
+      <translation>Инсталирање Додатка</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="449"/>
@@ -232,96 +232,96 @@
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="463"/>
       <source>Cancelling</source>
-      <translation>Afbryder</translation>
+      <translation>Отказивање</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="464"/>
       <source>Cancelling installation of &apos;{}&apos;</source>
-      <translation>Afbryder installationen af &apos;{}&apos;</translation>
+      <translation>Отказивање од инсталације &apos;{}&apos;</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="489"/>
       <location filename="../../addonmanager_package_details_controller.py" line="260"/>
       <source>Success</source>
-      <translation>Succes</translation>
+      <translation>Успешно</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="490"/>
       <source>{} was installed successfully</source>
-      <translation>{} er hermed installeret</translation>
+      <translation>{} је успешно инсталиран</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="502"/>
       <source>Installation Failed</source>
-      <translation>Installation mislykkedes</translation>
+      <translation>Инсталација није успела</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="504"/>
       <source>Failed to install {}</source>
-      <translation>Mislykkedes at installere {}</translation>
+      <translation>Инсталирање {} није успело</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="614"/>
       <source>Create new toolbar</source>
-      <translation>Opret ny værktøjsbjælke</translation>
+      <translation>Направи нову палету са алаткама</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="684"/>
       <source>A macro installed with the FreeCAD Addon Manager</source>
-      <translation>En makro installeret med FreeCAD Tilføjelseshåndtering</translation>
+      <translation>Макро инсталиран са FreeCAD Менаџером додатака</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer_gui.py" line="686"/>
       <source>Run</source>
       <comment>Indicates a macro that can be &apos;run&apos;</comment>
-      <translation>Kør</translation>
+      <translation>Покрени</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer.py" line="366"/>
       <source>Received {} response code from server</source>
-      <translation type="unfinished"/>
+      <translation>Примљен {} код одговора са сервера</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer.py" line="536"/>
       <source>Failed to install macro {}</source>
-      <translation>Mislykkedes at installere makroen {}</translation>
+      <translation>Инсталирање макро-а {} није успело</translation>
     </message>
     <message>
       <location filename="../../addonmanager_installer.py" line="570"/>
       <source>Failed to create installation manifest file:
 </source>
-      <translation>Mislykkedes at oprette installationsmanifestfil:
+      <translation>Није успело прављење манифест датотеке инсталације:
 </translation>
     </message>
     <message>
       <location filename="../../addonmanager_macro.py" line="161"/>
       <source>Unable to open macro wiki page at {}</source>
-      <translation>Kan ikke åbne makro wiki-siden på {}</translation>
+      <translation>Није могуће отворити макро wiki страницу на {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_macro.py" line="174"/>
       <source>Unable to fetch the code of this macro.</source>
-      <translation>Kan ikke hente denne makros kode.</translation>
+      <translation>Није могуће преузети код овог макроа.</translation>
     </message>
     <message>
       <location filename="../../addonmanager_macro.py" line="189"/>
       <source>Unable to retrieve a description from the wiki for macro {}</source>
-      <translation>Kan ikke hente en beskrivelse fra wiki'en til makroen {}</translation>
+      <translation>Није могуће преузети опис са wiki-ја за макро {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_macro.py" line="221"/>
       <source>Unable to open macro code URL {}</source>
-      <translation>Kan ikke åbne makrokode-URL'en {}</translation>
+      <translation>Није могуће отворити URL адресу кода макроа {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_macro.py" line="354"/>
       <source>Unable to fetch macro-specified file {} from {}</source>
-      <translation>Kan ikke hente makrospecificeret fil {} fra {}</translation>
+      <translation>Није могуће преузети датотеку {} наведену макроом из {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_macro.py" line="362"/>
       <source>Could not locate macro-specified file {} (expected at {})</source>
-      <translation>Kunne ikke finde makrospecificeret fil {} (forventet på {})</translation>
+      <translation>Није могуће лоцирати датотеку наведену макро-ом {} (требала је бити у {})</translation>
     </message>
     <message>
       <location filename="../../addonmanager_package_details_controller.py" line="129"/>
@@ -361,57 +361,57 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../addonmanager_readme_controller.py" line="82"/>
       <source>Loading info for {} from the FreeCAD Macro Recipes wiki...</source>
-      <translation>Indlæser info for {} fra FreeCAD Makroopskrifter wiki...</translation>
+      <translation>Учитавање информација за {} са wiki страна FreeCAD Macro Recipes...</translation>
     </message>
     <message>
       <location filename="../../addonmanager_readme_controller.py" line="90"/>
       <source>Loading page for {} from {}...</source>
-      <translation>Indlæser side til {} fra {}...</translation>
+      <translation>Учитавање странице за {} од {}...</translation>
     </message>
     <message>
       <location filename="../../addonmanager_readme_controller.py" line="108"/>
       <source>Failed to download data from {} -- received response code {}.</source>
-      <translation>Mislykkedes at downloade data fra {} – modtaget svarkode {}.</translation>
+      <translation>Преузимање података са {} није успело -- примљен је код одговора {}.</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller_gui.py" line="86"/>
       <source>Confirm remove</source>
-      <translation>Bekræft fjernelse</translation>
+      <translation>Потврди уклањање</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller_gui.py" line="87"/>
       <source>Are you sure you want to uninstall {}?</source>
-      <translation>Sikker på, at {} skal afinstalleres?</translation>
+      <translation>Да ли си сигуран да желиш да деинсталираш {}?</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller_gui.py" line="97"/>
       <source>Removing Addon</source>
-      <translation>Fjerner tilføjelse</translation>
+      <translation>Уклањање Додатка</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller_gui.py" line="98"/>
       <source>Removing {}</source>
-      <translation>Fjerner {}</translation>
+      <translation>Уклања се {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller_gui.py" line="121"/>
       <source>Uninstall complete</source>
-      <translation>Afinstallation er færdig</translation>
+      <translation>Деинсталирање је завршено</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller_gui.py" line="133"/>
       <source>Uninstall failed</source>
-      <translation>Afinstallation mislykkedes</translation>
+      <translation>Деинсталирање није успело</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller.py" line="110"/>
       <source>An unknown error occurred</source>
-      <translation>En ukendt fejl opstod</translation>
+      <translation>Дошло је до непознате грешке</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller.py" line="133"/>
       <source>Could not find addon {} to remove it.</source>
-      <translation>Kunne ikke finde tilføjelsen {} for at fjerne den.</translation>
+      <translation>Није могуће пронаћи Додатак {} за уклањање.</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller.py" line="157"/>
@@ -421,47 +421,47 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../addonmanager_uninstaller.py" line="176"/>
       <source>Removed extra installed file {}</source>
-      <translation>Fjernede ekstra installeret fil {}</translation>
+      <translation>Уклоњена је додатно инсталирана датотека {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller.py" line="190"/>
       <source>Error while trying to remove extra installed file {}</source>
-      <translation>Fejl under forsøget på at fjerne ekstra installeret fil {}</translation>
+      <translation>Грешка при покушају уклањања додатно инсталиране датотеке {}</translation>
     </message>
     <message>
       <location filename="../../addonmanager_uninstaller.py" line="254"/>
       <source>Error while trying to remove macro file {}:</source>
-      <translation>Fejl under forsøget på at fjerne makrofilen {}:</translation>
+      <translation>Грешка при покушају уклањања датотеке макро-а {}:</translation>
     </message>
     <message>
       <location filename="../../addonmanager_update_all_gui.py" line="80"/>
       <source>Installing</source>
-      <translation>Installerer</translation>
+      <translation>Инсталирање</translation>
     </message>
     <message>
       <location filename="../../addonmanager_update_all_gui.py" line="83"/>
       <source>Succeeded</source>
-      <translation>Gennemført</translation>
+      <translation>Уcпешно</translation>
     </message>
     <message>
       <location filename="../../addonmanager_update_all_gui.py" line="85"/>
       <source>Failed</source>
-      <translation>Mislykket</translation>
+      <translation>Неуспешно</translation>
     </message>
     <message>
       <location filename="../../addonmanager_update_all_gui.py" line="235"/>
       <source>Update was cancelled</source>
-      <translation>Opdatering blev afbrudt</translation>
+      <translation>Ажурирање је отказано</translation>
     </message>
     <message>
       <location filename="../../addonmanager_update_all_gui.py" line="236"/>
       <source>some addons may have been updated</source>
-      <translation>nogle tilføjelser kan være blevet opdateret</translation>
+      <translation>неки додаци су можда ажурирани</translation>
     </message>
     <message>
       <location filename="../../addonmanager_workers_startup.py" line="111"/>
       <source>WARNING: Duplicate addon {} ignored</source>
-      <translation>ADVARSEL: Dublettilføjelsen {} ignoreret</translation>
+      <translation>УПОЗОРЕЊЕ: Дупликат додатка {} је игнорисан</translation>
     </message>
     <message>
       <location filename="../../addonmanager_workers_startup.py" line="218"/>
@@ -486,12 +486,12 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../addonmanager_workers_startup.py" line="432"/>
       <source>Failed to read metadata from {name}</source>
-      <translation>Kunne ikke læse metadata fra {name}</translation>
+      <translation>Читање метаподатака са {name} није успело</translation>
     </message>
     <message>
       <location filename="../../addonmanager_workers_startup.py" line="456"/>
       <source>Failed to fetch code for macro &apos;{name}&apos;</source>
-      <translation>Kunne ikke hente kode til makroen &apos;{name}&apos;</translation>
+      <translation>Није успело преузимање кода за &apos;{name}&apos;</translation>
     </message>
     <message>
       <location filename="../../addonmanager_workers_startup.py" line="509"/>
@@ -528,17 +528,17 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../AddonManager.py" line="393"/>
       <source>You must restart FreeCAD for changes to take effect.</source>
-      <translation>FreeCAD skal genstartes for at effektuere ændringerne.</translation>
+      <translation>Мораш поново покренути FreeCAD да би промене ступиле на снагу.</translation>
     </message>
     <message>
       <location filename="../../AddonManager.py" line="402"/>
       <source>Restart now</source>
-      <translation>Genstart nu</translation>
+      <translation>Поново покрени сада</translation>
     </message>
     <message>
       <location filename="../../AddonManager.py" line="403"/>
       <source>Restart later</source>
-      <translation>Genstart senere</translation>
+      <translation>Поново покрени касније</translation>
     </message>
     <message>
       <location filename="../../AddonManager.py" line="446"/>
@@ -556,44 +556,44 @@ Please restart to use the new version.</source>
       <location filename="../../AddonManager.py" line="645"/>
       <location filename="../../AddonManager.py" line="730"/>
       <source>Cannot launch a new installer until the previous one has finished.</source>
-      <translation>Kan ikke starte en ny installer, før den foregående er færdig.</translation>
+      <translation>Не може се покренути нови програм за инсталацију док се претходни не заврши.</translation>
     </message>
     <message>
       <location filename="../../AddonManager.py" line="715"/>
       <source>Temporary installation of macro failed.</source>
-      <translation>Midlertidig installation af makro mislykkedes.</translation>
+      <translation>Привремена инсталација макро-а није успела.</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.py" line="249"/>
       <source>Repository URL</source>
       <comment>Preferences header for custom repositories</comment>
-      <translation>Repo-URL</translation>
+      <translation>URL адреса спремишта</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.py" line="255"/>
       <source>Branch name</source>
       <comment>Preferences header for custom repositories</comment>
-      <translation>Grennavn</translation>
+      <translation>Име гране</translation>
     </message>
     <message>
       <location filename="../../change_branch.py" line="103"/>
       <source>DANGER: Developer feature</source>
-      <translation>FARE: Udviklerfunktion</translation>
+      <translation>ОПАСНОСТ: Функција за програмере</translation>
     </message>
     <message>
       <location filename="../../change_branch.py" line="110"/>
       <source>DANGER: Switching branches is intended for developers and beta testers, and may result in broken, non-backwards compatible documents, instability, crashes, and/or the premature heat death of the universe. Are you sure you want to continue?</source>
-      <translation>FARE: Skift af grene er beregnet til udviklere og betatestere, og det kan resultere i ødelagte, ikke-bagudkompatible dokumenter, ustabilitet, nedbrud og/eller for tidlig varmedød for universet. Fortsæt alligevel?</translation>
+      <translation>ОПАСНОСТ: Пребацивање грана је намењено програмерима и бета тестерима и може да доведе до оштећених докумената који нису компатибилни уназад, нестабилности, кварова и/или прераног топлотног колапса универзума. Да ли си сигуран да желиш да наставиш?</translation>
     </message>
     <message>
       <location filename="../../change_branch.py" line="119"/>
       <source>There are local changes</source>
-      <translation>Der er lokale ændringer</translation>
+      <translation>Постоје локалне промене</translation>
     </message>
     <message>
       <location filename="../../change_branch.py" line="124"/>
       <source>WARNING: This repo has uncommitted local changes. Are you sure you want to change branches (bringing the changes with you)?</source>
-      <translation>ADVARSEL: Dette repo har ikke-committede lokale ændringer. Sikker på, at der skal skiftes grene (medbringende ændringerne)?</translation>
+      <translation>УПОЗОРЕЊЕ: Ово спремиште има неповезане локалне промене. Да ли си сигуран да желиш да промениш гране (доносећи промене са собом)?</translation>
     </message>
     <message>
       <location filename="../../change_branch.py" line="155"/>
@@ -619,19 +619,19 @@ Please restart to use the new version.</source>
       <location filename="../../change_branch.py" line="272"/>
       <source>Local</source>
       <comment>Table header for local git ref name</comment>
-      <translation>Lokal</translation>
+      <translation>Локално</translation>
     </message>
     <message>
       <location filename="../../change_branch.py" line="278"/>
       <source>Remote tracking</source>
       <comment>Table header for git remote tracking branch name</comment>
-      <translation>Fjernsporing</translation>
+      <translation>Даљинско праћење</translation>
     </message>
     <message>
       <location filename="../../change_branch.py" line="284"/>
       <source>Last Updated</source>
       <comment>Table header for git update date</comment>
-      <translation>Senest opdateret</translation>
+      <translation>Последње ажурирано</translation>
     </message>
     <message>
       <location filename="../../NetworkManager.py" line="200"/>
@@ -641,82 +641,82 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../NetworkManager.py" line="232"/>
       <source>Parameter error: mutually exclusive proxy options set. Resetting to default.</source>
-      <translation>Parameterfejl: Gensidig eksklusiv proxyindstillingssæt. Nulstiller til standard.</translation>
+      <translation>Грешка у параметру: постављене су међусобно искључиве прокси опције. Враћање на подразумеване вредности.</translation>
     </message>
     <message>
       <location filename="../../NetworkManager.py" line="247"/>
       <source>Parameter error: user proxy indicated, but no proxy provided. Resetting to default.</source>
-      <translation>Parameterfejl: Brugerproxy indikeret, men ingen proxy angivet. Nulstiller til standard.</translation>
+      <translation>Грешка у параметру: кориснички прокси је назначен, али није обезбеђен. Враћање на подразумеване вредности.</translation>
     </message>
     <message>
       <location filename="../../NetworkManager.py" line="397"/>
       <source>Addon Manager: Unexpected {} response from server</source>
-      <translation>Tilføjelseshåndtering: Uventet {}-svar fra server</translation>
+      <translation>Менаџер додатака: Неочекивани {} одговор од сервера</translation>
     </message>
     <message>
       <location filename="../../NetworkManager.py" line="487"/>
       <source>Error with encrypted connection</source>
-      <translation>Fejl på krypteret forbindelse</translation>
+      <translation>Грешка шифроване везе</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="199"/>
       <source>Click for details about package {}</source>
-      <translation>Klik for detaljer om pakken {}</translation>
+      <translation>Кликни за детаље о пакету {}</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="205"/>
       <source>Click for details about workbench {}</source>
-      <translation>Klik for detaljer om arbejdsbordet {}</translation>
+      <translation>Кликни за детаље о радном окружењу {}</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="207"/>
       <source>Click for details about macro {}</source>
-      <translation>Klik for detaljer om makroen {}</translation>
+      <translation>Кликни за детаље о макро-у {}</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="346"/>
       <source>Tags</source>
-      <translation type="unfinished"/>
+      <translation>Тагови</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="392"/>
       <source>Maintainer</source>
-      <translation>Vedligeholder</translation>
+      <translation>Програмер задужен за одржавање</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="397"/>
       <source>Maintainers:</source>
-      <translation>Vedligeholdere:</translation>
+      <translation>Програмери задужени за одржавање:</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="404"/>
       <source>Author</source>
-      <translation>Forfatter</translation>
+      <translation>Аутор</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="425"/>
       <source>{} ★ on GitHub</source>
-      <translation>{} ★ på GitHub</translation>
+      <translation>{} ★ на GitHub</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="427"/>
       <source>No ★, or not on GitHub</source>
-      <translation>Ingen ★, eller ikke på GitHub</translation>
+      <translation>Нема ★, или нема на GitHub</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="432"/>
       <source>Created </source>
-      <translation>Oprettet </translation>
+      <translation>Направљено </translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="440"/>
       <source>Updated </source>
-      <translation>Opdateret </translation>
+      <translation>Ажурирано </translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="443"/>
       <source>Score: </source>
-      <translation type="unfinished"/>
+      <translation>Оцена: </translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="463"/>
@@ -724,13 +724,13 @@ Please restart to use the new version.</source>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="124"/>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="277"/>
       <source>Installed</source>
-      <translation>Installeret</translation>
+      <translation>Инсталирано</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="465"/>
       <location filename="../../package_list.py" line="527"/>
       <source>Up-to-date</source>
-      <translation>Opdateret</translation>
+      <translation>Ажурирано</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="467"/>
@@ -739,64 +739,64 @@ Please restart to use the new version.</source>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="310"/>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="318"/>
       <source>Update available</source>
-      <translation>Opdatering tilgængelig</translation>
+      <translation>Доступно је ажурирање</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="470"/>
       <location filename="../../package_list.py" line="535"/>
       <source>Pending restart</source>
-      <translation>Afventer genstart</translation>
+      <translation>Поновно покретање на чекању</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="472"/>
       <location filename="../../package_list.py" line="538"/>
       <source>DISABLED</source>
-      <translation>DEAKTIVERET</translation>
+      <translation>ОНЕМОГУЋЕНО</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="487"/>
       <source>Installed version</source>
-      <translation>Installeret version</translation>
+      <translation>Инсталирана верзија</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="496"/>
       <source>Unknown version</source>
-      <translation>Ukendt version</translation>
+      <translation>Непозната верзија</translation>
     </message>
     <message>
       <location filename="../../package_list.py" line="506"/>
       <source>Available version</source>
-      <translation>Tilgængelig version</translation>
+      <translation>Доступна верзија</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_addon_buttons.py" line="93"/>
       <source>Install</source>
-      <translation>Installation</translation>
+      <translation>Инсталирај</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_addon_buttons.py" line="94"/>
       <source>Uninstall</source>
-      <translation>Afinstallation</translation>
+      <translation>Деинсталирај</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_addon_buttons.py" line="95"/>
       <source>Disable</source>
-      <translation>Deaktivér</translation>
+      <translation>Онемогући</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_addon_buttons.py" line="96"/>
       <source>Enable</source>
-      <translation>Aktivér</translation>
+      <translation>Омогући</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_addon_buttons.py" line="97"/>
       <source>Update</source>
-      <translation>Opdatering</translation>
+      <translation>Ажурирање</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_addon_buttons.py" line="98"/>
       <source>Run</source>
-      <translation>Kør</translation>
+      <translation>Покрени</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_addon_buttons.py" line="99"/>
@@ -816,28 +816,28 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="88"/>
       <source>Addon Type</source>
-      <translation>Tilføjelsestype</translation>
+      <translation>Врста додатка</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="91"/>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="117"/>
       <source>Any</source>
-      <translation>Enhver</translation>
+      <translation>Било који</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="94"/>
       <source>Workbench</source>
-      <translation>Arbejdsbord</translation>
+      <translation>Радно окружење</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="98"/>
       <source>Macro</source>
-      <translation>Makro</translation>
+      <translation>Макро</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="102"/>
       <source>Preference Pack</source>
-      <translation>Præferencepakke</translation>
+      <translation>Пакет подешавања</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="106"/>
@@ -852,17 +852,17 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="114"/>
       <source>Installation Status</source>
-      <translation>Installationsstatus</translation>
+      <translation>Статус инсталације</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="120"/>
       <source>Not installed</source>
-      <translation>Ikke installeret</translation>
+      <translation>Није инсталирано</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_filter_selector.py" line="243"/>
       <source>Filter</source>
-      <translation type="unfinished"/>
+      <translation>Филтер</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_global_buttons.py" line="93"/>
@@ -882,7 +882,7 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../Widgets/addonmanager_widget_global_buttons.py" line="97"/>
       <source>Close</source>
-      <translation>Luk</translation>
+      <translation>Затвори</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_global_buttons.py" line="98"/>
@@ -897,12 +897,12 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../Widgets/addonmanager_widget_global_buttons.py" line="108"/>
       <source>No updates available</source>
-      <translation>Ingen opdateringer tilgængelige</translation>
+      <translation>Нема доступних ажурирања</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="120"/>
       <source>Repository URL</source>
-      <translation>Repo-URL</translation>
+      <translation>URL адреса спремишта</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="175"/>
@@ -927,132 +927,132 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="235"/>
       <source>Disabled</source>
-      <translation>Deaktiveret</translation>
+      <translation>Онемогућен унос</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="263"/>
       <source>Version {version} installed on {date}</source>
-      <translation>Version {version} installeret pr. {date}</translation>
+      <translation>Дана {date} инсталирана је верзија {version}</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="270"/>
       <source>Version {version} installed</source>
-      <translation>Version {version} installeret</translation>
+      <translation>Инсталирана је верзија {version}</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="274"/>
       <source>Installed on {date}</source>
-      <translation>Installeret pr. {date}</translation>
+      <translation>Инсталирано {date}</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="282"/>
       <source>Update check in progress</source>
-      <translation>Opdateringstjek i gang</translation>
+      <translation>У току је провера ажурирања</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="289"/>
       <source>Git tag &apos;{}&apos; checked out, no updates possible</source>
-      <translation>Git-tag &apos;{}&apos; tjekket ud, ingen opdateringer er mulige</translation>
+      <translation>Git таг &apos;{}&apos; checked out, ажурирања нису могућа</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="299"/>
       <source>Currently on branch {}, name changed to {}</source>
-      <translation>Aktuelt på gren {}, navn ændret til {}</translation>
+      <translation>Тренутно на грани {}, промењено је име у {}</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="307"/>
       <source>Currently on branch {}, update available to version {}</source>
-      <translation>Pt. på gren {}, opdatering tilgængelig til version {}</translation>
+      <translation>На грани {} доступно је ажурирање до верзије {}</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="313"/>
       <source>Update available to version {}</source>
-      <translation>Opdatering tilgængelig til version {}</translation>
+      <translation>Доступно је ажурирање до верзије {}</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="319"/>
       <source>This is the latest version available</source>
-      <translation>Dette er seneste tilgængelige version</translation>
+      <translation>Ово је најновија доступна верзија</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="339"/>
       <source>WARNING: This addon is currently installed, but disabled. Use the &apos;enable&apos; button to re-enable.</source>
-      <translation>ADVARSEL: Denne tilføjelse er p.t. installeret, men deaktiveret. Brug knappen &apos;Aktivér&apos; for at genaktivere.</translation>
+      <translation>УПОЗОРЕЊЕ: Овај додатак је тренутно инсталиран, али онемогућен. Користи &apos;омогући&apos; дугме да би поново омогућио.</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="341"/>
       <source>WARNING: This addon is obsolete</source>
-      <translation>ADVARSEL: Denne tilføjelse er forældet</translation>
+      <translation>УПОЗОРЕЊЕ: Овај додатак је застарео</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="343"/>
       <source>WARNING: This addon is Python 2 only</source>
-      <translation>ADVARSEL: Dette er en ren Python 2-tilføjelse</translation>
+      <translation>УПОЗОРЕЊЕ: Овај додатак је само за Python 2</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_package_details_view.py" line="344"/>
       <source>WARNING: This addon requires FreeCAD {}</source>
-      <translation>ADVARSEL: Denne tilføjelse kræver FreeCAD {}</translation>
+      <translation>УПОЗОРЕЊЕ: Овај додатак захтева FreeCAD {}</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_search.py" line="68"/>
       <source>Filter is valid</source>
-      <translation>Filter er gyldigt</translation>
+      <translation>Филтер је важећи</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_search.py" line="77"/>
       <source>Filter regular expression is invalid</source>
-      <translation type="unfinished"/>
+      <translation>Регуларни израз филтра је неважећи</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_search.py" line="90"/>
       <source>Search...</source>
-      <translation>Søg...</translation>
+      <translation>Претрага...</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_view_control_bar.py" line="144"/>
       <source>Alphabetical</source>
       <comment>Sort order</comment>
-      <translation>Alfabetisk</translation>
+      <translation>По абецедном реду</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_view_control_bar.py" line="147"/>
       <source>Last Updated</source>
       <comment>Sort order</comment>
-      <translation>Senest opdateret</translation>
+      <translation>Последње ажурирано</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_view_control_bar.py" line="150"/>
       <source>Date Created</source>
       <comment>Sort order</comment>
-      <translation>Oprettelsesdato</translation>
+      <translation>Датум креирања</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_view_control_bar.py" line="153"/>
       <source>GitHub Stars</source>
       <comment>Sort order</comment>
-      <translation>GitHub-stjerner</translation>
+      <translation>GitHub звезде</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_view_control_bar.py" line="157"/>
       <source>Score</source>
       <comment>Sort order</comment>
-      <translation type="unfinished"/>
+      <translation>Оцена</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_view_selector.py" line="142"/>
       <source>Composite view</source>
-      <translation>Sammensat visning</translation>
+      <translation>Раздвојени изглед</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_view_selector.py" line="143"/>
       <source>Expanded view</source>
-      <translation>Udvidet visning</translation>
+      <translation>Проширен приказ</translation>
     </message>
     <message>
       <location filename="../../Widgets/addonmanager_widget_view_selector.py" line="144"/>
       <source>Compact view</source>
-      <translation>Kompakt visning</translation>
+      <translation>Компактан изглед</translation>
     </message>
   </context>
   <context>
@@ -1061,29 +1061,29 @@ Please restart to use the new version.</source>
       <location filename="../../compact_view.py" line="87"/>
       <location filename="../../compact_view.ui" line="59"/>
       <source>Icon</source>
-      <translation>Ikon</translation>
+      <translation>Икона</translation>
     </message>
     <message>
       <location filename="../../compact_view.py" line="90"/>
       <source>&lt;b&gt;Package Name&lt;/b&gt;</source>
-      <translation>&lt;b&gt;Pakkenavn&lt;/b&gt;</translation>
+      <translation>&lt;b&gt;Име пакета&lt;/b&gt;</translation>
     </message>
     <message>
       <location filename="../../compact_view.py" line="91"/>
       <location filename="../../compact_view.ui" line="73"/>
       <source>Version</source>
-      <translation type="unfinished"/>
+      <translation>Верзија</translation>
     </message>
     <message>
       <location filename="../../compact_view.py" line="94"/>
       <location filename="../../compact_view.ui" line="86"/>
       <source>Description</source>
-      <translation>Beskrivelse</translation>
+      <translation>Опис</translation>
     </message>
     <message>
       <location filename="../../compact_view.py" line="97"/>
       <source>Update Available</source>
-      <translation>Opdatering tilgængelig</translation>
+      <translation>Доступно је ажурирање</translation>
     </message>
     <message>
       <location filename="../../compact_view.ui" line="66"/>
@@ -1093,7 +1093,7 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../compact_view.ui" line="102"/>
       <source>UpdateAvailable</source>
-      <translation>Opdatering tilgængelig</translation>
+      <translation>На располагању је новија верзија</translation>
     </message>
   </context>
   <context>
@@ -1101,7 +1101,7 @@ Please restart to use the new version.</source>
     <message>
       <location filename="../../dependency_resolution_dialog.ui" line="17"/>
       <source>Resolve Dependencies</source>
-      <translation>Løs afhængigheder</translation>
+      <translation>Реши зависности</translation>
     </message>
     <message>
       <location filename="../../dependency_resolution_dialog.ui" line="29"/>
@@ -1113,7 +1113,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../dependency_resolution_dialog.ui" line="43"/>
       <source>FreeCAD Addons</source>
-      <translation>FreeCAD-tilføjelser</translation>
+      <translation>FreeCAD Додаци</translation>
     </message>
     <message>
       <location filename="../../dependency_resolution_dialog.ui" line="55"/>
@@ -1131,7 +1131,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../AddonManager.ui" line="14"/>
       <source>Addon Manager</source>
-      <translation>Tilføjelseshåndtering</translation>
+      <translation>Менаџер додатака</translation>
     </message>
     <message>
       <location filename="../../first_run.ui" line="17"/>
@@ -1146,12 +1146,12 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../first_run.ui" line="93"/>
       <source>Continue</source>
-      <translation type="unfinished"/>
+      <translation>Настави</translation>
     </message>
     <message>
       <location filename="../../first_run.ui" line="100"/>
       <source>Cancel</source>
-      <translation>Annuller</translation>
+      <translation>Откажи</translation>
     </message>
   </context>
   <context>
@@ -1160,41 +1160,41 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
       <location filename="../../expanded_view.py" line="136"/>
       <location filename="../../expanded_view.ui" line="68"/>
       <source>Icon</source>
-      <translation>Ikon</translation>
+      <translation>Икона</translation>
     </message>
     <message>
       <location filename="../../expanded_view.py" line="139"/>
       <source>&lt;h1&gt;Package Name&lt;/h1&gt;</source>
-      <translation>&lt;h1&gt;Pakkenavn&lt;/h1&gt;</translation>
+      <translation>&lt;h1&gt;Име пакета&lt;/h1&gt;</translation>
     </message>
     <message>
       <location filename="../../expanded_view.py" line="142"/>
       <location filename="../../expanded_view.ui" line="114"/>
       <source>Version</source>
-      <translation type="unfinished"/>
+      <translation>Верзија</translation>
     </message>
     <message>
       <location filename="../../expanded_view.py" line="143"/>
       <location filename="../../expanded_view.ui" line="121"/>
       <source>(tags)</source>
-      <translation type="unfinished"/>
+      <translation>(тагови)</translation>
     </message>
     <message>
       <location filename="../../expanded_view.py" line="146"/>
       <location filename="../../expanded_view.ui" line="156"/>
       <source>Description</source>
-      <translation>Beskrivelse</translation>
+      <translation>Опис</translation>
     </message>
     <message>
       <location filename="../../expanded_view.py" line="149"/>
       <location filename="../../expanded_view.ui" line="178"/>
       <source>Maintainer</source>
-      <translation>Vedligeholder</translation>
+      <translation>Програмер задужен за одржавање</translation>
     </message>
     <message>
       <location filename="../../expanded_view.py" line="152"/>
       <source>Update Available</source>
-      <translation>Opdatering tilgængelig</translation>
+      <translation>Доступно је ажурирање</translation>
     </message>
     <message>
       <location filename="../../expanded_view.ui" line="101"/>
@@ -1204,12 +1204,12 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../expanded_view.ui" line="128"/>
       <source>labelSort</source>
-      <translation>etiketsortering</translation>
+      <translation type="unfinished"/>
     </message>
     <message>
       <location filename="../../expanded_view.ui" line="193"/>
       <source>UpdateAvailable</source>
-      <translation>Opdatering tilgængelig</translation>
+      <translation>На располагању је новија верзија</translation>
     </message>
   </context>
   <context>
@@ -1262,22 +1262,22 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../AddonManagerOptions.ui" line="144"/>
       <source>Custom repositories</source>
-      <translation>Tilpasset repos</translation>
+      <translation>Сопствено спремиште</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="198"/>
       <source>Proxy</source>
-      <translation type="unfinished"/>
+      <translation>Прокси, Посреднички сервер</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="204"/>
       <source>No proxy</source>
-      <translation>Ingen proxy</translation>
+      <translation>Без прокси</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="220"/>
       <source>User system proxy</source>
-      <translation>Benyt systemproxy</translation>
+      <translation>Кориснички системски прокси</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="233"/>
@@ -1287,7 +1287,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../AddonManagerOptions.ui" line="264"/>
       <source>Score source URL</source>
-      <translation>Scorekilde-URL</translation>
+      <translation>URL извора оцена</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="277"/>
@@ -1307,7 +1307,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../AddonManagerOptions.ui" line="334"/>
       <source>Advanced Options</source>
-      <translation>Avancerede indstillinger</translation>
+      <translation>Напредне опције</translation>
     </message>
     <message>
       <location filename="../../AddonManagerOptions.ui" line="340"/>
@@ -1330,22 +1330,22 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../package_details.ui" line="52"/>
       <source>Install</source>
-      <translation>Installation</translation>
+      <translation>Инсталирај</translation>
     </message>
     <message>
       <location filename="../../package_details.ui" line="59"/>
       <source>Uninstall</source>
-      <translation>Afinstallation</translation>
+      <translation>Деинсталирај</translation>
     </message>
     <message>
       <location filename="../../package_details.ui" line="66"/>
       <source>Update</source>
-      <translation>Opdatering</translation>
+      <translation>Ажурирање</translation>
     </message>
     <message>
       <location filename="../../package_details.ui" line="73"/>
       <source>Run Macro</source>
-      <translation>Kør makro</translation>
+      <translation>Покрени макро</translation>
     </message>
     <message>
       <location filename="../../package_details.ui" line="80"/>
@@ -1358,7 +1358,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../PythonDependencyUpdateDialog.ui" line="14"/>
       <source>Manage Python Dependencies</source>
-      <translation>Håndtér Python-afhængigheder</translation>
+      <translation>Управљање Python зависностима</translation>
     </message>
     <message>
       <location filename="../../PythonDependencyUpdateDialog.ui" line="20"/>
@@ -1386,7 +1386,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../AddonManager.py" line="194"/>
       <source>Addon Manager</source>
-      <translation>Tilføjelseshåndtering</translation>
+      <translation>Менаџер додатака</translation>
     </message>
   </context>
   <context>
@@ -1407,7 +1407,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../update_all.ui" line="14"/>
       <source>Updating Addons</source>
-      <translation>Opdaterer Tilføjelser</translation>
+      <translation>Ажурирање Додатака</translation>
     </message>
     <message>
       <location filename="../../update_all.ui" line="23"/>
@@ -1420,7 +1420,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../addonmanager_toolbar_adapter.py" line="45"/>
       <source>Auto-Created Macro Toolbar</source>
-      <translation>Autooprettet Makroværktøjsbjælke</translation>
+      <translation>Аутоматски направљена Макро палета алатки</translation>
     </message>
   </context>
   <context>
@@ -1433,22 +1433,22 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../add_toolbar_button_dialog.ui" line="20"/>
       <source>Add a toolbar button for this macro?</source>
-      <translation>Tilføj en værktøjsbjælkeknap for denne makro?</translation>
+      <translation>Желиш ли додати дугме на палети алатки за овај макро?</translation>
     </message>
     <message>
       <location filename="../../add_toolbar_button_dialog.ui" line="32"/>
       <source>Yes</source>
-      <translation>Ja</translation>
+      <translation>Да</translation>
     </message>
     <message>
       <location filename="../../add_toolbar_button_dialog.ui" line="39"/>
       <source>No</source>
-      <translation>Nej</translation>
+      <translation>Не</translation>
     </message>
     <message>
       <location filename="../../add_toolbar_button_dialog.ui" line="46"/>
       <source>Never</source>
-      <translation>Aldrig</translation>
+      <translation>Никада</translation>
     </message>
   </context>
   <context>
@@ -1456,7 +1456,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../change_branch.ui" line="14"/>
       <source>Change Branch</source>
-      <translation>Skift gren</translation>
+      <translation>Промени грану</translation>
     </message>
     <message>
       <location filename="../../change_branch.ui" line="23"/>
@@ -1474,17 +1474,17 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../proxy_authentication.ui" line="20"/>
       <source>Proxy requires authentication</source>
-      <translation>Proxy kræver godkendelse</translation>
+      <translation>Прокси захтева аутентификацију</translation>
     </message>
     <message>
       <location filename="../../proxy_authentication.ui" line="29"/>
       <source>Proxy</source>
-      <translation type="unfinished"/>
+      <translation>Прокси, Посреднички сервер</translation>
     </message>
     <message>
       <location filename="../../proxy_authentication.ui" line="42"/>
       <source>Placeholder for proxy address</source>
-      <translation>Variabel til proxyadresse</translation>
+      <translation>Резервисано место за прокси адресу</translation>
     </message>
     <message>
       <location filename="../../proxy_authentication.ui" line="49"/>
@@ -1494,17 +1494,17 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../proxy_authentication.ui" line="56"/>
       <source>Placeholder for proxy realm</source>
-      <translation>Variabel til proxyområde</translation>
+      <translation>Резервисано место за прокси област</translation>
     </message>
     <message>
       <location filename="../../proxy_authentication.ui" line="67"/>
       <source>Username</source>
-      <translation>Brugernavn</translation>
+      <translation>Корисничко име</translation>
     </message>
     <message>
       <location filename="../../proxy_authentication.ui" line="77"/>
       <source>Password</source>
-      <translation>Adgangskode</translation>
+      <translation>Лозинка</translation>
     </message>
   </context>
   <context>
@@ -1512,7 +1512,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../select_toolbar_dialog.ui" line="14"/>
       <source>Select Toolbar</source>
-      <translation>Vælg Værktøjsbjælke</translation>
+      <translation>Изабери палету алатки</translation>
     </message>
     <message>
       <location filename="../../select_toolbar_dialog.ui" line="26"/>
@@ -1522,7 +1522,7 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../select_toolbar_dialog.ui" line="36"/>
       <source>Ask every time</source>
-      <translation>Spørg hver gang</translation>
+      <translation>Питај сваки пут</translation>
     </message>
   </context>
   <context>
@@ -1535,22 +1535,22 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
     <message>
       <location filename="../../toolbar_button.ui" line="20"/>
       <source>Add a toolbar button for this macro?</source>
-      <translation>Tilføj en værktøjsbjælkeknap for denne makro?</translation>
+      <translation>Желиш ли додати дугме на палети алатки за овај макро?</translation>
     </message>
     <message>
       <location filename="../../toolbar_button.ui" line="32"/>
       <source>Yes</source>
-      <translation>Ja</translation>
+      <translation>Да</translation>
     </message>
     <message>
       <location filename="../../toolbar_button.ui" line="39"/>
       <source>No</source>
-      <translation>Nej</translation>
+      <translation>Не</translation>
     </message>
     <message>
       <location filename="../../toolbar_button.ui" line="46"/>
       <source>Never</source>
-      <translation>Aldrig</translation>
+      <translation>Никада</translation>
     </message>
   </context>
 </TS>
