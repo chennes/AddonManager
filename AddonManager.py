@@ -180,7 +180,13 @@ class CommandAddonManager(QtCore.QObject):
 
         metadata = MetadataReader.from_file(os.path.join(os.path.dirname(__file__), "package.xml"))
         am_version = str(metadata.version)
-        self.dialog.setWindowTitle(translate("AddonsInstaller", "Addon Manager v") + am_version)
+        self.dialog.setWindowTitle(
+            "{} {} {}".format(
+                translate("AddonsInstaller", "Addon Manager"),
+                translate("AddonsInstaller", "version"),
+                am_version,
+            )
+        )
 
         # clean up the leftovers from previous runs
         self.packages_with_updates = set()
