@@ -73,7 +73,7 @@ def call_pip(args: List[str]) -> List[str]:
     try:
         proc = run_interruptable_subprocess(call_args)
     except subprocess.CalledProcessError as exception:
-        raise PipFailed("pip timed out") from exception
+        raise PipFailed(f"pip call failed:\n{exception}") from exception
 
     if proc.returncode != 0:
         raise PipFailed(proc.stderr)
@@ -253,6 +253,8 @@ class PythonPackageListModel(QtCore.QAbstractTableModel):
             self.reset_call_finished()
 
     def reset_call_finished(self):
+        if self.reset_worker.error:
+            fci.Console.PrintError(f"Error while resetting package list: {self.reset_worker.error}")
         self.package_list = self.reset_worker.package_list
         self.endResetModel()
 
