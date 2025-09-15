@@ -34,7 +34,7 @@ import sys
 import tempfile
 import time
 from functools import lru_cache
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlparse
 from urllib.request import Request, urlopen, urlretrieve
 
 CROWDIN_API_URL = "https://api.crowdin.com/api/v2"
@@ -76,6 +76,9 @@ class CrowdinUpdater:
         return self._make_api_req(url=url, *args, **kwargs)
 
     def _make_api_req(self, url, extra_headers=None, method="GET", data=None):
+        parsed_url = urlparse(url)
+        if parsed_url.scheme != "https":
+            raise Exception("API requests must use HTTPS!")
         if extra_headers is None:
             extra_headers = {}
         headers = {"Authorization": "Bearer " + load_token(), **extra_headers}
@@ -131,6 +134,9 @@ class CrowdinUpdater:
     def download(self, build_id):
         filename = f"{self.project_identifier}.zip"
         response = self._make_project_api_req(f"/translations/builds/{build_id}/download")
+        parsed_url = urlparse(response["url"])
+        if parsed_url.scheme != "https":
+            raise Exception("API requests must use HTTPS!")
         urlretrieve(response["url"], filename)
         print("download of " + filename + " complete")
 

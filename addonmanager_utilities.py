@@ -438,11 +438,14 @@ def blocking_get(url: str, method=None) -> bytes:
             if hasattr(p, "data"):
                 p = p.data()
     elif requests and method is None or method == "requests":
-        response = requests.get(url)
+        response = requests.get(url, timeout=10)
         if response.status_code == 200:
             p = response.content
     else:
         ctx = ssl.create_default_context()
+        parsed_url = urlparse(url)
+        if parsed_url.scheme not in ["http", "https"]:
+            raise RuntimeError("blocking_get can only be used with http and https URLs")
         with urllib.request.urlopen(url, context=ctx) as f:
             p = f.read()
     return p
@@ -625,4 +628,11 @@ def create_pip_call(args: List[str]) -> List[str]:
         call_args.extend(["--proxy", f"http://{host}:{port}"])
 
     call_args.extend(args)
+
+    # If installing or updating, apply our constraints file
+    if "install" in args or "update" in args:
+        constraints = fci.Preferences().get("pip_constraints_url")
+        if constraints:
+            call_args.extend(["-c", constraints])
+
     return call_args

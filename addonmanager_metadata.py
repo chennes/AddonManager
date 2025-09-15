@@ -32,12 +32,7 @@ from typing import Tuple, Dict, List, Optional
 
 from addonmanager_licenses import get_license_manager
 
-try:
-    # If this system provides a secure parser, use that:
-    import defusedxml.ElementTree as ET
-except ImportError:
-    # Otherwise fall back to the Python standard parser
-    import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 
 
 @dataclass

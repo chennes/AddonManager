@@ -36,7 +36,7 @@ import json
 import os
 import requests
 import subprocess
-import xml.etree.ElementTree
+import defusedxml.ElementTree as ElementTree
 import zipfile
 
 import AddonCatalog
@@ -92,7 +92,7 @@ class CatalogFetcher:
 
     def fetch_catalog(self) -> AddonCatalog.AddonCatalog:
         """Fetch the addon catalog from the given URL and return an AddonCatalog object."""
-        response = requests.get(self.addon_catalog_url)
+        response = requests.get(self.addon_catalog_url, timeout=10)
         if response.status_code != 200:
             raise RuntimeError(
                 f"ERROR: Failed to fetch addon catalog from {self.addon_catalog_url}"
@@ -221,7 +221,7 @@ class CacheWriter:
             metadata = addonmanager_metadata.MetadataReader.from_bytes(
                 cache_entry.package_xml.encode("utf-8")
             )
-        except xml.etree.ElementTree.ParseError:
+        except ElementTree.ParseError:
             print(f"ERROR: Failed to parse XML from {path_to_package_xml}")
             return None
         except RuntimeError:
@@ -265,7 +265,7 @@ class CacheWriter:
     def create_local_copy_of_single_addon_with_zip(
         self, addon_id: str, index: int, catalog_entry: AddonCatalog.AddonCatalogEntry
     ):
-        response = requests.get(catalog_entry.zip_url)
+        response = requests.get(catalog_entry.zip_url, timeout=10)
         if response.status_code != 200:
             print(f"ERROR: Failed to fetch zip data for {addon_id} from {catalog_entry.zip_url}.")
             return

@@ -27,12 +27,7 @@ from typing import Optional
 
 from PySideWrapper import QtCore, QtGui, QtSvg
 
-try:
-    # If this system provides a secure parser, use that:
-    import defusedxml.ElementTree as ET
-except ImportError:
-    # Otherwise fall back to the Python standard parser
-    import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 
 from Addon import Addon
 import addonmanager_freecad_interface as fci
