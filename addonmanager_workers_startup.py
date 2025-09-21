@@ -27,7 +27,6 @@ import hashlib
 import io
 import json
 import os
-import time
 from typing import List
 import xml.etree.ElementTree
 import zipfile
@@ -43,6 +42,7 @@ import NetworkManager
 from addonmanager_git import initialize_git, GitFailed
 from addonmanager_metadata import MetadataReader, get_branch_from_metadata
 import addonmanager_freecad_interface as fci
+from addonmanager_path_utilities import classify_path, addon_id_from_classification
 
 translate = fci.translate
 
@@ -95,15 +95,26 @@ class CreateAddonListWorker(QtCore.QThread):
     def _get_custom_addons(self):
 
         # querying custom addons first
-        addon_list = fci.Preferences().get("CustomRepositories").split("\n")
+        repo_list = fci.Preferences().get("CustomRepositories").split("\n")
+        custom_addons_string = fci.Preferences().get("CustomAddons")
+        addon_source_dict = json.loads(custom_addons_string) if custom_addons_string else {}
+        if repo_list and not addon_source_dict:
+            # Migrate the repo list to the addon list:
+            for repo in repo_list:
+                if " " in repo:
+                    addon_and_branch = repo.rsplit(" ", 1)
+                    new_addon = {"url": addon_and_branch[0], "branch": addon_and_branch[1]}
+                else:
+                    new_addon = {"url": repo, "branch": "master"}
+                classification = classify_path(new_addon["url"])
+                addon_id = addon_id_from_classification(classification)
+                new_addon["name"] = addon_id
+                new_addon["kind"] = classification["kind"]
+                new_addon["path"] = classification.normalized
+                addon_source_dict[addon_id] = new_addon
+
         custom_addons = []
-        for addon in addon_list:
-            if " " in addon:
-                addon_and_branch = addon.split(" ")
-                custom_addons.append({"url": addon_and_branch[0], "branch": addon_and_branch[1]})
-            else:
-                custom_addons.append({"url": addon, "branch": "master"})
-        for addon in custom_addons:
+        for addon_source in addon_source_list:
             if self.current_thread.isInterruptionRequested():
                 return
             if addon and addon["url"]:

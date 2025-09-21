@@ -21,7 +21,7 @@
 # *                                                                         *
 # ***************************************************************************
 
-from enum import Enum, auto
+from enum import StrEnum, auto
 from dataclasses import dataclass
 from typing import Optional
 from pathlib import Path
@@ -29,22 +29,68 @@ from urllib.parse import urlparse, unquote
 from urllib.request import url2pathname
 
 
-class InputKind(Enum):
-    GIT_CLONE = auto()
-    REMOTE_ZIP = auto()
-    LOCAL_ZIP = auto()
-    LOCAL_COPY = auto()
+class PathKind(StrEnum):
+    GIT_CLONE = "git clone"
+    REMOTE_ZIP = "remote ZIP"
+    LOCAL_ZIP = "local ZIP"
+    LOCAL_COPY = "local copy"
 
 
 @dataclass
 class Classification:
-    kind: InputKind
-    exists: Optional[bool] = None
+    kind: PathKind
+    exists: Optional[bool] = None  # Only checked for local paths
     is_git_repo: Optional[bool] = None
     normalized: Optional[str] = None
 
 
-# ---------------- helpers ----------------
+def classify_path(text: str) -> Classification:
+    """Given something expected to be an installable path of some kind (either a local path or a URL
+    of some variety), return a Classification object describing the path. This makes some
+    approximations along the way for simplicity so may not handle all possible edge cases. If it
+    isn't really anything recognizable, returns a Classification with kind=PathKind.LOCAL_COPY."""
+    s = text.strip()
+    parsed = urlparse(s)
+    if parsed.scheme:
+        if parsed.scheme == "file":
+            local = file_url_to_path(parsed)
+            return classify_local_path(local)
+        if is_remote_zip_url(parsed):
+            return Classification(kind=PathKind.REMOTE_ZIP, normalized=s)
+        if is_git_url(parsed):
+            return Classification(kind=PathKind.GIT_CLONE, normalized=s)
+        return Classification(kind=PathKind.GIT_CLONE, normalized=s)
+    if is_scp_like_git(s):
+        return Classification(kind=PathKind.GIT_CLONE, normalized=s)
+    return classify_local_path(Path(s).expanduser())
+
+
+def addon_id_from_classification(c: Classification) -> str:
+    """
+    Given a Classification, extract the last path component (file or directory name),
+    stripping any extension if present.
+
+    Examples:
+      /home/user/archive.zip -> "archive"
+      /repos/myproject       -> "myproject"
+      https://host/x/y.git   -> "y"
+      git@github.com:org/repo.git -> "repo"
+    """
+    s = c.normalized or ""
+
+    # Handle SCP-like (git@host:org/repo.git) specially
+    if "@" in s and ":" in s and "://" not in s:
+        right = s.split(":", 1)[1]
+        last = Path(right).name
+        return Path(last).stem
+
+    # If it's a URL, parse and use its path
+    parsed = urlparse(s)
+    if parsed.scheme and parsed.path:
+        return Path(parsed.path).stem
+
+    # Fallback: treat it as a filesystem path
+    return Path(s).stem
 
 
 def is_windows_drive_path(s: str) -> bool:
@@ -98,73 +144,24 @@ def is_local_git_repo(path: Path) -> bool:
     return (path / ".git").is_dir() or looks_like_bare_git_dir(path)
 
 
-# ---------------- main API ----------------
-
-
-def classify_input(text: str) -> Classification:
-    s = text.strip()
-    parsed = urlparse(s)
-
-    # URL forms
-    if parsed.scheme:
-        if parsed.scheme == "file":
-            local = file_url_to_path(parsed)
-            return classify_local_path(local)
-        if is_remote_zip_url(parsed):
-            return Classification(kind=InputKind.REMOTE_ZIP, normalized=s)
-        if is_git_url(parsed):
-            return Classification(kind=InputKind.GIT_CLONE, normalized=s)
-        # If you prefer to reject unknown schemes, handle that in your caller.
-        return Classification(kind=InputKind.GIT_CLONE, normalized=s)
-
-    # SCP-like git (git@host:org/repo.git)
-    if is_scp_like_git(s):
-        return Classification(kind=InputKind.GIT_CLONE, normalized=s)
-
-    # Local paths
-    return classify_local_path(Path(s).expanduser())
-
-
 def classify_local_path(path: Path) -> Classification:
     if not path.exists():
         # Caller can decide whether to error or create; we report intent + exists=False
         return Classification(
-            kind=InputKind.LOCAL_COPY, exists=False, is_git_repo=False, normalized=str(path)
+            kind=PathKind.LOCAL_COPY, exists=False, is_git_repo=False, normalized=str(path)
         )
 
     if path.is_file() and path.suffix.lower() == ".zip":
         return Classification(
-            kind=InputKind.LOCAL_ZIP, exists=True, is_git_repo=False, normalized=str(path)
+            kind=PathKind.LOCAL_ZIP, exists=True, is_git_repo=False, normalized=str(path)
         )
 
     if path.is_dir() and is_local_git_repo(path):
         # Treat existing local repo as a clone source (e.g., for `git clone --local`)
         return Classification(
-            kind=InputKind.GIT_CLONE, exists=True, is_git_repo=True, normalized=str(path)
+            kind=PathKind.GIT_CLONE, exists=True, is_git_repo=True, normalized=str(path)
         )
 
     return Classification(
-        kind=InputKind.LOCAL_COPY, exists=True, is_git_repo=False, normalized=str(path)
+        kind=PathKind.LOCAL_COPY, exists=True, is_git_repo=False, normalized=str(path)
     )
-
-
-# --------------- quick check ---------------
-if __name__ == "__main__":
-    samples = [
-        "ssh://git@github.com/org/repo.git",
-        "git://git.kernel.org/pub/scm/git/git.git",
-        "https://github.com/org/repo",
-        "git@github.com:org/repo.git",
-        "https://github.com/org/repo/archive/refs/heads/main.zip",
-        "file:///usr/src/project/repo.git",
-        "file:///C:/Users/me/Downloads/data.zip",
-        r"C:\Users\me\src\project",
-        "/tmp/some-repo",
-        "/tmp/file.zip",
-        "relative/path",
-    ]
-    for s in samples:
-        c = classify_input(s)
-        print(
-            f"{s:70} -> {c.kind.name:10} exists={c.exists} git_repo={c.is_git_repo} normalized={c.normalized}"
-        )
