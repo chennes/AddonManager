@@ -622,7 +622,29 @@ def create_pip_call(args: List[str]) -> List[str]:
         port = fci.Preferences().get("proxy_port")
 
     if use_proxy:
+        # noinspection HttpUrlsUsage
         call_args.extend(["--proxy", f"http://{host}:{port}"])
+
+    if "install" in args:
+        constraints = fci.Preferences().get("pip_constraints_path")
+        if not constraints:
+            fci.Console.PrintWarning(
+                "pip constraints explicitly disabled by unsetting 'pip_constraints_path'\n"
+            )
+        else:
+            parsed_url = urlparse(constraints)
+            major = sys.version_info.major
+            minor = sys.version_info.minor
+            expected_filename = f"constraints-py{major}{minor}.txt"
+            if parsed_url.scheme == "https":
+                # The only supported remote scheme is https, and this is the default setup
+                if not constraints.endswith("/"):
+                    constraints += "/"
+                constraints += expected_filename
+            else:
+                # If it wasn't https, treat it like it's a local path
+                constraints = os.path.join(constraints, expected_filename)
+            args.extend(["--constraint", constraints])
 
     call_args.extend(args)
     return call_args
