@@ -45,9 +45,9 @@ class PythonPackageManagerGui:
         self.model = PythonPackageListModel(addons)
         self.dlg.tableView.setModel(self.model)
 
-        self.dlg.tableView.horizontalHeader().setStretchLastSection(False)
+        self.dlg.tableView.horizontalHeader().setStretchLastSection(True)
         self.dlg.tableView.horizontalHeader().setSectionResizeMode(
-            0, QtWidgets.QHeaderView.ResizeMode.Stretch
+            0, QtWidgets.QHeaderView.ResizeMode.ResizeToContents
         )
         self.dlg.tableView.horizontalHeader().setSectionResizeMode(
             1, QtWidgets.QHeaderView.ResizeMode.ResizeToContents

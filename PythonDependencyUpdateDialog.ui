@@ -30,14 +30,17 @@
       <string notr="true">placeholder for path</string>
      </property>
      <property name="textInteractionFlags">
-      <set>Qt::TextInteractionFlag::TextSelectableByMouse</set>
+      <set>Qt::NoTextInteraction</set>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QTableView" name="tableView">
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
+     </property>
      <property name="selectionBehavior">
-      <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+      <enum>QAbstractItemView::SelectItems</enum>
      </property>
      <property name="sortingEnabled">
       <bool>false</bool>
@@ -53,7 +56,7 @@
       <string>Update in progress…</string>
      </property>
      <property name="textInteractionFlags">
-      <set>Qt::TextInteractionFlag::NoTextInteraction</set>
+      <set>Qt::NoTextInteraction</set>
      </property>
     </widget>
    </item>
