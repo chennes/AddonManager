@@ -24,7 +24,7 @@
     }
   },
   "patternProperties": {
-    "^.+$": {
+    "^(?!\\$schema$|_meta$).+$": {
       "type": "array",
       "items": {
         "type": "object",
