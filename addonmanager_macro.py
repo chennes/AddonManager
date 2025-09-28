@@ -328,7 +328,6 @@ class Macro:
 
     def _copy_other_files(self, macro_dir, warnings) -> bool:
         """Copy any specified "other files" into the installation directory"""
-        base_dir = os.path.dirname(self.src_filename)
         for filename, data in self.other_files_data.items():
             if not filename or not data or data == "ICON":
                 continue
