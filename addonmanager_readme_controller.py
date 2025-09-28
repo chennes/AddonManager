@@ -193,8 +193,8 @@ class ReadmeController(QtCore.QObject):
                         fci.Console.PrintLog(f"package.xml contents: {url.location}\n")
                         fci.Console.PrintLog(
                             "Note to addon devs: package.xml now expects a"
-                            " url to the raw MD data, now that Qt can render"
-                            " it without having it transformed to HTML.\n"
+                            " url to the raw MD data since Qt>=5.15 can render"
+                            " it without having it manually transformed to HTML.\n"
                         )
                     self.url = url.location
                     if "/blob/" in self.url:
@@ -221,7 +221,11 @@ class ReadmeController(QtCore.QObject):
                 self.readme_data_type = ReadmeDataType.Html
 
             with open(self.url, "r") as fd:
-                self._process_package_download("".join(fd.readlines()))
+                try:
+                    self._process_package_download("".join(fd.readlines()))
+                except Exception as e:
+                    fci.Console.PrintWarning(f"Failed to load {self.url}\n")
+                    fci.Console.PrintWarning(f"Error: {e}\n")
         else:
             self.readme_request_index = NetworkManager.AM_NETWORK_MANAGER.submit_unmonitored_get(
                 self.url
