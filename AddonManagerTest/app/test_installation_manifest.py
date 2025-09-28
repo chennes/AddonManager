@@ -156,7 +156,7 @@ class TestInstallationManifest(PyFakeFSTestCase):
         self.fs.create_dir(os.path.join(mod_dir, "OrphanAddon"))
 
         InstallationManifest.path_to_manifest_file = ""  # Reset shared class var
-        manifest = InstallationManifest(catalog=None)
+        _ = InstallationManifest(catalog=None)
 
         self.assertTrue(os.path.exists(manifest_path))
 

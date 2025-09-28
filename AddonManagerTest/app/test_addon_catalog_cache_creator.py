@@ -35,7 +35,6 @@ import os
 
 import AddonCatalogCacheCreator as accc
 import AddonCatalog
-from AddonCatalogCacheCreator import EXCLUDED_REPOS
 
 
 class TestRecursiveSerialize(TestCase):
@@ -309,7 +308,7 @@ class TestCacheWriter(TestCase):
                         AddonCatalog.AddonCatalogEntry({"zip_url": "zip1"}),
                         AddonCatalog.AddonCatalogEntry({"zip_url": "zip2"}),
                     ],
-                    EXCLUDED_REPOS[0]: [
+                    accc.EXCLUDED_REPOS[0]: [
                         AddonCatalog.AddonCatalogEntry({"zip_url": "zip1"}),
                         AddonCatalog.AddonCatalogEntry({"zip_url": "zip2"}),
                     ],

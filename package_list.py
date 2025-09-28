@@ -33,7 +33,6 @@ from compact_view import Ui_CompactView
 from expanded_view import Ui_ExpandedView
 
 import addonmanager_utilities as utils
-from addonmanager_metadata import get_first_supported_freecad_version, Version
 from Widgets.addonmanager_widget_view_control_bar import WidgetViewControlBar, SortOptions
 from Widgets.addonmanager_widget_view_selector import AddonManagerDisplayStyle
 from Widgets.addonmanager_widget_filter_selector import StatusFilter, Filter

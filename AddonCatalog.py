@@ -31,7 +31,7 @@ import xml.etree.ElementTree
 from dataclasses import dataclass
 import json
 from hashlib import sha256
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 from addonmanager_metadata import Version, MetadataReader
 from Addon import Addon
