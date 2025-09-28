@@ -115,6 +115,9 @@ class Addon:
                 return self.value < other.value
             return NotImplemented
 
+        def __le__(self, other):
+            return self < other or self == other
+
         def __str__(self) -> str:
             if self.value == 0:
                 result = "Not installed"
