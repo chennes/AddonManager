@@ -51,7 +51,6 @@ import addonmanager_freecad_interface as fci
 from composite_view import CompositeView
 from Widgets.addonmanager_widget_global_buttons import WidgetGlobalButtonBar
 from Widgets.addonmanager_widget_progress_bar import Progress
-from Widgets.addonmanager_utility_dialogs import MessageDialog
 from package_list import PackageListItemModel
 from Addon import Addon, cycle_to_sub_addon, MissingDependencies
 from addonmanager_python_deps_gui import (
