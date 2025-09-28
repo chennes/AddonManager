@@ -235,7 +235,14 @@ class CacheWriter:
             )
             if os.path.exists(absolute_icon_path):
                 with open(absolute_icon_path, "rb") as f:
-                    cache_entry.icon_data = base64.b64encode(f.read()).decode("utf-8")
+                    try:
+                        cache_entry.icon_data = base64.b64encode(f.read()).decode("utf-8")
+                    except IOError as e:
+                        print(f"ERROR: IO Error while reading icon file {absolute_icon_path}")
+                        print(e)
+                    except Exception as e:
+                        print(f"ERROR: Unknown error while reading icon file {absolute_icon_path}")
+                        print(e)
             else:
                 self.icon_errors[metadata.name] = relative_icon_path
                 print(f"ERROR: Could not find icon file {absolute_icon_path}")

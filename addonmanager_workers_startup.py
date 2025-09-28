@@ -27,7 +27,6 @@ import hashlib
 import io
 import json
 import os
-import time
 from typing import List
 import xml.etree.ElementTree
 import zipfile
