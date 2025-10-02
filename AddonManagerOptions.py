@@ -24,7 +24,7 @@
 """Contains the Addon Manager's preferences dialog management class"""
 
 import os
-from enum import StrEnum, IntEnum
+from enum import IntEnum
 import ipaddress
 import re
 from typing import Tuple
@@ -128,10 +128,32 @@ def test_proxy_connection(
 class AddonManagerOptions:
     """A class containing a form element that is inserted as a FreeCAD preference page."""
 
-    class ProxyType(StrEnum):
-        none = "none"
-        system = "system"
-        custom = "custom"
+    class ProxyType(IntEnum):
+        """This is an IntEnum to continue to support Python 3.8 (e.g., FreeCAD 0.21) but can be
+        converted to a StrEnum when we can raise minimum support to Python 3.11."""
+
+        none = 0
+        system = 1
+        custom = 2
+
+        def __str__(self):
+            if self == self.none:
+                return "none"
+            if self == self.system:
+                return "system"
+            if self == self.custom:
+                return "custom"
+            return "unknown"
+
+        @staticmethod
+        def from_string(s: str) -> "AddonManagerOptions.ProxyType":
+            if s.lower() == "none":
+                return AddonManagerOptions.ProxyType.none
+            if s.lower() == "system":
+                return AddonManagerOptions.ProxyType.system
+            if s.lower() == "custom":
+                return AddonManagerOptions.ProxyType.custom
+            return AddonManagerOptions.ProxyType.none
 
     class ProxyTestStatus(IntEnum):
         untested = 0
@@ -412,7 +434,7 @@ class AddonManagerOptions:
             self.recursive_widget_loader(widget)
         self.table_model.load_model()
 
-        proxy_type = fci.Preferences().get("proxy_type")
+        proxy_type = AddonManagerOptions.ProxyType.from_string(fci.Preferences().get("proxy_type"))
         self.reconfigure_proxy_ui(proxy_type)
         self.fill_proxy_host_settings_from_preferences()
 
