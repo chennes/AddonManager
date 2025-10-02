@@ -85,7 +85,11 @@ class CrowdinUpdater:
             data = json.dumps(data).encode("utf-8")
 
         request = Request(url, headers=headers, method=method, data=data)
-        return json.loads(urlopen(request).read())["data"]
+        request_result = urlopen(request)
+        if request_result.getcode() >= 300:
+            print(f"Failed to make API request {url}: return code {request_result.getcode()}")
+            raise Exception("Failed to make API request")
+        return json.loads(request_result.read())["data"]
 
     def _get_files_info(self):
         files = self._make_project_api_req("/files?limit=250")
