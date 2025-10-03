@@ -40,7 +40,7 @@
 <context>
     <name>AddonsInstaller</name>
     <message>
-        <location filename="../../Addon.py" line="+392"/>
+        <location filename="../../Addon.py" line="+395"/>
         <source>{}: Unrecognized internal workbench &apos;{}&apos;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -320,7 +320,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+137"/>
+        <location line="+136"/>
         <source>Unable to fetch macro-specified file {} from {}</source>
         <translation type="unfinished"></translation>
     </message>
@@ -339,7 +339,7 @@ Please restart to use the new version.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../addonmanager_python_deps.py" line="+300"/>
+        <location filename="../../addonmanager_python_deps.py" line="+299"/>
         <source>Package</source>
         <translation type="unfinished"></translation>
     </message>
@@ -474,7 +474,7 @@ Please restart to use the new version.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../addonmanager_workers_startup.py" line="+117"/>
+        <location filename="../../addonmanager_workers_startup.py" line="+116"/>
         <source>WARNING: Duplicate addon {} ignored</source>
         <translation type="unfinished"></translation>
     </message>
@@ -533,7 +533,7 @@ Please restart to use the new version.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../AddonManager.py" line="+282"/>
+        <location filename="../../AddonManager.py" line="+281"/>
         <source>Worker process {} is taking a long time to stop…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -634,7 +634,65 @@ Please restart to use the new version.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../AddonManagerOptions.py" line="+250"/>
+        <location filename="../../AddonManagerOptions.py" line="+95"/>
+        <source>Proxy test timed out: no connection made.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Proxy test returned an error: no connection made.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>Proxy test succeeded, connection established.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Proxy requires authentication. The Addon Manager does not support this.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Proxy connection failed with code {}: {}.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+80"/>
+        <source>Invalid hostname</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <location line="+20"/>
+        <location line="+38"/>
+        <source>No proxy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-57"/>
+        <source>n/a</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>proxy.example.com</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+34"/>
+        <source>System has no proxy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+43"/>
+        <source>Testing proxy connection…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+259"/>
         <source>Repository URL</source>
         <comment>Preferences header for custom repositories</comment>
         <translation type="unfinished"></translation>
@@ -646,22 +704,7 @@ Please restart to use the new version.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../NetworkManager.py" line="+213"/>
-        <source>Failed to parse proxy URL &apos;{}&apos;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+32"/>
-        <source>Parameter error: mutually exclusive proxy options set. Resetting to default.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+15"/>
-        <source>Parameter error: user proxy indicated, but no proxy provided. Resetting to default.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+214"/>
+        <location filename="../../NetworkManager.py" line="+403"/>
         <source>Addon Manager: Unexpected {} response from server</source>
         <translation type="unfinished"></translation>
     </message>
@@ -671,7 +714,7 @@ Please restart to use the new version.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../package_list.py" line="+194"/>
+        <location filename="../../package_list.py" line="+193"/>
         <source>Click for details about package {}</source>
         <translation type="unfinished"></translation>
     </message>
@@ -781,7 +824,7 @@ Please restart to use the new version.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../Widgets/addonmanager_widget_addon_buttons.py" line="+170"/>
+        <location filename="../../Widgets/addonmanager_widget_addon_buttons.py" line="+169"/>
         <source>Install</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1248,27 +1291,59 @@ Do you want the Addon Manager to install them automatically? Choose &quot;Ignore
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Proxy</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>No proxy</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>User system proxy</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>User-defined proxy</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Score source URL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>The URL for the addon score data (see Addon Manager wiki page for formatting and hosting details)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use a proxy server for access to addon data</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Proxy addon manager traffic</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use the system&apos;s proxy settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>System</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use custom proxy settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Custom</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Host</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Test these proxy settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Test Connection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Connection Test</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
