@@ -51,7 +51,7 @@ BASE_DIRECTORY = "./CatalogCache"
 MAX_COUNT = 10000  # Do at most this many repos (for testing purposes this can be made smaller)
 
 # Repos that are too large, or that should for some reason not be cloned here
-EXCLUDED_REPOS = ["parts_library"]
+EXCLUDED_REPOS = ["parts_library", "offline-documentation", "FreeCAD-Documentation-html"]
 
 
 def recursive_serialize(obj: Any):
