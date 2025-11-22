@@ -26,7 +26,7 @@ import datetime
 import shutil
 import sys
 from dataclasses import is_dataclass, fields
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Dict
 
 import base64
 import enum
@@ -34,16 +34,16 @@ import hashlib
 import io
 import json
 import os
+import re
 import requests
 import subprocess
-from typing import List
 import xml.etree.ElementTree
 import zipfile
 
 import AddonCatalog
 import addonmanager_metadata
 import addonmanager_utilities as utils
-
+import addonmanager_icon_utilities as icon_utils
 
 ADDON_CATALOG_URL = "https://raw.githubusercontent.com/FreeCAD/Addons/main/Data/Index.json"
 BASE_DIRECTORY = "./CatalogCache"
@@ -114,6 +114,8 @@ class CacheWriter:
         else:
             self.cwd = os.path.normpath(os.path.join(os.getcwd(), BASE_DIRECTORY))
         self._cache = {}
+        self._sanitize_counter = 0
+        self._directory_name_cache: Dict[str, str] = {}
 
     def write(self, addon_id: Optional[str] = None) -> None:
         original_working_directory = os.getcwd()
@@ -253,7 +255,7 @@ class CacheWriter:
             with open(path_to_metadata, "r", encoding="utf-8") as f:
                 cache_entry.metadata_txt = f.read()
 
-        dirname = CacheWriter.get_directory_name(addon_id, index, catalog_entry)
+        dirname = self.get_directory_name(addon_id, index, catalog_entry)
         if os.path.exists(os.path.join(self.cwd, dirname, ".git")):
             old_dir = os.getcwd()
             os.chdir(os.path.join(self.cwd, dirname))
@@ -293,17 +295,37 @@ class CacheWriter:
                 os.path.dirname(path_to_package_xml), relative_icon_path
             )
             if os.path.exists(absolute_icon_path):
+                icon_data_is_good = True
                 with open(absolute_icon_path, "rb") as f:
+                    icon_data = None
                     try:
-                        cache_entry.icon_data = base64.b64encode(f.read()).decode("utf-8")
+                        icon_data = f.read()
                     except IOError as e:
                         print(f"ERROR: IO Error while reading icon file {absolute_icon_path}")
                         print(e)
+                        icon_data_is_good = False
                     except Exception as e:
                         print(f"ERROR: Unknown error while reading icon file {absolute_icon_path}")
                         print(e)
+                        icon_data_is_good = False
+                    if absolute_icon_path.lower().endswith(".svg"):
+                        try:
+                            if not icon_utils.is_svg_bytes(icon_data):
+                                self.icon_errors[metadata.name] = {
+                                    "valid_icon_path": relative_icon_path,
+                                    "error_message": "SVG file does not have valid XML header",
+                                }
+                                icon_data_is_good = False
+                        except icon_utils.BadIconData as e:
+                            self.icon_errors[metadata.name] = {
+                                "valid_icon_path": relative_icon_path,
+                                "error_message": str(e),
+                            }
+                            icon_data_is_good = False
+                    if icon_data_is_good:
+                        cache_entry.icon_data = base64.b64encode(icon_data).decode("utf-8")
             else:
-                self.icon_errors[metadata.name] = relative_icon_path
+                self.icon_errors[metadata.name] = {"bad_icon_path": relative_icon_path}
                 print(f"ERROR: Could not find icon file {absolute_icon_path}")
         return cache_entry
 
@@ -334,16 +356,44 @@ class CacheWriter:
             print(f"ERROR: Failed to clone or update {addon_id} from {catalog_entry.repository}.")
             print(f"ERROR: {e}")
 
-    @staticmethod
-    def get_directory_name(addon_id, index, catalog_entry):
+    def sanitize_directory_name(self, expected_name: str) -> str:
+        """Take a string and return a sanitized version suitable for use as a directory name."""
+        if expected_name in self._directory_name_cache:
+            return self._directory_name_cache[expected_name]
+        self._sanitize_counter += 1
+        forbidden_chars = r'<>:"|?*'
+        if os.path.sep == "/":
+            forbidden_chars += "\\\\"
+        else:
+            forbidden_chars += "/"
+        sanitized = re.sub(f"[{forbidden_chars}]", str(self._sanitize_counter), expected_name)
+        sanitized = sanitized.rstrip(" .")
+        reserved = {
+            "con",
+            "prn",
+            "aux",
+            "nul",
+            *(f"com{i}" for i in range(1, 10)),
+            *(f"lpt{i}" for i in range(1, 10)),
+        }
+        components = sanitized.split(os.path.sep)
+        for i, comp in enumerate(components):
+            if comp.lower() in reserved:
+                components[i] = comp + "-RES"
+        sanitized = os.path.sep.join(components)
+
+        self._directory_name_cache[expected_name] = sanitized
+        return sanitized
+
+    def get_directory_name(self, addon_id, index, catalog_entry):
         expected_name = os.path.join(addon_id, str(index) + "-")
         if catalog_entry.branch_display_name:
-            expected_name += catalog_entry.branch_display_name.replace("/", "-")
+            expected_name += catalog_entry.branch_display_name
         elif catalog_entry.git_ref:
-            expected_name += catalog_entry.git_ref.replace("/", "-")
+            expected_name += catalog_entry.git_ref
         else:
             expected_name += "unknown-branch-name"
-        return expected_name
+        return self.sanitize_directory_name(expected_name)
 
     def create_local_copy_of_single_addon_with_zip(
         self, addon_id: str, index: int, catalog_entry: AddonCatalog.AddonCatalogEntry
@@ -562,7 +612,7 @@ class CacheWriter:
         zip file is written to a file with the same name as the calculated addon cache directory
         in the current working directory."""
 
-        dirname = CacheWriter.get_directory_name(addon_id, index, catalog_entry)
+        dirname = self.get_directory_name(addon_id, index, catalog_entry)
         start_dir = os.path.join(self.cwd, dirname)
         zip_file_path = os.path.join(self.cwd, f"{dirname}.zip")
         temp_file_path = zip_file_path + ".new"
