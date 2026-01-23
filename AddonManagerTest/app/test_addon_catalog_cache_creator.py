@@ -252,6 +252,9 @@ class TestCacheWriter(TestCase):
         cache_entry = writer.generate_cache_entry("TestMod", 1, ace)
         self.assertIsNone(cache_entry)
 
+    def test_generate_cache_entry_with_approval(self):
+        """If the addon appears in the catalog (as opposed to just the index), it gets marked as approved."""
+
     @patch("AddonCatalogCacheCreator.CacheWriter.create_local_copy_of_single_addon_with_git")
     def test_create_local_copy_of_single_addon_using_git(self, mock_create_with_git):
         """Given a single addon, each catalog entry is fetched with git if git info is available."""
@@ -267,7 +270,7 @@ class TestCacheWriter(TestCase):
             ),
         ]
         writer = accc.CacheWriter()
-        writer.catalog = MagicMock()
+        writer.index = MagicMock()
         writer.cwd = os.path.abspath(os.path.join("home", "cache"))
         writer.create_local_copy_of_single_addon("TestMod", catalog_entries)
         self.assertEqual(mock_create_with_git.call_count, 3)
@@ -287,15 +290,14 @@ class TestCacheWriter(TestCase):
             ),
         ]
         writer = accc.CacheWriter()
-        writer.catalog = MagicMock()
+        writer.index = MagicMock()
         writer.cwd = os.path.abspath(os.path.join("home", "cache"))
         writer.create_local_copy_of_single_addon("TestMod", catalog_entries)
         self.assertEqual(mock_create_with_zip.call_count, 2)
         self.assertEqual(mock_create_with_git.call_count, 1)
 
     @patch("AddonCatalogCacheCreator.CacheWriter.create_local_copy_of_single_addon")
-    @patch("AddonCatalogCacheCreator.CatalogFetcher.fetch_catalog")
-    def test_create_local_copy_of_addons(self, mock_fetch_catalog, mock_create_single_addon):
+    def test_create_local_copy_of_addons(self, mock_create_single_addon):
         """Given a catalog, each addon is fetched and cached."""
 
         class MockCatalog:
@@ -319,8 +321,8 @@ class TestCacheWriter(TestCase):
                     ],
                 }
 
-        mock_fetch_catalog.return_value = MockCatalog()
         writer = accc.CacheWriter()
+        writer.index = MockCatalog()
         writer.create_local_copy_of_addons()
         mock_create_single_addon.assert_any_call("TestMod1", mock.ANY)
         mock_create_single_addon.assert_any_call("TestMod2", mock.ANY)

@@ -56,6 +56,9 @@
           },
           "last_update_time": {
             "type": "string"
+          },
+          "reviewed": {
+            "type": "boolean"
           }
         },
         "anyOf": [

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2025 The FreeCAD project association AISBL              *
+# *   Copyright (c) 2025-2026 The FreeCAD project association AISBL         *
 # *                                                                         *
 # *   This file is part of FreeCAD.                                         *
 # *                                                                         *
@@ -26,6 +26,7 @@ Intended to be run by a server-side systemd timer to generate a file that is the
 Addon Manager in each FreeCAD installation."""
 
 import datetime
+import sys
 from dataclasses import is_dataclass, fields
 from typing import Any, List, Optional, Dict
 
@@ -46,11 +47,11 @@ import addonmanager_metadata
 import addonmanager_utilities as utils
 import addonmanager_icon_utilities as icon_utils
 
-ADDON_CATALOG_URL = (
-    "https://raw.githubusercontent.com/FreeCAD/FreeCAD-addons/master/AddonCatalog.json"
-)
+ADDON_CATALOG_URL = "https://raw.githubusercontent.com/FreeCAD/Addons/main/Catalog.txt"
+ADDON_INDEX_URL = "https://raw.githubusercontent.com/FreeCAD/Addons/main/Index.json"
 BASE_DIRECTORY = "./CatalogCache"
 MAX_COUNT = 10000  # Do at most this many repos (for testing purposes this can be made smaller)
+CLONE_TIMEOUT = 60  # Seconds: repos that take longer than this are assumed to be too large to index
 
 # Repos that are too large, or that should for some reason not be cloned here
 EXCLUDED_REPOS = ["parts_library", "offline-documentation", "FreeCAD-Documentation-html"]
@@ -84,22 +85,37 @@ class GitRefType(enum.IntEnum):
 
 
 class CatalogFetcher:
-    """Fetches the addon catalog from the given URL and returns an AddonCatalog object. Separated
+    """Fetches the addon index from the given URL and returns an AddonCatalog object. Separated
     from the main class for easy mocking during tests. Note that every instantiation of this class
     will run a new fetch of the catalog."""
 
-    def __init__(self, addon_catalog_url: str = ADDON_CATALOG_URL):
+    def __init__(
+        self, addon_index_url: str = ADDON_INDEX_URL, addon_catalog_url: str = ADDON_CATALOG_URL
+    ):
+        self.addon_index_url = addon_index_url
         self.addon_catalog_url = addon_catalog_url
+        self.index = self.fetch_index()
         self.catalog = self.fetch_catalog()
 
-    def fetch_catalog(self) -> AddonCatalog.AddonCatalog:
-        """Fetch the addon catalog from the given URL and return an AddonCatalog object."""
+    def fetch_index(self) -> AddonCatalog.AddonCatalog:
+        """Fetch the addon index from the given URL and return an AddonCatalog object."""
+        response = requests.get(self.addon_index_url, timeout=10.0)
+        if response.status_code != 200:
+            raise RuntimeError(f"ERROR: Failed to fetch addon index from {self.addon_index_url}")
+        return AddonCatalog.AddonCatalog(response.json())
+
+    def fetch_catalog(self) -> list[str]:
+        """Fetch the catalog of "approved" addons, stripping off anything after the first whitespace"""
         response = requests.get(self.addon_catalog_url, timeout=10.0)
         if response.status_code != 200:
             raise RuntimeError(
                 f"ERROR: Failed to fetch addon catalog from {self.addon_catalog_url}"
             )
-        return AddonCatalog.AddonCatalog(response.json())
+        raw_lines = response.text.splitlines()
+        catalog = []
+        for line in raw_lines:
+            catalog.append(line.split()[0].strip())
+        return catalog
 
 
 class CacheWriter:
@@ -108,8 +124,10 @@ class CacheWriter:
     as a base64-encoded icon image. The cache is written to the current working directory."""
 
     def __init__(self):
-        self.catalog: AddonCatalog = None
+        self.index: AddonCatalog = None
+        self.approved_addons: list[str] = []
         self.icon_errors = {}
+        self.clone_errors = {}
         if os.path.isabs(BASE_DIRECTORY):
             self.cwd = BASE_DIRECTORY
         else:
@@ -118,18 +136,30 @@ class CacheWriter:
         self._sanitize_counter = 0
         self._directory_name_cache: Dict[str, str] = {}
 
-    def write(self):
+    def write(self, addon_id: Optional[str] = None) -> None:
         original_working_directory = os.getcwd()
         os.makedirs(self.cwd, exist_ok=True)
         os.chdir(self.cwd)
-        self.create_local_copy_of_addons()
+
+        fetcher = CatalogFetcher()
+        self.index = fetcher.index
+        self.approved_addons = fetcher.catalog
+
+        if addon_id is None:
+            self.create_local_copy_of_addons()
+        else:
+            catalog = self.index.get_catalog()
+            if addon_id not in catalog:
+                raise RuntimeError(f"ERROR: Addon {addon_id} not in index")
+            catalog_entries = catalog[addon_id]
+            self.create_local_copy_of_single_addon(addon_id, catalog_entries)
 
         with zipfile.ZipFile(
             os.path.join(self.cwd, "addon_catalog_cache.zip"), "w", zipfile.ZIP_DEFLATED
         ) as zipf:
             zipf.writestr(
                 "addon_catalog_cache.json",
-                json.dumps(recursive_serialize(self.catalog.get_catalog()), indent="  "),
+                json.dumps(recursive_serialize(self.index.get_catalog()), indent="  "),
             )
 
         # Also generate the sha256 hash of the zip file and store it
@@ -142,13 +172,15 @@ class CacheWriter:
         with open(os.path.join(self.cwd, "icon_errors.json"), "w") as f:
             json.dump(self.icon_errors, f, indent="  ")
 
+        with open(os.path.join(self.cwd, "clone_errors.json"), "w") as f:
+            json.dump(self.clone_errors, f, indent="  ")
+
         os.chdir(original_working_directory)
         print(f"Wrote cache to {os.path.join(self.cwd, 'addon_catalog_cache.zip')}")
 
     def create_local_copy_of_addons(self):
-        self.catalog = CatalogFetcher().catalog
         counter = 0
-        for addon_id, catalog_entries in self.catalog.get_catalog().items():
+        for addon_id, catalog_entries in self.index.get_catalog().items():
             if addon_id in EXCLUDED_REPOS:
                 continue
             self.create_local_copy_of_single_addon(addon_id, catalog_entries)
@@ -171,7 +203,7 @@ class CacheWriter:
                 )
                 continue
             metadata = self.generate_cache_entry(addon_id, index, catalog_entry)
-            self.catalog.add_metadata_to_entry(addon_id, index, metadata)
+            self.index.add_metadata_to_entry(addon_id, index, metadata)
             self.create_zip_of_entry(addon_id, index, catalog_entry)
 
     def generate_cache_entry(
@@ -212,6 +244,8 @@ class CacheWriter:
             # Don't use os.path.join, by convention this path is always UNIX style, and local
             # users are required to translate it into their OS's format as needed
             catalog_entry.relative_cache_path = BASE_DIRECTORY + "/" + dirname + ".zip"
+
+        catalog_entry.reviewed = addon_id in self.approved_addons
 
         return cache_entry
 
@@ -341,8 +375,7 @@ class CacheWriter:
                 catalog_entry.last_update_time = datetime.datetime(*latest).isoformat()
             zip_file.extractall(path=extract_to_dir)
 
-    @staticmethod
-    def clone_or_update(name: str, url: str, branch: str) -> None:
+    def clone_or_update(self, name: str, url: str, branch: str) -> None:
         """If a directory called "name" exists, and it contains a subdirectory called .git,
         then 'git fetch' is called; otherwise we use 'git clone' to make a bare, shallow
         copy of the repo (in the normal case where minimal is True), or a normal clone,
@@ -361,8 +394,13 @@ class CacheWriter:
                 url,
                 name,
             ]
-            completed_process = subprocess.run(command)
+            try:
+                completed_process = subprocess.run(command, CLONE_TIMEOUT)
+            except subprocess.TimeoutExpired:
+                self.clone_errors[url] = f"Timed out after {CLONE_TIMEOUT} seconds."
+                raise RuntimeError(f"Clone of {url} timed out.")
             if completed_process.returncode != 0:
+                self.clone_errors[url] = f"Failed to clone {url}: {completed_process.returncode}"
                 raise RuntimeError(f"Clone failed for {url}")
         else:
             print(f"Updating {name}", flush=True)
@@ -393,7 +431,7 @@ class CacheWriter:
                 print("Deleting and re-cloning the original repo")
                 os.chdir(old_dir)
                 utils.rmdir(os.path.join(old_dir, name))
-                CacheWriter.clone_or_update(name, url, branch)
+                self.clone_or_update(name, url, branch)
             os.chdir(old_dir)
 
     def find_file(
@@ -518,6 +556,7 @@ class CacheWriter:
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        addon_id = sys.argv[1]
     writer = CacheWriter()
-
-    writer.write()
+    writer.write(sys.argv[1])
