@@ -29,6 +29,7 @@ import datetime
 import sys
 from dataclasses import is_dataclass, fields
 from typing import Any, List, Optional, Dict
+from types import SimpleNamespace
 
 import base64
 import enum
@@ -182,8 +183,9 @@ class CacheWriter:
         counter = 0
         for addon_id, catalog_entries in self.index.get_catalog().items():
             if addon_id in EXCLUDED_REPOS:
-                continue
-            self.create_local_copy_of_single_addon(addon_id, catalog_entries)
+                self.handle_excluded_repo(addon_id, catalog_entries)
+            else:
+                self.create_local_copy_of_single_addon(addon_id, catalog_entries)
             counter += 1
             if counter >= MAX_COUNT:
                 break
@@ -205,6 +207,37 @@ class CacheWriter:
             metadata = self.generate_cache_entry(addon_id, index, catalog_entry)
             self.index.add_metadata_to_entry(addon_id, index, metadata)
             self.create_zip_of_entry(addon_id, index, catalog_entry)
+
+    def handle_excluded_repo(
+        self, addon_id: str, catalog_entries: List[AddonCatalog.AddonCatalogEntry]
+    ):
+        """An excluded repo cannot be cloned (because they are too large), so we have to fetch
+        their metadata directly from their source instead of using git."""
+        for index, catalog_entry in enumerate(catalog_entries):
+            if catalog_entry.repository is None:
+                print(
+                    f"A repo on the exclusion list MUST list a git repository, and {addon_id} does not"
+                )
+                continue
+            r = SimpleNamespace(
+                url=catalog_entry.repository,
+                branch=catalog_entry.git_ref,
+            )
+            url = utils.construct_git_url(r, "package.xml")
+            request = requests.get(url, timeout=10.0)
+            if request.status_code != 200:
+                print(f"ERROR: Failed to fetch package.xml from {url}")
+                continue
+            cache_entry = AddonCatalog.CatalogEntryMetadata()
+            cache_entry.package_xml = request.text
+            metadata = addonmanager_metadata.MetadataReader.from_bytes(request.content)
+            relative_icon_path = self.get_icon_from_metadata(metadata)
+            if relative_icon_path is not None:
+                icon_url = utils.construct_git_url(r, relative_icon_path)
+                response = requests.get(icon_url, timeout=10.0)
+                if response.status_code == 200:
+                    cache_entry.icon_data = base64.b64encode(response.content).decode("utf-8")
+            self.index.add_metadata_to_entry(addon_id, index, metadata)
 
     def generate_cache_entry(
         self, addon_id: str, index: int, catalog_entry: AddonCatalog.AddonCatalogEntry
@@ -245,7 +278,7 @@ class CacheWriter:
             # users are required to translate it into their OS's format as needed
             catalog_entry.relative_cache_path = BASE_DIRECTORY + "/" + dirname + ".zip"
 
-        catalog_entry.reviewed = addon_id in self.approved_addons
+        catalog_entry.in_catalog = addon_id in self.approved_addons
 
         return cache_entry
 
