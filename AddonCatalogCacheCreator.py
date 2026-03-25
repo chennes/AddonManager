@@ -163,7 +163,9 @@ class CacheWriter:
                 for addon_id, catalog_entries in catalog.items():
                     approved_entries: List[AddonCatalog.AddonCatalogEntry] = []
                     for entry in catalog_entries:
-                        if entry.curated or True:  # Disable curation until we are ready with the feature
+                        if (
+                            entry.curated or True
+                        ):  # Disable curation until we are ready with the feature
                             approved_entries.append(entry)
                     if approved_entries:
                         reduced_catalog[addon_id] = approved_entries
