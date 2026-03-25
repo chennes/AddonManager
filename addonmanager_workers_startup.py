@@ -168,7 +168,9 @@ class CreateAddonListWorker(QtCore.QThread):
         Failures are non-fatal: the addon will simply show without metadata."""
 
         package_xml_url = utils.construct_git_url(repo, "package.xml")
-        fci.Console.PrintLog(f"Fetching remote metadata for custom addon {repo.name} from {package_xml_url}\n")
+        fci.Console.PrintLog(
+            f"Fetching remote metadata for custom addon {repo.name} from {package_xml_url}\n"
+        )
         try:
             result = NetworkManager.AM_NETWORK_MANAGER.blocking_get_with_retries(
                 package_xml_url,
@@ -177,18 +179,24 @@ class CreateAddonListWorker(QtCore.QThread):
                 0,
             )
         except Exception as e:
-            fci.Console.PrintLog(f"Could not fetch remote package.xml for custom addon {repo.name}: {e}\n")
+            fci.Console.PrintLog(
+                f"Could not fetch remote package.xml for custom addon {repo.name}: {e}\n"
+            )
             return
 
         if not result:
-            fci.Console.PrintLog(f"No package.xml found at {package_xml_url} for custom addon {repo.name}\n")
+            fci.Console.PrintLog(
+                f"No package.xml found at {package_xml_url} for custom addon {repo.name}\n"
+            )
             return
 
         try:
             metadata = MetadataReader.from_bytes(result.data())
             repo.set_metadata(metadata)
         except Exception as e:
-            fci.Console.PrintWarning(f"Could not parse remote package.xml for custom addon {repo.name}: {e}\n")
+            fci.Console.PrintWarning(
+                f"Could not parse remote package.xml for custom addon {repo.name}: {e}\n"
+            )
             return
 
         if repo.metadata and repo.metadata.icon:
@@ -203,7 +211,9 @@ class CreateAddonListWorker(QtCore.QThread):
                 if icon_result:
                     repo.icon_data = icon_result.data()
             except Exception as e:
-                fci.Console.PrintLog(f"Could not fetch remote icon for custom addon {repo.name}: {e}\n")
+                fci.Console.PrintLog(
+                    f"Could not fetch remote icon for custom addon {repo.name}: {e}\n"
+                )
 
     def get_cache(self, cache_name: str) -> str:
         cache_file_name = cache_name + "_cache.json"
