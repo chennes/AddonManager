@@ -26,7 +26,6 @@ import io
 import json
 import os
 from typing import List
-import xml.etree.ElementTree
 import zipfile
 
 from PySideWrapper import QtCore
@@ -129,31 +128,27 @@ class CreateAddonListWorker(QtCore.QThread):
                 repo = Addon(name, addon["url"], state, addon["branch"])
                 md_file = os.path.join(addon_dir, "package.xml")
                 if os.path.isfile(md_file):
-                    try:
-                        # load_metadata_file calls set_metadata(), populating repo.metadata,
-                        # repo.description, repo.display_name etc. for the UI to display.
-                        repo.load_metadata_file(md_file)
-                        if repo.metadata:
-                            repo.installed_metadata = repo.metadata
-                            repo.installed_version = repo.metadata.version
-                            repo.updated_timestamp = os.path.getmtime(md_file)
-                            repo.verify_url_and_branch(addon["url"], addon["branch"])
-                            # Load icon bytes from the local install directory so the
-                            # list view can display the addon's actual icon.
-                            if repo.metadata.icon:
-                                icon_file = os.path.join(addon_dir, repo.metadata.icon)
-                                if os.path.isfile(icon_file):
-                                    try:
-                                        with open(icon_file, "rb") as f:
-                                            repo.icon_data = f.read()
-                                    except OSError as e:
-                                        fci.Console.PrintWarning(
-                                            f"Could not load icon for custom addon {name}: {e}\n"
-                                        )
-                    except xml.etree.ElementTree.ParseError:
-                        fci.Console.PrintWarning(
-                            f"An invalid or corrupted package.xml file was installed for custom addon {name}... ignoring the bad data.\n"
-                        )
+                    # load_metadata_file calls set_metadata(), populating repo.metadata,
+                    # repo.description, repo.display_name etc. for the UI to display.
+                    # It handles ParseError internally, leaving repo.metadata as None on failure.
+                    repo.load_metadata_file(md_file)
+                    if repo.metadata:
+                        repo.installed_metadata = repo.metadata
+                        repo.installed_version = repo.metadata.version
+                        repo.updated_timestamp = os.path.getmtime(md_file)
+                        repo.verify_url_and_branch(addon["url"], addon["branch"])
+                        # Load icon bytes from the local install directory so the
+                        # list view can display the addon's actual icon.
+                        if repo.metadata.icon:
+                            icon_file = os.path.join(addon_dir, repo.metadata.icon)
+                            if os.path.isfile(icon_file):
+                                try:
+                                    with open(icon_file, "rb") as f:
+                                        repo.icon_data = f.read()
+                                except OSError as e:
+                                    fci.Console.PrintWarning(
+                                        f"Could not load icon for custom addon {name}: {e}\n"
+                                    )
                 else:
                     # Not installed: try to fetch package.xml from the remote repo so the
                     # browse view can show description and icon.
@@ -189,6 +184,9 @@ class CreateAddonListWorker(QtCore.QThread):
             )
             return
 
+        original_url = repo.url
+        original_branch = repo.branch
+
         try:
             metadata = MetadataReader.from_bytes(result.data())
             repo.set_metadata(metadata)
@@ -197,6 +195,10 @@ class CreateAddonListWorker(QtCore.QThread):
                 f"Could not parse remote package.xml for custom addon {repo.name}: {e}\n"
             )
             return
+
+        repo.verify_url_and_branch(original_url, original_branch)
+        repo.url = original_url
+        repo.branch = original_branch
 
         if repo.metadata and repo.metadata.icon:
             icon_url = utils.construct_git_url(repo, repo.metadata.icon)
